@@ -22,6 +22,8 @@ class ProductsTable
                 ->searchable()
                 ->sortable(),
                 TextColumn::make('price')->label('Price')
+                    ->money('ARS', 100)
+                    //->formatS tateUsing(fn (int $state): float =>  $state /100)
                 ->sortable(),
             ])
             ->filters([

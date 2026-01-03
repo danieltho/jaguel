@@ -15,6 +15,7 @@ class ProductForm
                     ->required(),
                 TextInput::make('price')
                     ->required()
+                    ->prefix('ARS')
                     ->rules('numeric'),
             ]);
     }
