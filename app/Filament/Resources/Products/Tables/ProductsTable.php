@@ -25,6 +25,7 @@ class ProductsTable
                     ->money('ARS', 100)
                     //->formatS tateUsing(fn (int $state): float =>  $state /100)
                 ->sortable(),
+                TextColumn::make('status')->label('Status')
             ])
             ->filters([
                 //
