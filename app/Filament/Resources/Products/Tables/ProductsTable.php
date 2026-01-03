@@ -26,6 +26,8 @@ class ProductsTable
                     //->formatS tateUsing(fn (int $state): float =>  $state /100)
                 ->sortable(),
                 TextColumn::make('status')->label('Status')
+                ,
+                TextColumn::make('category.name')
             ])
             ->filters([
                 //
