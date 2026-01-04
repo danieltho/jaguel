@@ -49,6 +49,10 @@ class ProductsTable
                     //->date('d/m/Y')
                     ->since()
                 ,
+                TextColumn::make('media_count')
+                    ->label('Images')
+                ->counts('media')
+                ->sortable()
             ])
             ->filters([
                 SelectFilter::make('category_id')

@@ -6,6 +6,7 @@ use App\Enums\ProductStatusEnum;
 use App\Filament\Tables\CategoriesTable;
 use Filament\Forms\Components\ModalTableSelect;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -31,6 +32,20 @@ class ProductForm
                     ->relationship('category', 'name')
                     ->tableConfiguration(CategoriesTable::class)
                 ,
+                SpatieMediaLibraryFileUpload::make('files')
+                    ->columnSpanFull()
+                    ->disk('public')
+                    ->directory('product/original')
+                    ->panelLayout('grid')
+                    ->image()
+                    ->multiple()
+                    ->reorderable()
+                    ->preserveFilenames()
+                    ->downloadable()
+                    ->responsiveImages()
+                    ->imageEditor()
+                    ->conversion('thumb')
+
             ]);
     }
 }
