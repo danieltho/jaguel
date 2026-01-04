@@ -6,8 +6,13 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProductsTable
 {
@@ -16,23 +21,45 @@ class ProductsTable
         return $table
             ->columns([
                 TextColumn::make('id')->label('ID')
-                ->searchable()
-                ->sortable(),
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('name')->label('Name')
-                ->searchable()
-                ->sortable(),
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('price')->label('Price')
                     ->money('ARS', 100)
                     //->formatS tateUsing(fn (int $state): float =>  $state /100)
-                ->sortable(),
+                    ->sortable(),
                 TextColumn::make('status')->label('Status')
                 ,
                 TextColumn::make('category.name'),
                 TextColumn::make('tags.name')
             ])
             ->filters([
-                //
-            ])
+                SelectFilter::make('category_id')
+                    ->label('Category')
+                    ->relationship('category', 'name'),
+                Filter::make('created_at')
+                    ->schema([
+                        DatePicker::make('created_from'),
+                    ])->query(
+                        function (Builder $query, array $data): Builder {
+                            return $query->when($data['created_from'], function (Builder $query, $date) {
+                                return $query->where('created_at', '>=', $date);
+                            });
+                        }
+                    ),
+                Filter::make('created_until')
+                    ->schema([
+                        DatePicker::make('created_until'),
+                    ])->query(
+                        function (Builder $query, array $data): Builder {
+                            return $query->when($data['created_until'], function (Builder $query, $date) {
+                                return $query->where('created_at', '<=', $date);
+                            });
+                        }
+                    )
+            ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
