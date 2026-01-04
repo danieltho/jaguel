@@ -27,7 +27,8 @@ class ProductsTable
                 ->sortable(),
                 TextColumn::make('status')->label('Status')
                 ,
-                TextColumn::make('category.name')
+                TextColumn::make('category.name'),
+                TextColumn::make('tags.name')
             ])
             ->filters([
                 //
