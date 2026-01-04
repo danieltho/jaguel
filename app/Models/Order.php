@@ -11,6 +11,11 @@ class Order extends Model
         'user_id',
         'product_id',
         'price',
+        'is_completed'
+    ];
+
+    protected $casts = [
+        'is_completed' => 'boolean',
     ];
 
     public function user(): BelongsTo
