@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Products\Tables;
 
+use App\Enums\ProductStatusEnum;
 use App\Filament\Resources\Products\ProductResource;
 use App\Models\Product;
 use Filament\Actions\BulkActionGroup;
@@ -9,7 +10,10 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Columns\CheckboxColumn;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -34,8 +38,10 @@ class ProductsTable
                     ->alignEnd()
                     //->formatS tateUsing(fn (int $state): float =>  $state /100)
                     ->sortable(),
-                TextColumn::make('status')->label('Status')->badge()
-                ,
+                SelectColumn::make('status')
+                    ->options(ProductStatusEnum::class),
+                CheckboxColumn::make('is_active'),
+                //ToggleColumn::make('is_active'),
                 TextColumn::make('category.name')->badge(),
                 TextColumn::make('tags.name')->badge(),
                 TextColumn::make('created_at')

@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Product extends Model
 {
     use HasFactory;
-    protected $fillable = ['name','price','description','status','category_id'];
+    protected $fillable = ['name','price','description','status','category_id','is_active'];
 
     protected $casts = [
         'status' => ProductStatusEnum::class,
