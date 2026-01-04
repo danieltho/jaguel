@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Products\Tables;
 
+use App\Filament\Resources\Products\ProductResource;
+use App\Models\Product;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -24,16 +26,23 @@ class ProductsTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('name')->label('Name')
+                    ->url(fn (Product $record): string => ProductResource::getUrl('edit',['record'=> $record]))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('price')->label('Price')
                     ->money('ARS', 100)
+                    ->alignEnd()
                     //->formatS tateUsing(fn (int $state): float =>  $state /100)
                     ->sortable(),
-                TextColumn::make('status')->label('Status')
+                TextColumn::make('status')->label('Status')->badge()
                 ,
-                TextColumn::make('category.name'),
-                TextColumn::make('tags.name')
+                TextColumn::make('category.name')->badge(),
+                TextColumn::make('tags.name')->badge(),
+                TextColumn::make('created_at')
+                    ->label('Created at')
+                    //->date('d/m/Y')
+                    ->since()
+                ,
             ])
             ->filters([
                 SelectFilter::make('category_id')
