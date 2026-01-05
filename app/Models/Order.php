@@ -12,6 +12,9 @@ class Order extends Model
         'product_id',
         'price',
         'is_completed'
+        // numero_seguimiento
+        // estado de compra
+        // estado de orden OrderStatus
     ];
 
     protected $casts = [
