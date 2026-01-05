@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\ProductStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,11 +14,21 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 class Product extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
-    protected $fillable = ['name','price','description','status','category_id','is_active'];
+
+    protected $fillable = [
+        'name',
+        'description',
+        'is_custom',
+        'is_simple',
+        'is_featured',
+        'price',
+        'category_id',
+    ];
 
     protected $casts = [
-        'status' => ProductStatusEnum::class,
-        'files' => 'array',
+        'is_custom' => 'boolean',
+        'is_simple' => 'boolean',
+        'is_featured' => 'boolean',
     ];
 
     public function category(): BelongsTo

@@ -2,12 +2,11 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
-use App\Enums\ProductStatusEnum;
-use App\Filament\Tables\CategoriesTable;
-use Filament\Forms\Components\ModalTableSelect;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
 class ProductForm
@@ -17,22 +16,37 @@ class ProductForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label('Nombre')
                     ->required(),
+                RichEditor::make('description')
+                    ->label('Descripción')
+                    ->columnSpanFull(),
+                Toggle::make('is_custom')
+                    ->label('Personalizado')
+                    ->default(false),
+                Toggle::make('is_simple')
+                    ->label('Simple')
+                    ->default(false)
+                    ->live(),
                 TextInput::make('price')
-                    ->required()
+                    ->label('Precio')
                     ->prefix('ARS')
-                    ->rules('numeric'),
-                Select::make('status')
-                    ->options(ProductStatusEnum::class)
-                    ->required(),
+                    ->numeric()
+                    ->visible(fn ($get) => $get('is_simple')),
+                Toggle::make('is_featured')
+                    ->label('Destacado')
+                    ->default(false),
+                Select::make('category_id')
+                    ->label('Categoría')
+                    ->relationship('category', 'name')
+                    ->preload()
+                    ->searchable(),
                 Select::make('tags')
                     ->relationship('tags', 'name')
-                    ->multiple(),
-                ModalTableSelect::make('category_id')
-                    ->relationship('category', 'name')
-                    ->tableConfiguration(CategoriesTable::class)
-                ,
+                    ->multiple()
+                    ->preload(),
                 SpatieMediaLibraryFileUpload::make('files')
+                    ->label('Imágenes')
                     ->columnSpanFull()
                     ->disk('public')
                     ->directory('product/original')
@@ -45,7 +59,6 @@ class ProductForm
                     ->responsiveImages()
                     ->imageEditor()
                     ->conversion('thumb')
-
             ]);
     }
 }

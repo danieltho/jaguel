@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Products\Tables;
 
-use App\Enums\ProductStatusEnum;
 use App\Filament\Resources\Products\ProductResource;
 use App\Models\Product;
 use Filament\Actions\BulkActionGroup;
@@ -10,13 +9,11 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Tables\Columns\CheckboxColumn;
-use Filament\Tables\Columns\SelectColumn;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -26,41 +23,51 @@ class ProductsTable
     {
         return $table
             ->columns([
-                TextColumn::make('id')->label('ID')
+                TextColumn::make('id')
+                    ->label('ID')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('name')->label('Name')
-                    ->url(fn (Product $record): string => ProductResource::getUrl('edit',['record'=> $record]))
+                TextColumn::make('name')
+                    ->label('Nombre')
+                    ->url(fn (Product $record): string => ProductResource::getUrl('edit', ['record' => $record]))
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('price')->label('Price')
-                    ->money('ARS', 100)
-                    ->alignEnd()
-                    //->formatS tateUsing(fn (int $state): float =>  $state /100)
+                IconColumn::make('is_custom')
+                    ->label('Personalizado')
+                    ->boolean(),
+                IconColumn::make('is_simple')
+                    ->label('Simple')
+                    ->boolean(),
+                IconColumn::make('is_featured')
+                    ->label('Destacado')
+                    ->boolean(),
+                TextColumn::make('tags.name')
+                    ->label('Tags')
+                    ->badge(),
+                TextColumn::make('variants_count')
+                    ->label('Variantes')
+                    ->counts('variants')
                     ->sortable(),
-                SelectColumn::make('status')
-                    ->options(ProductStatusEnum::class),
-                CheckboxColumn::make('is_active'),
-                //ToggleColumn::make('is_active'),
-                TextColumn::make('category.name')->badge(),
-                TextColumn::make('tags.name')->badge(),
-                TextColumn::make('created_at')
-                    ->label('Created at')
-                    //->date('d/m/Y')
-                    ->since()
-                ,
                 TextColumn::make('media_count')
-                    ->label('Images')
-                ->counts('media')
-                ->sortable()
+                    ->label('Imágenes')
+                    ->counts('media')
+                    ->sortable(),
+                TextColumn::make('created_at')
+                    ->label('Creado')
+                    ->since()
+                    ->sortable(),
             ])
             ->filters([
-                SelectFilter::make('category_id')
-                    ->label('Category')
-                    ->relationship('category', 'name'),
+                TernaryFilter::make('is_custom')
+                    ->label('Personalizado'),
+                TernaryFilter::make('is_simple')
+                    ->label('Simple'),
+                TernaryFilter::make('is_featured')
+                    ->label('Destacado'),
                 Filter::make('created_at')
                     ->schema([
-                        DatePicker::make('created_from'),
+                        DatePicker::make('created_from')
+                            ->label('Desde'),
                     ])->query(
                         function (Builder $query, array $data): Builder {
                             return $query->when($data['created_from'], function (Builder $query, $date) {
@@ -70,7 +77,8 @@ class ProductsTable
                     ),
                 Filter::make('created_until')
                     ->schema([
-                        DatePicker::make('created_until'),
+                        DatePicker::make('created_until')
+                            ->label('Hasta'),
                     ])->query(
                         function (Builder $query, array $data): Builder {
                             return $query->when($data['created_until'], function (Builder $query, $date) {

@@ -22,7 +22,11 @@ class CategoryGroupResource extends Resource
 {
     protected static ?string $model = CategoryGroup::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;
+
+    protected static string|null|\UnitEnum $navigationGroup = 'Settings';
+
+    protected static ?int $navigationSort = 4;
 
     public static function form(Schema $schema): Schema
     {

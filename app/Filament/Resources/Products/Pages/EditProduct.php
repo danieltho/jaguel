@@ -19,14 +19,18 @@ class EditProduct extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $data['price'] = $data['price'] / 100;
+        if ($data['is_simple']) {
+            $data['price'] = $data['price'] / 100;
+        }
 
         return $data;
     }
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $data['price'] = $data['price'] * 100;
+        if ($data['is_simple']) {
+            $data['price'] = $data['price'] * 100;
+        }
 
         return $data;
     }
