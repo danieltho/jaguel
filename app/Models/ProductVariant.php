@@ -19,6 +19,7 @@ class ProductVariant extends Model implements HasMedia
         'stock',
         'is_active',
         'sort_order',
+        'size_id',
     ];
 
     protected $casts = [
@@ -33,5 +34,10 @@ class ProductVariant extends Model implements HasMedia
     public function color(): BelongsTo
     {
         return $this->belongsTo(Color::class);
+    }
+
+    public function size(): BelongsTo
+    {
+        return $this->belongsTo(Size::class);
     }
 }

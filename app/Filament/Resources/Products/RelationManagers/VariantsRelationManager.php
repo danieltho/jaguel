@@ -46,9 +46,13 @@ class VariantsRelationManager extends RelationManager
                 Toggle::make('is_active')
                     ->label('Activo')
                     ->default(true),
-                Select::make('colors')
-                    ->label('Colores')
+                Select::make('color_id')
+                    ->label('Color')
                     ->relationship('color', 'name')
+                    ->preload(),
+                Select::make('size_id')
+                    ->label('Talla')
+                    ->relationship('size', 'name')
                     ->preload(),
                 SpatieMediaLibraryFileUpload::make('images')
                     ->disk('public')
