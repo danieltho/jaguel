@@ -7,6 +7,8 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use App\Models\Color;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -44,6 +46,10 @@ class VariantsRelationManager extends RelationManager
                 Toggle::make('is_active')
                     ->label('Activo')
                     ->default(true),
+                Select::make('colors')
+                    ->label('Colores')
+                    ->relationship('color', 'name')
+                    ->preload(),
                 SpatieMediaLibraryFileUpload::make('images')
                     ->disk('public')
                     ->directory('product/original')
