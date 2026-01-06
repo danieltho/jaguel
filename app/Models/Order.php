@@ -11,6 +11,9 @@ class Order extends Model
         'user_id',
         'product_id',
         'price',
+        'subtotal',
+        'discount_amount',
+        'coupon_id',
         'is_completed'
         // numero_seguimiento
         // estado de compra
@@ -29,6 +32,11 @@ class Order extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function coupon(): BelongsTo
+    {
+        return $this->belongsTo(Coupon::class);
     }
 }
 

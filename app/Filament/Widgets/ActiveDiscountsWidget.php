@@ -1,40 +1,20 @@
 <?php
 
-namespace App\Filament\Resources\Products\Pages;
+namespace App\Filament\Widgets;
 
 use App\Enums\CouponScopeEnum;
 use App\Enums\CouponTypeEnum;
 use App\Enums\DiscountTypeEnum;
-use App\Filament\Resources\Products\ProductResource;
 use App\Models\Coupon;
-use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\ListRecords;
+use Filament\Widgets\Widget;
 
-class ListProducts extends ListRecords
+class ActiveDiscountsWidget extends Widget
 {
-    protected static string $resource = ProductResource::class;
+    protected string $view = 'filament.widgets.active-discounts-widget';
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            CreateAction::make(),
-        ];
-    }
+    protected int | string | array $columnSpan = 'full';
 
-    public function getHeaderWidgets(): array
-    {
-        $activeDiscounts = $this->getActiveGeneralDiscounts();
-
-        if ($activeDiscounts->isEmpty()) {
-            return [];
-        }
-
-        return [
-            \App\Filament\Widgets\ActiveDiscountsWidget::class,
-        ];
-    }
-
-    protected function getActiveGeneralDiscounts()
+    public function getDiscounts()
     {
         return Coupon::where('type', CouponTypeEnum::AUTOMATIC_DISCOUNT)
             ->where('scope', CouponScopeEnum::GENERAL)
@@ -52,5 +32,23 @@ class ListProducts extends ListRecords
                     ->orWhereColumn('current_uses', '<', 'max_uses');
             })
             ->get();
+    }
+
+    public function formatDiscount(Coupon $coupon): string
+    {
+        if ($coupon->discount_type === DiscountTypeEnum::PERCENTAGE) {
+            return $coupon->discount_value . '%';
+        }
+
+        return '$' . number_format($coupon->discount_value / 100, 2);
+    }
+
+    public function formatExpiration(Coupon $coupon): string
+    {
+        if (!$coupon->expires_at) {
+            return 'Sin fecha de expiración';
+        }
+
+        return 'Válido hasta: ' . $coupon->expires_at->format('d/m/Y H:i');
     }
 }

@@ -23,15 +23,35 @@ class OrdersTable
         return $table
             ->columns([
                 TextColumn::make('user.name')
+                    ->label('Cliente')
                     ->searchable(),
                 TextColumn::make('product.name')
+                    ->label('Producto')
                     ->searchable(),
+                TextColumn::make('coupon.code')
+                    ->label('Cupón')
+                    ->badge()
+                    ->color('success')
+                    ->placeholder('-'),
+                TextColumn::make('subtotal')
+                    ->label('Subtotal')
+                    ->money('ARS', 100)
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('discount_amount')
+                    ->label('Descuento')
+                    ->money('ARS', 100)
+                    ->color('danger')
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('price')
+                    ->label('Total')
                     ->money('ARS', 100)
                     ->summarize(Sum::make()->money('ARS', 100))
                     ->sortable(),
                 TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Fecha')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
