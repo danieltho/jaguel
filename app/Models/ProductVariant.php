@@ -13,13 +13,14 @@ class ProductVariant extends Model implements HasMedia
     use InteractsWithMedia;
     protected $fillable = [
         'product_id',
-        'name',
+        'description',
         'sku',
         'price',
         'stock',
         'is_active',
         'sort_order',
         'size_id',
+        'color_id',
     ];
 
     protected $casts = [

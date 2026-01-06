@@ -59,6 +59,7 @@ class ProductForm
                     ->responsiveImages()
                     ->imageEditor()
                     ->conversion('thumb')
+                    ->visible(fn ($get) => $get('is_simple'))
             ]);
     }
 }

@@ -22,23 +22,19 @@ class VariantsRelationManager extends RelationManager
 {
     protected static string $relationship = 'variants';
 
-    protected static ?string $title = 'Variantes';
+    protected static ?string $title = 'Product variants';
 
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                TextInput::make('name')
-                    ->label('Nombre')
-                    ->required()
-                    ->maxLength(255),
                 TextInput::make('sku')
                     ->label('SKU')
                     ->maxLength(255),
                 TextInput::make('price')
                     ->label('Precio')
                     ->numeric()
-                    ->prefix('$'),
+                    ->prefix('ARS'),
                 TextInput::make('stock')
                     ->label('Stock')
                     ->numeric()
@@ -65,33 +61,30 @@ class VariantsRelationManager extends RelationManager
                     ->downloadable()
                     ->responsiveImages()
                     ->imageEditor()
-                    ->conversion('thumb')
+                    ->conversion('thumb'),
+                \Filament\Forms\Components\Textarea::make('description')
+                    ->label('Descripción')
+                    ->columnSpanFull(),
             ]);
     }
 
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('name')
+            ->recordTitleAttribute('sku')
             ->reorderable('sort_order')
             ->defaultSort('sort_order')
             ->columns([
-                TextColumn::make('name')
-                    ->label('Nombre')
-                    ->searchable(),
                 TextColumn::make('sku')
                     ->label('SKU')
                     ->searchable(),
                 TextColumn::make('price')
                     ->label('Precio')
-                    ->money('CLP')
+                    ->money('ARS', 100)
                     ->sortable(),
                 TextColumn::make('stock')
                     ->label('Stock')
                     ->sortable(),
-                IconColumn::make('is_active')
-                    ->label('Activo')
-                    ->boolean(),
             ])
             ->filters([
                 //
@@ -108,5 +101,37 @@ class VariantsRelationManager extends RelationManager
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        if (isset($data['price'])) {
+            $data['price'] = $data['price'] / 100;
+        }
+
+        return $data;
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (isset($data['price'])) {
+            $data['price'] = $data['price'] * 100;
+        }
+
+        return $data;
+    }
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        if (isset($data['price'])) {
+            $data['price'] = $data['price'] * 100;
+        }
+
+        return $data;
+    }
+
+    public function isReadOnly(): bool
+    {
+        return $this->getOwnerRecord()->is_simple;
     }
 }
