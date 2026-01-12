@@ -24,7 +24,7 @@ class TagResource extends Resource
 
     protected static string|null|\UnitEnum $navigationGroup = 'Settings';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 12;
 
     public static function form(Schema $schema): Schema
     {
