@@ -16,7 +16,7 @@ class CustomersTable
     {
         return $table
             ->columns([
-                TextColumn::make('name')
+                TextColumn::make('firstname')
                     ->label('Nombre')
                     ->searchable()
                     ->sortable(),
@@ -24,15 +24,15 @@ class CustomersTable
                     ->label('Apellido')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('dni')
-                    ->label('DNI')
+                TextColumn::make('document')
+                    ->label('Documento')
                     ->searchable(),
                 TextColumn::make('email')
                     ->label('Email')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('phone')
-                    ->label('Teléfono')
+                    ->label('Telefono')
                     ->searchable(),
                 TextColumn::make('whatsapp')
                     ->label('WhatsApp')
@@ -42,7 +42,7 @@ class CustomersTable
                     ->label('Ciudad')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('province')
+                TextColumn::make('state')
                     ->label('Provincia')
                     ->searchable()
                     ->sortable(),

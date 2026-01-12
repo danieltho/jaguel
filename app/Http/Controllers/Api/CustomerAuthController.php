@@ -14,27 +14,38 @@ class CustomerAuthController extends Controller
     public function register(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'nullable|string|max:255',
+            'document' => 'nullable|string|max:20',
             'email' => 'required|string|email|max:255|unique:customers',
             'password' => 'required|string|min:8|confirmed',
             'phone' => 'nullable|string|max:20',
             'whatsapp' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:255',
+            'address_number' => 'nullable|string|max:20',
+            'department' => 'nullable|string|max:100',
+            'zone' => 'nullable|string|max:100',
             'city' => 'nullable|string|max:100',
-            'province' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'country_iso' => 'nullable|string|max:10',
             'receive_offers' => 'nullable|boolean',
         ]);
 
         $customer = Customer::create([
-            'name' => $validated['name'],
+            'firstname' => $validated['firstname'],
+            'lastname' => $validated['lastname'] ?? null,
+            'document' => $validated['document'] ?? null,
             'email' => $validated['email'],
             'password' => $validated['password'],
             'phone' => $validated['phone'] ?? null,
             'whatsapp' => $validated['whatsapp'] ?? null,
             'address' => $validated['address'] ?? null,
+            'address_number' => $validated['address_number'] ?? null,
+            'department' => $validated['department'] ?? null,
+            'zone' => $validated['zone'] ?? null,
             'city' => $validated['city'] ?? null,
-            'province' => $validated['province'] ?? null,
-            'country' => 'Argentina',
+            'state' => $validated['state'] ?? null,
+            'country_iso' => $validated['country_iso'] ?? 'AR',
             'receive_offers' => $validated['receive_offers'] ?? false,
         ]);
 
@@ -89,12 +100,18 @@ class CustomerAuthController extends Controller
         $customer = $request->user();
 
         $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
+            'firstname' => 'sometimes|string|max:255',
+            'lastname' => 'nullable|string|max:255',
+            'document' => 'nullable|string|max:20',
             'phone' => 'nullable|string|max:20',
             'whatsapp' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:255',
+            'address_number' => 'nullable|string|max:20',
+            'department' => 'nullable|string|max:100',
+            'zone' => 'nullable|string|max:100',
             'city' => 'nullable|string|max:100',
-            'province' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'country_iso' => 'nullable|string|max:10',
             'receive_offers' => 'nullable|boolean',
         ]);
 

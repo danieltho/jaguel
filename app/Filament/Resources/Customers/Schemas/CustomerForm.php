@@ -14,18 +14,18 @@ class CustomerForm
     {
         return $schema
             ->components([
-                Section::make('Información Personal')
+                Section::make('Informacion Personal')
                     ->columns(2)
                     ->schema([
-                        TextInput::make('name')
+                        TextInput::make('firstname')
                             ->label('Nombre')
                             ->required()
                             ->maxLength(255),
                         TextInput::make('lastname')
                             ->label('Apellido')
                             ->maxLength(255),
-                        TextInput::make('dni')
-                            ->label('DNI')
+                        TextInput::make('document')
+                            ->label('Documento')
                             ->maxLength(20),
                     ]),
 
@@ -39,7 +39,7 @@ class CustomerForm
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
                         TextInput::make('password')
-                            ->label('Contraseña')
+                            ->label('Contrasena')
                             ->password()
                             ->required(fn (string $operation): bool => $operation === 'create')
                             ->dehydrated(fn (?string $state) => filled($state))
@@ -50,7 +50,7 @@ class CustomerForm
                     ->columns(2)
                     ->schema([
                         TextInput::make('phone')
-                            ->label('Teléfono')
+                            ->label('Telefono')
                             ->tel()
                             ->maxLength(20),
                         TextInput::make('whatsapp')
@@ -59,24 +59,31 @@ class CustomerForm
                             ->maxLength(20),
                     ]),
 
-                Section::make('Dirección')
+                Section::make('Direccion')
                     ->columns(2)
                     ->schema([
                         TextInput::make('address')
-                            ->label('Dirección')
-                            ->maxLength(255)
-                            ->columnSpanFull(),
+                            ->label('Direccion')
+                            ->maxLength(255),
+                        TextInput::make('address_number')
+                            ->label('Numero')
+                            ->maxLength(20),
+                        TextInput::make('department')
+                            ->label('Departamento')
+                            ->maxLength(100),
+                        TextInput::make('zone')
+                            ->label('Zona')
+                            ->maxLength(100),
                         TextInput::make('city')
                             ->label('Ciudad')
                             ->maxLength(100),
-                        TextInput::make('province')
+                        TextInput::make('state')
                             ->label('Provincia')
                             ->maxLength(100),
-                        TextInput::make('country')
-                            ->label('País')
-                            ->default('Argentina')
-                            ->disabled()
-                            ->dehydrated(),
+                        TextInput::make('country_iso')
+                            ->label('Pais')
+                            ->default('AR')
+                            ->maxLength(10),
                     ]),
 
                 Section::make('Preferencias')
