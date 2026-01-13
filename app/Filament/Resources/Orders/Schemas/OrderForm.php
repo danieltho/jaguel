@@ -2,18 +2,10 @@
 
 namespace App\Filament\Resources\Orders\Schemas;
 
-use App\Enums\CouponTypeEnum;
-use App\Enums\DiscountTypeEnum;
-use App\Models\Coupon;
-use App\Models\Product;
-use App\Services\CouponService;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Components\Placeholder;
-use Filament\Schemas\Components\Section;
+use App\Enums\OrderStatusEnum;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Set;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class OrderForm
@@ -22,161 +14,70 @@ class OrderForm
     {
         return $schema
             ->components([
-                Section::make('Información de la Orden')
+                Section::make('Informacion del Pedido')
+                    ->columns(2)
                     ->schema([
-                        Select::make('user_id')
-                            ->label('Cliente')
-                            ->relationship('user', 'name')
-                            ->searchable()
-                            ->preload()
+                        TextInput::make('order_number')
+                            ->label('Numero de Pedido')
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->visibleOn('edit'),
+
+                        TextInput::make('email')
+                            ->label('Email de Contacto')
+                            ->email()
                             ->required(),
 
-                        Select::make('product_id')
-                            ->label('Producto')
-                            ->relationship('product', 'name')
+                        TextInput::make('postal_code')
+                            ->label('Codigo Postal')
+                            ->maxLength(20),
+
+                        Select::make('customer_id')
+                            ->label('Cliente')
+                            ->relationship('customer', 'email')
                             ->searchable()
                             ->preload()
-                            ->required()
-                            ->live()
-                            ->afterStateUpdated(function ($state, Set $set) {
-                                if ($state) {
-                                    $product = Product::find($state);
-                                    if ($product) {
-                                        $price = $product->price ?? 0;
-                                        $set('subtotal', $price / 100);
-                                        $set('discount_amount', 0);
-                                        $set('price', $price / 100);
-                                        $set('coupon_id', null);
-                                        $set('coupon_code', null);
-                                    }
-                                }
-                            }),
-                    ])->columns(2),
+                            ->nullable(),
 
-                Section::make('Cupón de Descuento')
-                    ->schema([
-                        TextInput::make('coupon_code')
-                            ->label('Código de Cupón')
-                            ->placeholder('Ingresa el código del cupón')
-                            ->dehydrated(false)
-                            ->live(),
-
-                        Actions::make([
-                            Action::make('apply_coupon')
-                                ->label('Aplicar Cupón')
-                                ->icon('heroicon-o-ticket')
-                                ->color('success')
-                                ->action(function ($state, Set $set, $get) {
-                                    $code = $get('coupon_code');
-                                    $productId = $get('product_id');
-                                    $userId = $get('user_id');
-                                    $subtotal = ($get('subtotal') ?? 0) * 100;
-
-                                    if (!$code || !$productId || !$userId) {
-                                        \Filament\Notifications\Notification::make()
-                                            ->title('Error')
-                                            ->body('Debes seleccionar cliente, producto e ingresar un código de cupón')
-                                            ->danger()
-                                            ->send();
-                                        return;
-                                    }
-
-                                    $coupon = Coupon::where('code', $code)
-                                        ->where('is_active', true)
-                                        ->first();
-
-                                    if (!$coupon) {
-                                        \Filament\Notifications\Notification::make()
-                                            ->title('Cupón inválido')
-                                            ->body('El código de cupón no existe o no está activo')
-                                            ->danger()
-                                            ->send();
-                                        return;
-                                    }
-
-                                    $product = Product::find($productId);
-                                    $user = \App\Models\User::find($userId);
-
-                                    $couponService = new CouponService();
-                                    $validation = $couponService->validateCoupon($coupon, $user, $product, $subtotal);
-
-                                    if (!$validation['valid']) {
-                                        \Filament\Notifications\Notification::make()
-                                            ->title('Cupón no válido')
-                                            ->body($validation['error'])
-                                            ->danger()
-                                            ->send();
-                                        return;
-                                    }
-
-                                    $discount = $couponService->calculateDiscount($coupon, $subtotal);
-                                    $finalPrice = $subtotal - $discount;
-
-                                    $set('coupon_id', $coupon->id);
-                                    $set('discount_amount', $discount / 100);
-                                    $set('price', $finalPrice / 100);
-
-                                    $discountText = $coupon->discount_type === DiscountTypeEnum::PERCENTAGE
-                                        ? $coupon->discount_value . '%'
-                                        : '$' . number_format($coupon->discount_value / 100, 2);
-
-                                    \Filament\Notifications\Notification::make()
-                                        ->title('Cupón aplicado')
-                                        ->body("Descuento de {$discountText} aplicado correctamente")
-                                        ->success()
-                                        ->send();
-                                }),
-
-                            Action::make('remove_coupon')
-                                ->label('Quitar Cupón')
-                                ->icon('heroicon-o-x-mark')
-                                ->color('danger')
-                                ->action(function (Set $set, $get) {
-                                    $subtotal = $get('subtotal') ?? 0;
-                                    $set('coupon_id', null);
-                                    $set('coupon_code', null);
-                                    $set('discount_amount', 0);
-                                    $set('price', $subtotal);
-
-                                    \Filament\Notifications\Notification::make()
-                                        ->title('Cupón removido')
-                                        ->body('El cupón ha sido removido de la orden')
-                                        ->info()
-                                        ->send();
-                                }),
-                        ]),
-
-                        Select::make('coupon_id')
-                            ->label('Cupón Aplicado')
-                            ->relationship('coupon', 'name')
-                            ->disabled()
-                            ->dehydrated(true),
+                        Select::make('status')
+                            ->label('Estado')
+                            ->options(OrderStatusEnum::class)
+                            ->default(OrderStatusEnum::PENDING)
+                            ->required(),
                     ]),
 
-                Section::make('Resumen de Precios')
+                Section::make('Totales')
+                    ->columns(2)
+                    ->visibleOn('edit')
                     ->schema([
                         TextInput::make('subtotal')
                             ->label('Subtotal')
                             ->numeric()
                             ->prefix('ARS')
                             ->disabled()
-                            ->dehydrated(true),
+                            ->dehydrated(false),
 
-                        TextInput::make('discount_amount')
-                            ->label('Descuento')
+                        TextInput::make('shipping_cost')
+                            ->label('Gastos de Envio')
                             ->numeric()
                             ->prefix('ARS')
                             ->disabled()
-                            ->dehydrated(true)
-                            ->default(0),
+                            ->dehydrated(false),
 
-                        TextInput::make('price')
-                            ->label('Precio Final')
+                        TextInput::make('total')
+                            ->label('Total')
                             ->numeric()
                             ->prefix('ARS')
-                            ->required()
-                            ->live(),
-                    ])->columns(3),
+                            ->disabled()
+                            ->dehydrated(false),
+
+                        Select::make('coupon_id')
+                            ->label('Cupon')
+                            ->relationship('coupon', 'code')
+                            ->searchable()
+                            ->preload()
+                            ->nullable(),
+                    ]),
             ]);
     }
 }

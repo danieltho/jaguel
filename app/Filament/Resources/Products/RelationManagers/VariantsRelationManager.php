@@ -78,9 +78,13 @@ class VariantsRelationManager extends RelationManager
                 TextColumn::make('sku')
                     ->label('SKU')
                     ->searchable(),
+                TextColumn::make('color.name')
+                    ->label('Color'),
+                TextColumn::make('size.name')
+                    ->label('Talla'),
                 TextColumn::make('price')
                     ->label('Precio')
-                    ->money('ARS', 100)
+                    ->money('ARS')
                     ->sortable(),
                 TextColumn::make('stock')
                     ->label('Stock')

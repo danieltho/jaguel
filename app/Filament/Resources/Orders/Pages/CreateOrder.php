@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Orders\Pages;
 
 use App\Filament\Resources\Orders\OrderResource;
 use App\Models\Coupon;
+use App\Models\Customer;
 use App\Models\User;
 use App\Services\CouponService;
 use Filament\Resources\Pages\CreateRecord;
@@ -27,7 +28,7 @@ class CreateOrder extends CreateRecord
         // Si hay un cupón aplicado, registrar el uso
         if ($this->record->coupon_id) {
             $coupon = Coupon::find($this->record->coupon_id);
-            $user = User::find($this->record->user_id);
+            $user = Customer::find($this->record->user_id);
 
             if ($coupon && $user) {
                 $couponService = new CouponService();

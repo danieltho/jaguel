@@ -2,19 +2,14 @@
 
 namespace App\Filament\Resources\Orders\Tables;
 
-use App\Models\Order;
-use Filament\Actions\Action;
-use Filament\Actions\ActionGroup;
-use Filament\Actions\BulkAction;
+use App\Enums\OrderStatusEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\Checkbox;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Collection;
 
 class OrdersTable
 {
@@ -22,73 +17,65 @@ class OrdersTable
     {
         return $table
             ->columns([
-                TextColumn::make('user.name')
+                TextColumn::make('order_number')
+                    ->label('N Pedido')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('email')
+                    ->label('Email')
+                    ->searchable(),
+                TextColumn::make('status')
+                    ->label('Estado')
+                    ->badge()
+                    ->color(fn (OrderStatusEnum $state): string => $state->color()),
+                TextColumn::make('customer.email')
                     ->label('Cliente')
+                    ->placeholder('Sin asignar')
                     ->searchable(),
-                TextColumn::make('product.name')
-                    ->label('Producto')
-                    ->searchable(),
+                TextColumn::make('postal_code')
+                    ->label('CP')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('coupon.code')
-                    ->label('Cupón')
+                    ->label('Cupon')
                     ->badge()
                     ->color('success')
                     ->placeholder('-'),
                 TextColumn::make('subtotal')
                     ->label('Subtotal')
-                    ->money('ARS', 100)
+                    ->money('ARS')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('discount_amount')
-                    ->label('Descuento')
-                    ->money('ARS', 100)
-                    ->color('danger')
+                TextColumn::make('shipping_cost')
+                    ->label('Envio')
+                    ->money('ARS')
                     ->sortable()
                     ->toggleable(),
-                TextColumn::make('price')
+                TextColumn::make('total')
                     ->label('Total')
-                    ->money('ARS', 100)
+                    ->money('ARS')
                     ->summarize(Sum::make()->money('ARS', 100))
                     ->sortable(),
+                TextColumn::make('items_count')
+                    ->label('Items')
+                    ->counts('items'),
                 TextColumn::make('created_at')
                     ->label('Fecha')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->defaultGroup('product.name')
+            ->defaultSort('created_at', 'desc')
             ->filters([
-                //
+                SelectFilter::make('status')
+                    ->label('Estado')
+                    ->options(OrderStatusEnum::class),
             ])
             ->recordActions([
-                ActionGroup::make([
-                    EditAction::make()/*,
-                    Action::make('is Completed')
-                        ->requiresConfirmation()
-                        ->icon(Heroicon::OutlinedCheckBadge)
-                        ->hidden(fn(Order $record) => $record->is_completed)
-                        ->action(fn(Order $record) => $record->update(['is_completed' => true]))*/,
-                    Action::make('Change is completed')
-                        ->requiresConfirmation()
-                        ->icon(Heroicon::OutlinedCheckBadge)
-                        ->fillForm(fn(Order $order) => ['is_completed' => $order->is_completed])
-                        ->schema([
-                            Checkbox::make('is_completed')
-                        ])
-                        ->action(fn(array $data, Order $record) => $record->update(['is_completed' => $data['is_completed']]))
-                ])
+                EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                    BulkAction::make('Change is completed')
-                        ->requiresConfirmation()
-                        ->icon(Heroicon::OutlinedCheckBadge)
-                        ->action(fn(Collection $records) => $records->each->update(['is_completed' => true]))
-                        ->deselectRecordsAfterCompletion()
                 ]),
             ]);
     }

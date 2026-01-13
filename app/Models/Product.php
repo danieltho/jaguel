@@ -31,6 +31,21 @@ class Product extends Model implements HasMedia
         'is_featured' => 'boolean',
     ];
 
+    protected static function booted(): void
+    {
+        static::created(function (Product $product) {
+            if ($product->is_simple) {
+                $product->variants()->create([
+                    'sku' => 'PROD-' . $product->id,
+                    'price' => $product->price ?? 0,
+                    'stock' => 0,
+                    'is_active' => true,
+                    'sort_order' => 1,
+                ]);
+            }
+        });
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);

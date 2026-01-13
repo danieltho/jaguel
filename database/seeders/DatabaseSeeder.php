@@ -17,7 +17,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call([
+            ColorSeeder::class,
+            SizeSeeder::class,
+            CategoryGroupSeeder::class,
+            CategoryWithGroupSeeder::class,
+        ]);
+
         // User::factory(10)->create();
-        Product::factory()->count(3)->create();
+        //Product::factory()->count(3)->create();
     }
 }
