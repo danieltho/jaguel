@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Orders\Tables;
 
 use App\Enums\OrderStatusEnum;
+use App\Enums\PaymentStatusEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -17,6 +18,10 @@ class OrdersTable
     {
         return $table
             ->columns([
+                TextColumn::make('created_at')
+                    ->label('Creado')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable(),
                 TextColumn::make('order_number')
                     ->label('N Pedido')
                     ->sortable()
@@ -24,10 +29,17 @@ class OrdersTable
                 TextColumn::make('email')
                     ->label('Email')
                     ->searchable(),
+                TextColumn::make('payment_status')
+                    ->label('Pago')
+                    ->badge(),
                 TextColumn::make('status')
-                    ->label('Estado')
+                    ->label('Estado Pedido')
                     ->badge()
                     ->color(fn (OrderStatusEnum $state): string => $state->color()),
+                TextColumn::make('paymentMethod.title')
+                    ->label('Metodo Pago')
+                    ->placeholder('-')
+                    ->toggleable(),
                 TextColumn::make('customer.email')
                     ->label('Cliente')
                     ->placeholder('Sin asignar')
@@ -35,7 +47,7 @@ class OrdersTable
                 TextColumn::make('postal_code')
                     ->label('CP')
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('coupon.code')
+                TextColumn::make('coupon.name')
                     ->label('Cupon')
                     ->badge()
                     ->color('success')
@@ -43,8 +55,7 @@ class OrdersTable
                 TextColumn::make('subtotal')
                     ->label('Subtotal')
                     ->money('ARS')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
                 TextColumn::make('shipping_cost')
                     ->label('Envio')
                     ->money('ARS')
@@ -53,21 +64,19 @@ class OrdersTable
                 TextColumn::make('total')
                     ->label('Total')
                     ->money('ARS')
-                    ->summarize(Sum::make()->money('ARS', 100))
+                    ->summarize(Sum::make()->money('ARS'))
                     ->sortable(),
                 TextColumn::make('items_count')
                     ->label('Items')
                     ->counts('items'),
-                TextColumn::make('created_at')
-                    ->label('Fecha')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
+                SelectFilter::make('payment_status')
+                    ->label('Estado de Pago')
+                    ->options(PaymentStatusEnum::class),
                 SelectFilter::make('status')
-                    ->label('Estado')
+                    ->label('Estado Pedido')
                     ->options(OrderStatusEnum::class),
             ])
             ->recordActions([

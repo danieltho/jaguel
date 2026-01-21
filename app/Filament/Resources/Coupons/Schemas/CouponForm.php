@@ -38,9 +38,8 @@ class CouponForm
                             ->unique(ignoreRecord: true)
                             ->maxLength(50)
                             ->visible(fn ($get) => $get('type') === CouponTypeEnum::COUPON->value)
-                            ->required(fn ($get) => $get('type') === CouponTypeEnum::COUPON->value)
                             ->alphaDash()
-                            ->helperText('Solo letras, números, guiones y guiones bajos'),
+                            ->helperText('Dejar vacío para generar automáticamente. Solo letras, números, guiones y guiones bajos'),
 
                         Textarea::make('description')
                             ->label('Descripción')

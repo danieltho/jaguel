@@ -28,7 +28,7 @@ class ProductsTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('name')
-                    ->label('Nombre')
+                    ->label('Producto')
                     ->url(fn (Product $record): string => ProductResource::getUrl('edit', ['record' => $record]))
                     ->searchable()
                     ->sortable(),
@@ -41,11 +41,8 @@ class ProductsTable
                 IconColumn::make('is_featured')
                     ->label('Destacado')
                     ->boolean(),
-                TextColumn::make('tags.name')
-                    ->label('Tags')
-                    ->badge(),
                 TextColumn::make('variants_count')
-                    ->label('Variantes')
+                    ->label('Stock')
                     ->counts('variants')
                     ->sortable(),
                 TextColumn::make('media_count')
@@ -54,7 +51,7 @@ class ProductsTable
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Creado')
-                    ->since()
+                    ->date('d/m/Y')
                     ->sortable(),
             ])
             ->filters([

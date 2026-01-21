@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\OrderStatusEnum;
+use App\Enums\PaymentStatusEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,7 +17,10 @@ class Order extends Model
         'total',
         'subtotal',
         'shipping_cost',
+        'discount_amount',
         'coupon_id',
+        'payment_method_id',
+        'payment_status',
         'status',
     ];
 
@@ -24,6 +28,7 @@ class Order extends Model
         'subtotal' => 0,
         'total' => 0,
         'shipping_cost' => 0,
+        'discount_amount' => 0,
     ];
 
     protected $casts = [
@@ -31,7 +36,9 @@ class Order extends Model
         'total' => 'integer',
         'subtotal' => 'integer',
         'shipping_cost' => 'integer',
+        'discount_amount' => 'integer',
         'status' => OrderStatusEnum::class,
+        'payment_status' => PaymentStatusEnum::class,
     ];
 
     protected static function booted(): void
@@ -51,6 +58,11 @@ class Order extends Model
         return $this->belongsTo(Coupon::class);
     }
 
+    public function paymentMethod(): BelongsTo
+    {
+        return $this->belongsTo(PaymentMethod::class);
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
@@ -59,7 +71,16 @@ class Order extends Model
     public function recalculateTotals(): void
     {
         $this->subtotal = $this->items()->sum(\DB::raw('quantity * unit_price'));
-        $this->total = $this->subtotal + $this->shipping_cost;
+        
+        // Calcular descuento si hay cupón
+        $this->discount_amount = 0;
+        if ($this->coupon_id && $this->coupon) {
+            $couponService = app(\App\Services\CouponService::class);
+            $this->discount_amount = $couponService->calculateDiscount($this->coupon, $this->subtotal);
+        }
+        
+        // Total = Subtotal - Descuento + Envío
+        $this->total = $this->subtotal - $this->discount_amount + $this->shipping_cost;
         $this->saveQuietly();
     }
 }
