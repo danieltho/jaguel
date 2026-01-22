@@ -32,15 +32,6 @@ class ProductsTable
                     ->url(fn (Product $record): string => ProductResource::getUrl('edit', ['record' => $record]))
                     ->searchable()
                     ->sortable(),
-                IconColumn::make('is_custom')
-                    ->label('Personalizado')
-                    ->boolean(),
-                IconColumn::make('is_simple')
-                    ->label('Simple')
-                    ->boolean(),
-                IconColumn::make('is_featured')
-                    ->label('Destacado')
-                    ->boolean(),
                 TextColumn::make('variants_count')
                     ->label('Stock')
                     ->counts('variants')
@@ -55,12 +46,6 @@ class ProductsTable
                     ->sortable(),
             ])
             ->filters([
-                TernaryFilter::make('is_custom')
-                    ->label('Personalizado'),
-                TernaryFilter::make('is_simple')
-                    ->label('Simple'),
-                TernaryFilter::make('is_featured')
-                    ->label('Destacado'),
                 Filter::make('created_at')
                     ->schema([
                         DatePicker::make('created_from')

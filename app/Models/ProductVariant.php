@@ -7,24 +7,27 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ProductVariant extends Model implements HasMedia
 {
     use InteractsWithMedia;
+
+    public $timestamps = false;
     protected $fillable = [
         'product_id',
-        'description',
-        'sku',
-        'price',
+        'price_sold',
+        'price_sales',
+        'price_provider',
+        'price_cost',
+        'dimension_weight',
+        'dimension_height',
+        'dimension_width',
+        'dimension_length',
         'stock',
-        'is_active',
         'sort_order',
         'size_id',
         'color_id',
-    ];
-
-    protected $casts = [
-        'is_active' => 'boolean',
     ];
 
     public function product(): BelongsTo
@@ -40,5 +43,13 @@ class ProductVariant extends Model implements HasMedia
     public function size(): BelongsTo
     {
         return $this->belongsTo(Size::class);
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->width(368)
+            ->height(232)
+            ->sharpen(10);
     }
 }

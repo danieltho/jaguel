@@ -8,12 +8,4 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateProduct extends CreateRecord
 {
     protected static string $resource = ProductResource::class;
-
-    protected function mutateFormDataBeforeCreate(array $data): array
-    {
-        if ($data['is_simple']) {
-            $data['price'] = $data['price'] * 100;
-        }
-        return $data;
-    }
 }

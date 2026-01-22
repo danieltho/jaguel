@@ -71,13 +71,9 @@ class VariantsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('sku')
             ->reorderable('sort_order')
             ->defaultSort('sort_order')
             ->columns([
-                TextColumn::make('sku')
-                    ->label('SKU')
-                    ->searchable(),
                 TextColumn::make('color.name')
                     ->label('Color'),
                 TextColumn::make('size.name')
@@ -105,37 +101,5 @@ class VariantsRelationManager extends RelationManager
                     DeleteBulkAction::make(),
                 ]),
             ]);
-    }
-
-    protected function mutateFormDataBeforeFill(array $data): array
-    {
-        if (isset($data['price'])) {
-            $data['price'] = $data['price'] / 100;
-        }
-
-        return $data;
-    }
-
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        if (isset($data['price'])) {
-            $data['price'] = $data['price'] * 100;
-        }
-
-        return $data;
-    }
-
-    protected function mutateFormDataBeforeCreate(array $data): array
-    {
-        if (isset($data['price'])) {
-            $data['price'] = $data['price'] * 100;
-        }
-
-        return $data;
-    }
-
-    public function isReadOnly(): bool
-    {
-        return $this->getOwnerRecord()->is_simple;
     }
 }

@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::table('products', function (Blueprint $table) {
             $table->foreignId('category_id')
                 ->nullable()
-                ->constrained();
+                ->constrained()
+                ->nullOnDelete();
         });
     }
 

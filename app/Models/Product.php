@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProductTypeEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,33 +19,22 @@ class Product extends Model implements HasMedia
     protected $fillable = [
         'name',
         'description',
-        'is_custom',
-        'is_simple',
-        'is_featured',
-        'price',
+        'link_video',
+        'price_sold',
+        'price_sales',
+        'price_provider',
+        'price_cost',
         'category_id',
+        'type',
+        'dimension_weight',
+        'dimension_height',
+        'dimension_width',
+        'dimension_length'
     ];
 
     protected $casts = [
-        'is_custom' => 'boolean',
-        'is_simple' => 'boolean',
-        'is_featured' => 'boolean',
+        'type' => ProductTypeEnum::class
     ];
-
-    protected static function booted(): void
-    {
-        static::created(function (Product $product) {
-            if ($product->is_simple) {
-                $product->variants()->create([
-                    'sku' => 'PROD-' . $product->id,
-                    'price' => $product->price ?? 0,
-                    'stock' => 0,
-                    'is_active' => true,
-                    'sort_order' => 1,
-                ]);
-            }
-        });
-    }
 
     public function category(): BelongsTo
     {

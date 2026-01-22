@@ -36,7 +36,7 @@ class ProductResource extends Resource
     public static function getRelations(): array
     {
         return [
-            VariantsRelationManager::class,
+            //VariantsRelationManager::class,
         ];
     }
 

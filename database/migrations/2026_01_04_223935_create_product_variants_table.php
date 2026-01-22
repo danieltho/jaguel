@@ -14,12 +14,16 @@ return new class extends Migration
         Schema::create('product_variants', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
-            $table->string('name');
-            $table->string('sku')->unique()->nullable();
-            $table->integer('price')->nullable();
-            $table->integer('stock')->default(0);
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
+            $table->integer('price_sold')->default(0);
+            $table->integer('price_sales')->default(0);
+            $table->integer('price_provider')->default(0);
+            $table->integer('price_cost')->default(0);
+            $table->integer('dimension_weight')->nullable();
+            $table->integer('dimension_height')->nullable();
+            $table->integer('dimension_width')->nullable();
+            $table->integer('dimension_length')->nullable();
+            $table->integer('stock')->nullable();
+            $table->integer('sort_order')->default(0);
         });
     }
 
