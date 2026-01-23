@@ -133,8 +133,18 @@ class ProductForm
                     TextInput::make('stock')
                         ->label('Cantidad')
                         ->numeric()
-                        ->hidden(fn ($get) => $get('inventario_type') !== ProductStatusEnum::IN_STOCK->value),
-                ])->columnSpanFull(),
+                        ->hidden(function($get) {
+                            if (is_null($get('stock')) && $get('inventario_type')->value === ProductStatusEnum::OUT_STOCK->value){
+                                return true;
+                            }
+
+                            return false;
+                        }
+
+                        ),
+                ])
+                    ->columnSpanFull()
+                    ->hidden(fn ($get) => !empty($get('variants'))),
 
                 Section::make('Variantes')->schema([
                     SchemaActions::make([
@@ -144,6 +154,26 @@ class ProductForm
                             ->modalHeading('Seleccionar variantes')
                             ->modalDescription('Seleccioná los colores y/o talles para generar las variantes del producto.')
                             ->modalSubmitActionLabel('Generar')
+                            ->fillForm(function ($get) {
+                                $currentVariants = $get('variants') ?? [];
+                                $selectedColors = collect($currentVariants)
+                                    ->pluck('color_id')
+                                    ->filter()
+                                    ->unique()
+                                    ->values()
+                                    ->toArray();
+                                $selectedSizes = collect($currentVariants)
+                                    ->pluck('size_id')
+                                    ->filter()
+                                    ->unique()
+                                    ->values()
+                                    ->toArray();
+
+                                return [
+                                    'selected_colors' => $selectedColors,
+                                    'selected_sizes' => $selectedSizes,
+                                ];
+                            })
                             ->schema([
                                 CheckboxList::make('selected_colors')
                                     ->label('Colores')
@@ -264,8 +294,10 @@ class ProductForm
                             Action::make('edit_variant')
                                 ->label('Editar')
                                 ->icon('heroicon-o-pencil-square')
-                                ->modalHeading( 'Editar variante: ')
+                                ->modalHeading('Editar variante')
                                 ->fillForm(fn (array $arguments, $get) => [
+                                    'color_id' => $get("variants.{$arguments['item']}.color_id"),
+                                    'size_id' => $get("variants.{$arguments['item']}.size_id"),
                                     'price_sold' => $get("variants.{$arguments['item']}.price_sold"),
                                     'price_sales' => $get("variants.{$arguments['item']}.price_sales"),
                                     'price_cost' => $get("variants.{$arguments['item']}.price_cost"),
@@ -277,6 +309,18 @@ class ProductForm
                                     'dimension_length' => $get("variants.{$arguments['item']}.dimension_length"),
                                 ])
                                 ->schema([
+                                    Section::make('Color y Talle')->schema([
+                                        Grid::make()->columns(2)->schema([
+                                            Select::make('color_id')
+                                                ->label('Color')
+                                                ->options(Color::pluck('name', 'id'))
+                                                ->placeholder('Sin color'),
+                                            Select::make('size_id')
+                                                ->label('Talle')
+                                                ->options(Size::pluck('name', 'id'))
+                                                ->placeholder('Sin talle'),
+                                        ]),
+                                    ]),
                                     Section::make('Precios')->schema([
                                         Grid::make()->columns(4)->schema([
                                             TextInput::make('price_sold')
@@ -325,6 +369,8 @@ class ProductForm
                                 ])
                                 ->action(function (array $data, array $arguments, $get, $set) {
                                     $index = $arguments['item'];
+                                    $set("variants.{$index}.color_id", $data['color_id']);
+                                    $set("variants.{$index}.size_id", $data['size_id']);
                                     $set("variants.{$index}.price_sold", $data['price_sold']);
                                     $set("variants.{$index}.price_sales", $data['price_sales']);
                                     $set("variants.{$index}.price_cost", $data['price_cost']);
@@ -339,12 +385,27 @@ class ProductForm
                         ->defaultItems(0)
                         ->reorderable()
                         ->collapsible()
-                        ->itemLabel(fn (array $state): ?string =>
-                            collect([
+                        ->itemLabel(function (array $state, $get): ?string {
+                            $label = collect([
                                 isset($state['color_id']) ? Color::find($state['color_id'])?->name : null,
                                 isset($state['size_id']) ? Size::find($state['size_id'])?->name : null,
-                            ])->filter()->implode(' - ') ?: 'Variante'
-                        ),
+                            ])->filter()->implode(' - ') ?: 'Variante';
+
+                            $allVariants = $get('../../variants') ?? [];
+                            $currentColorId = $state['color_id'] ?? null;
+                            $currentSizeId = $state['size_id'] ?? null;
+
+                            $duplicateCount = collect($allVariants)->filter(function ($variant) use ($currentColorId, $currentSizeId) {
+                                return ($variant['color_id'] ?? null) == $currentColorId
+                                    && ($variant['size_id'] ?? null) == $currentSizeId;
+                            })->count();
+
+                            if ($duplicateCount > 1) {
+                                return "[DUPLICADO] {$label}";
+                            }
+
+                            return $label;
+                        }),
                 ])
                     ->columnSpanFull(),
 
