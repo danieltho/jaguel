@@ -1,0 +1,14 @@
+.git
+.gitignore
+.env
+.env.backup
+.env.docker
+vendor
+node_modules
+storage/*.key
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+docker-compose.override.yml
