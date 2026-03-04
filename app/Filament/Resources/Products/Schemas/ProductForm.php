@@ -38,7 +38,13 @@ class ProductForm
 
                     TextInput::make('name')
                         ->label('Nombre')
-                        ->required(),
+                        ->required()
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(fn ($state, $set, $get) => $get('slug') ?: $set('slug', \Illuminate\Support\Str::slug($state))),
+                    TextInput::make('slug')
+                        ->label('Slug')
+                        ->required()
+                        ->unique(ignoreRecord: true),
                     RichEditor::make('description')
                         ->label('Descripción')
                         ,

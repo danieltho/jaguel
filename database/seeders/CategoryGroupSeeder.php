@@ -7,15 +7,16 @@ use Illuminate\Database\Seeder;
 
 class CategoryGroupSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $categoryGroups = ['Mates', 'Cuchillos', 'Accesorios'];
+        $groups = [
+            ['name' => 'Mates', 'slug' => 'mates'],
+            ['name' => 'Cuchillos', 'slug' => 'cuchillos'],
+            ['name' => 'Accesorios', 'slug' => 'accesorios'],
+        ];
 
-        foreach ($categoryGroups as $group) {
-            CategoryGroup::create(['name' => $group]);
+        foreach ($groups as $group) {
+            CategoryGroup::create($group);
         }
     }
 }

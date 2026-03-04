@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\CategoryGroup;
+use App\Services\CartService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -37,7 +39,28 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
-            //
+            'customer' => fn () => $request->user('customer')
+                ? $request->user('customer')->only('id', 'firstname', 'lastname', 'email')
+                : null,
+            'cartCount' => fn () => app(CartService::class)->getItemCount(),
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
+            'navigation' => fn () => CategoryGroup::with('categories')
+                ->get()
+                ->map(fn ($group) => [
+                    'id' => $group->id,
+                    'name' => $group->name,
+                    'slug' => $group->slug,
+                    'path' => '/productos/'.$group->slug,
+                    'children' => $group->categories->map(fn ($cat) => [
+                        'id' => $cat->id,
+                        'name' => $cat->name,
+                        'slug' => $cat->slug,
+                        'path' => '/productos/'.$group->slug.'?category='.$cat->slug,
+                    ]),
+                ]),
         ];
     }
 }

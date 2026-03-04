@@ -19,6 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        if ($token = config('services.mercadopago.access_token')) {
+            \MercadoPago\MercadoPagoConfig::setAccessToken($token);
+        }
     }
 }

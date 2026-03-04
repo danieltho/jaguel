@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('coupon_usages', function (Blueprint $table) {
             $table->id();
             $table->foreignId('coupon_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
             $table->integer('discount_applied');
             $table->timestamps();
 
-            $table->index(['coupon_id', 'user_id']);
+            $table->index(['coupon_id', 'customer_id']);
         });
     }
 

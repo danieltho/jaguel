@@ -33,7 +33,12 @@ class CategoryGroupResource extends Resource
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->required(),
+                    ->required()
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(fn ($set, $state) => $set('slug', \Illuminate\Support\Str::slug($state))),
+                TextInput::make('slug')
+                    ->required()
+                    ->unique(ignoreRecord: true),
                 SpatieMediaLibraryFileUpload::make('image')
                 ->disk('public')
                 ->downloadable()

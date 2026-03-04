@@ -13,7 +13,7 @@ class CategoryGroup extends Model implements HasMedia
     use InteractsWithMedia;
     public $timestamps = false;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'slug'];
 
     public function registerMediaConversions(Media $media = null): void
     {

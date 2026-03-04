@@ -32,7 +32,12 @@ class CategoryResource extends Resource
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->required(),
+                    ->required()
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(fn ($set, $state) => $set('slug', \Illuminate\Support\Str::slug($state))),
+                TextInput::make('slug')
+                    ->required()
+                    ->unique(ignoreRecord: true),
                 Select::make('category_group_id')
                 ->relationship('categoryGroup', 'name')
                 ->required()

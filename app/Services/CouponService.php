@@ -9,7 +9,7 @@ use App\Models\Coupon;
 use App\Models\CouponUsage;
 use App\Models\Order;
 use App\Models\Product;
-use App\Models\User;
+use App\Models\Customer;
 use Illuminate\Support\Facades\DB;
 
 class CouponService
@@ -19,7 +19,7 @@ class CouponService
      */
     public function validate(
         string $code,
-        User $user,
+        Customer $customer,
         Product $product,
         int $subtotal
     ): array {
@@ -39,7 +39,7 @@ class CouponService
      */
     public function validateCoupon(
         Coupon $coupon,
-        User $user,
+        Customer $customer,
         Product $product,
         int $subtotal
     ): array {
@@ -60,7 +60,7 @@ class CouponService
         // Verificar limite por usuario
         if ($coupon->max_uses_per_user) {
             $userUsages = CouponUsage::where('coupon_id', $coupon->id)
-                ->where('user_id', $user->id)
+                ->where('user_id', $customer->id)
                 ->count();
 
             if ($userUsages >= $coupon->max_uses_per_user) {
@@ -112,16 +112,16 @@ class CouponService
     /**
      * Aplica el cupón a una orden
      */
-    public function applyCoupon(Coupon $coupon, Order $order, User $user): void
+    public function applyCoupon(Coupon $coupon, Order $order, Customer $customer): void
     {
-        DB::transaction(function () use ($coupon, $order, $user) {
+        DB::transaction(function () use ($coupon, $order, $customer) {
             // Incrementar contador de usos
             $coupon->increment('current_uses');
 
             // Registrar uso
             CouponUsage::create([
                 'coupon_id' => $coupon->id,
-                'user_id' => $user->id,
+                'customer_id' => $customer->id,
                 'order_id' => $order->id,
                 'discount_applied' => $order->discount_amount,
             ]);

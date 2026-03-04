@@ -18,6 +18,7 @@ class Product extends Model implements HasMedia
 
     protected $fillable = [
         'name',
+        'slug',
         'description',
         'link_video',
         'price_sold',
@@ -26,10 +27,11 @@ class Product extends Model implements HasMedia
         'price_cost',
         'category_id',
         'type',
+        'is_active',
         'dimension_weight',
         'dimension_height',
         'dimension_width',
-        'dimension_length'
+        'dimension_length',
     ];
 
     protected $casts = [
