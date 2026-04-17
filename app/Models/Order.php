@@ -22,6 +22,18 @@ class Order extends Model
         'payment_method_id',
         'payment_status',
         'status',
+        'document_number',
+        'document_type',
+        'wants_factura_a',
+        'recipient_firstname',
+        'recipient_lastname',
+        'recipient_phone',
+        'recipient_address',
+        'recipient_department',
+        'recipient_city',
+        'recipient_state',
+        'delivery_type',
+        'shipping_method',
     ];
 
     protected $attributes = [
@@ -39,6 +51,7 @@ class Order extends Model
         'discount_amount' => 'integer',
         'status' => OrderStatusEnum::class,
         'payment_status' => PaymentStatusEnum::class,
+        'wants_factura_a' => 'boolean',
     ];
 
     protected static function booted(): void

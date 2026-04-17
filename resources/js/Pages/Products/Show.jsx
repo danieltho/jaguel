@@ -224,17 +224,11 @@ export default function Show({ product, relatedProducts }) {
 
                         {/* Main Image */}
                         <div className="w-[383px] h-[530px] rounded-2xl overflow-hidden bg-neutral-100">
-                            {mainImage ? (
-                                <img
-                                    src={mainImage}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : (
-                                <div className="w-full h-full bg-neutral-100 flex items-center justify-center text-neutral-300">
-                                    Sin imagen
-                                </div>
-                            )}
+                            <img
+                                src={mainImage || '/images/img_default.jpg'}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                            />
                         </div>
                     </div>
 

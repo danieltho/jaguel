@@ -3,7 +3,6 @@ import { WhatsappLogo } from '@phosphor-icons/react';
 import Template from '../Shared/components/layout';
 import ProductCard from '../Shared/components/ProductCard/ProductCard';
 import CategoryBanner from '../Shared/components/CategoryBanner/CategoryBanner';
-import TagButton from '../Shared/components/TagButton/TagButton';
 import Newsletter from '../Shared/components/Newsletter/Newsletter';
 
 export default function Home() {
@@ -16,7 +15,11 @@ export default function Home() {
                 <div className="max-w-[1320px] mx-auto flex flex-col gap-6">
                     {/* Hero Section */}
                     <div className="relative w-full h-[608px] rounded-[20px] overflow-hidden flex flex-col justify-center pl-6">
-                        <div className="absolute inset-0 bg-[url('/resources/images/hero-home.jpg')] bg-cover bg-center" />
+                        <img
+                            src="/images/hero-home.jpg"
+                            alt="Hero"
+                            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                        />
                         <div className="relative z-[1] flex flex-col gap-2.5 max-w-[874px]">
                             <h1 className="text-[40px] font-semibold text-white leading-none">
                                 Reconectando con la Tradición
@@ -42,21 +45,12 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* Category Tabs */}
+            {/* Section Title */}
             <section className="py-[30px]">
-                <div className="flex flex-col items-center gap-4">
+                <div className="flex flex-col items-center">
                     <h2 className="text-[32px] font-medium text-neutral-500 text-center">
                         Productos Destacados
                     </h2>
-                    <div className="flex gap-2">
-                        {categoryGroups?.map((group) => (
-                            <TagButton
-                                key={group.id}
-                                label={group.name.toUpperCase()}
-                                href={`/productos/${group.slug}`}
-                            />
-                        ))}
-                    </div>
                 </div>
             </section>
 
@@ -80,7 +74,11 @@ export default function Home() {
             {/* Custom / Personalization Banner */}
             <section className="px-[60px] py-8">
                 <div className="max-w-[1320px] mx-auto relative h-[655px] rounded-[20px] overflow-hidden flex flex-col items-end justify-between p-[50px]">
-                    <div className="absolute inset-0 bg-[url('/resources/images/custom-banner.jpg')] bg-cover bg-center" />
+                    <img
+                        src="/images/custom-banner.jpg"
+                        alt="Tu toque personal"
+                        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                    />
                     <div className="absolute inset-0 bg-black/20 rounded-[20px]" />
                     <div className="relative z-[1] flex flex-col justify-between h-full w-full">
                         <div className="flex flex-col gap-2.5 max-w-[387px]">

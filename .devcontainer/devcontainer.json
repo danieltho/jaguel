@@ -1,0 +1,59 @@
+{
+  "name": "Jaguel Web (Laravel + React)",
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "app",
+  "workspaceFolder": "/var/www",
+  "shutdownAction": "stopCompose",
+
+  "forwardPorts": [8000, 5173, 3306],
+  "portsAttributes": {
+    "8000": { "label": "Laravel (nginx)", "onAutoForward": "openBrowser" },
+    "5173": { "label": "Vite dev server", "onAutoForward": "silent" },
+    "3306": { "label": "MySQL", "onAutoForward": "silent" }
+  },
+
+  "remoteUser": "jaguelweb",
+  "containerUser": "jaguelweb",
+
+  "postCreateCommand": "composer install --no-interaction && npm install && cp -n .env.example .env || true && php artisan key:generate --ansi || true",
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+        "[javascriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+        "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+        "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+        "tailwindCSS.includeLanguages": {
+          "blade": "html",
+          "javascriptreact": "javascript"
+        },
+        "files.associations": {
+          "*.blade.php": "blade"
+        },
+        "intelephense.environment.phpVersion": "8.3.0",
+        "eslint.workingDirectories": [{ "mode": "auto" }]
+      },
+      "extensions": [
+        "bmewburn.vscode-intelephense-client",
+        "open-southeners.laravel-pint",
+        "onecentlin.laravel-blade",
+        "shufo.vscode-blade-formatter",
+        "amiralizadeh9480.laravel-extra-intellisense",
+        "ryannaddy.laravel-artisan",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "dsznajder.es7-react-js-snippets",
+        "bradlc.vscode-tailwindcss",
+        "mikestead.dotenv",
+        "eamodio.gitlens",
+        "editorconfig.editorconfig"
+      ]
+    }
+  }
+}
