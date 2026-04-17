@@ -23,7 +23,7 @@ class CategoryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Settings';
+    protected static string|null|\UnitEnum $navigationGroup = 'Configuración';
 
     protected static ?int $navigationSort = 2;
 
@@ -51,9 +51,9 @@ class CategoryResource extends Resource
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('categoryGroup.name')
-                ->label('Group'),
+                ->label('Grupo'),
                 TextColumn::make('products_count')
-                    ->label('Products')
+                    ->label('Productos')
                 ->counts('products')
                 ->sortable()
                 ,

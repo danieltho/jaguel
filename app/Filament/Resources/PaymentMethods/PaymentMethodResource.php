@@ -34,7 +34,7 @@ class PaymentMethodResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Medios de Pago';
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Settings';
+    protected static string|null|\UnitEnum $navigationGroup = 'Configuración';
 
     protected static ?int $navigationSort = 15;
 

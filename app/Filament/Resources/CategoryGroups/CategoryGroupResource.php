@@ -24,7 +24,7 @@ class CategoryGroupResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Settings';
+    protected static string|null|\UnitEnum $navigationGroup = 'Configuración';
 
     protected static ?int $navigationSort = 3;
 
@@ -52,7 +52,7 @@ class CategoryGroupResource extends Resource
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('categories_count')
-                    ->label('Categories')
+                    ->label('Categorías')
                 ->counts('categories')
                 ->sortable(),
                 SpatieMediaLibraryImageColumn::make('image')

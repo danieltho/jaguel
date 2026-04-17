@@ -25,11 +25,7 @@ function CartItem({ item }) {
             {/* Image */}
             <Link href={`/producto/${item.slug}`} className="shrink-0">
                 <div className="w-[100px] h-[100px] rounded-xl overflow-hidden bg-neutral-100">
-                    {item.image ? (
-                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                    ) : (
-                        <div className="w-full h-full bg-neutral-100" />
-                    )}
+                    <img src={item.image || '/images/img_default.jpg'} alt={item.name} className="w-full h-full object-cover" />
                 </div>
             </Link>
 
@@ -155,10 +151,10 @@ function OrderSummary({ subtotal, discount, couponCode, shipping, total }) {
 
             {/* Checkout Button */}
             <Link
-                href="/checkout/direccion"
-                className="block w-full mt-4 py-3.5 bg-neutral-500 text-white text-center font-medium rounded-full hover:bg-neutral-400 transition-colors"
+                href="/checkout/contacto"
+                className="block w-full mt-4 py-3.5 bg-oxido-300 text-oxido-50 text-center font-medium rounded-[8px] hover:opacity-90 transition-opacity"
             >
-                Realizar Checkout
+                Iniciar Compra
             </Link>
         </div>
     );

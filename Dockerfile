@@ -1,7 +1,7 @@
 FROM php:8.3-fpm
 
 # Arguments
-ARG user=laravel
+ARG user=jaguelweb
 ARG uid=1000
 
 # Install system dependencies
@@ -15,11 +15,7 @@ RUN apt-get update && apt-get install -y \
     libicu-dev \
     zip \
     unzip \
-    nodejs \
-    npm
-
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
 RUN docker-php-ext-configure intl
@@ -43,9 +39,6 @@ COPY --chown=$user:$user . /var/www
 # Install dependencies
 USER $user
 RUN composer install --no-interaction --optimize-autoloader
-
-# Install npm dependencies and build assets
-RUN npm install && npm run build
 
 EXPOSE 9000
 CMD ["php-fpm"]

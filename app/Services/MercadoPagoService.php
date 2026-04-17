@@ -22,22 +22,49 @@ class MercadoPagoService
             ];
         })->toArray();
 
-        $preference = $client->create([
+        if ($order->shipping_cost > 0) {
+            $items[] = [
+                'title' => 'Envio - '.($order->shipping_method ?? 'Standard'),
+                'quantity' => 1,
+                'unit_price' => $order->shipping_cost / 100,
+                'currency_id' => 'ARS',
+            ];
+        }
+
+        $preferenceData = [
             'items' => $items,
             'back_urls' => [
                 'success' => route('checkout.result', ['status' => 'approved']),
                 'failure' => route('checkout.result', ['status' => 'rejected']),
                 'pending' => route('checkout.result', ['status' => 'pending']),
             ],
-            'auto_return' => 'approved',
             'external_reference' => (string) $order->id,
-            'notification_url' => url('/webhook/mercadopago'),
-        ]);
+        ];
+
+        // auto_return requires HTTPS back_urls — skip in local
+        // Use 'all' so MercadoPago auto-redirects on approved, rejected, and pending
+        if (! app()->environment('local')) {
+            $preferenceData['auto_return'] = 'all';
+        }
+
+        // MercadoPago rejects non-HTTPS/localhost notification URLs
+        $webhookUrl = url('/webhook/mercadopago');
+        if (! app()->environment('local') && str_starts_with($webhookUrl, 'https://')) {
+            $preferenceData['notification_url'] = $webhookUrl;
+        }
+
+        \Log::info('MercadoPago preference request', ['data' => $preferenceData]);
+
+        $preference = $client->create($preferenceData);
+
+        // Use sandbox_init_point in local, init_point in production
+        $redirectUrl = app()->environment('local')
+            ? $preference->sandbox_init_point
+            : $preference->init_point;
 
         return [
             'id' => $preference->id,
-            'init_point' => $preference->init_point,
-            'sandbox_init_point' => $preference->sandbox_init_point,
+            'init_point' => $redirectUrl,
         ];
     }
 

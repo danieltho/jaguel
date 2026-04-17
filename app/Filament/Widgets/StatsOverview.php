@@ -13,7 +13,7 @@ class StatsOverview extends BaseWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Total Users', Customer::count())
+            Stat::make('Total Clientes', Customer::count())
                 ->description('Usuarios registrados')
                 ->descriptionIcon('heroicon-m-users')
                 ->color('success'),

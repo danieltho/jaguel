@@ -7,6 +7,7 @@ use App\Enums\PaymentStatusEnum;
 use App\Models\PaymentMethod;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -46,6 +47,94 @@ class OrderForm
                             ->options(OrderStatusEnum::class)
                             ->default(OrderStatusEnum::PENDING)
                             ->required(),
+                    ]),
+
+                Section::make('Tipo de Entrega')
+                    ->columns(2)
+                    ->visibleOn('edit')
+                    ->schema([
+                        Select::make('delivery_type')
+                            ->label('Tipo de Entrega')
+                            ->options([
+                                'pickup' => 'Retiro en local',
+                                'shipping' => 'Envío a domicilio',
+                            ])
+                            ->disabled()
+                            ->dehydrated(false),
+
+                        Select::make('shipping_method')
+                            ->label('Método de Envío')
+                            ->options([
+                                'punto_retiro' => 'Punto de retiro',
+                                'correo_argentino' => 'Correo Argentino',
+                            ])
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->visible(fn ($record) => $record?->delivery_type === 'shipping'),
+                    ]),
+
+                Section::make('Datos del Destinatario')
+                    ->columns(2)
+                    ->visibleOn('edit')
+                    ->schema([
+                        TextInput::make('recipient_firstname')
+                            ->label('Nombre')
+                            ->disabled()
+                            ->dehydrated(false),
+
+                        TextInput::make('recipient_lastname')
+                            ->label('Apellido')
+                            ->disabled()
+                            ->dehydrated(false),
+
+                        TextInput::make('recipient_phone')
+                            ->label('Teléfono')
+                            ->disabled()
+                            ->dehydrated(false),
+
+                        TextInput::make('recipient_address')
+                            ->label('Dirección')
+                            ->disabled()
+                            ->dehydrated(false),
+
+                        TextInput::make('recipient_department')
+                            ->label('Departamento')
+                            ->disabled()
+                            ->dehydrated(false),
+
+                        TextInput::make('recipient_city')
+                            ->label('Ciudad')
+                            ->disabled()
+                            ->dehydrated(false),
+
+                        TextInput::make('recipient_state')
+                            ->label('Provincia')
+                            ->disabled()
+                            ->dehydrated(false),
+                    ]),
+
+                Section::make('Facturación')
+                    ->columns(2)
+                    ->visibleOn('edit')
+                    ->schema([
+                        TextInput::make('document_number')
+                            ->label('Número de Documento')
+                            ->disabled()
+                            ->dehydrated(false),
+
+                        Select::make('document_type')
+                            ->label('Tipo de Documento')
+                            ->options([
+                                'DNI' => 'DNI',
+                                'CUIT' => 'CUIT',
+                            ])
+                            ->disabled()
+                            ->dehydrated(false),
+
+                        Toggle::make('wants_factura_a')
+                            ->label('Solicita Factura A')
+                            ->disabled()
+                            ->dehydrated(false),
                     ]),
 
                 Section::make('Informacion de Pago')

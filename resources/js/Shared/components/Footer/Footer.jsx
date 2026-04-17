@@ -66,7 +66,7 @@ export default function Footer() {
                         </a>
                     </div>
                     <p className="text-sm text-white">
-                        A product of <span className="underline">Ophelia Studio</span>
+                        A product of <span className="font-semibold">Ophelia Studio</span>
                     </p>
                     <p className="text-sm text-white">
                         &copy; 2026 El Jagüel. All rights reserved.

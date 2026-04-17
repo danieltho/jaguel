@@ -44,11 +44,13 @@ Route::prefix('cuenta')->name('customer.')->group(function () {
 
 Route::get('/buscar', [SearchController::class, 'index'])->name('search');
 
-Route::prefix('checkout')->name('checkout.')->middleware('auth:customer')->group(function () {
-    Route::get('/direccion', [CheckoutController::class, 'showAddress'])->name('address');
-    Route::post('/direccion', [CheckoutController::class, 'saveAddress']);
-    Route::get('/datos-envio', [CheckoutController::class, 'showShipping'])->name('shipping');
-    Route::post('/datos-envio', [CheckoutController::class, 'saveShipping']);
+Route::prefix('checkout')->name('checkout.')->group(function () {
+    Route::get('/contacto', [CheckoutController::class, 'showContact'])->name('contact');
+    Route::post('/contacto', [CheckoutController::class, 'saveContact']);
+    Route::get('/entrega', [CheckoutController::class, 'showDelivery'])->name('delivery');
+    Route::post('/entrega', [CheckoutController::class, 'saveDelivery']);
+    Route::get('/destinatario', [CheckoutController::class, 'showRecipient'])->name('recipient');
+    Route::post('/destinatario', [CheckoutController::class, 'saveRecipient']);
     Route::get('/pago', [CheckoutController::class, 'showPayment'])->name('payment');
     Route::post('/pago', [CheckoutController::class, 'placeOrder']);
     Route::get('/resultado', [CheckoutController::class, 'success'])->name('result');
