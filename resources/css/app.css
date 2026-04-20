@@ -18,6 +18,7 @@
     /* Neutral — text and surfaces */
     --color-neutral-50: #F8F8F9;
     --color-neutral-100: #F5F5F5;
+    --color-neutral-200: #D9D9D6;
     --color-neutral-300: #9EA2A2;
     --color-neutral-400: #707372;
     --color-neutral-500: #202322;
@@ -30,4 +31,7 @@
     /* Carmesí — discount badges */
     --color-carmesi-100: #CBA2A7;
     --color-carmesi-300: #802F2D;
+
+    /* Success — feedback / selected states */
+    --color-success-bg-100: #E3E9E2;
 }

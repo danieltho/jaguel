@@ -19,28 +19,28 @@ export default function ProductCard({ product }) {
                     />
                 </div>
 
-                <div className="flex flex-col gap-1 flex-1">
-                    <h3 className="text-xl font-semibold text-[#202322] leading-snug line-clamp-2">
+                <div className="flex flex-col gap-2 items-start w-full">
+                    <h3 className="text-xl font-semibold text-neutral-500 leading-normal w-full line-clamp-2">
                         {name}
                     </h3>
 
                     {category && (
-                        <span className="inline-flex w-fit px-1.5 py-1 rounded-[10px] bg-moss-50 text-moss-300 text-base font-semibold uppercase">
+                        <span className="inline-flex h-[31px] items-center justify-center px-1.5 py-1 rounded-[10px] bg-moss-50 text-moss-300 text-base font-semibold uppercase">
                             {category}
                         </span>
                     )}
 
-                    <div className="flex items-center gap-2 mt-auto pt-2">
+                    <div className="flex items-center gap-2 w-full">
                         {hasDiscount && (
-                            <span className="text-2xl text-[#202322] line-through font-medium">
+                            <span className="text-2xl text-neutral-500 line-through font-medium">
                                 {formatPrice(price)}
                             </span>
                         )}
-                        <span className="text-2xl font-semibold text-[#202322]">
+                        <span className="text-2xl font-semibold text-neutral-500">
                             {formatPrice(finalPrice)}
                         </span>
                         {hasDiscount && discount.percentage && (
-                            <span className="px-1.5 py-1 rounded-full bg-carmesi-100 text-carmesi-300 text-base font-semibold">
+                            <span className="inline-flex items-center justify-center px-1.5 py-1 rounded-full bg-carmesi-100 text-carmesi-300 text-base font-semibold">
                                 -{discount.percentage}%
                             </span>
                         )}

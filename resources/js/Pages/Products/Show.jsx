@@ -4,6 +4,9 @@ import { Minus, Plus, ArrowLeft } from '@phosphor-icons/react';
 import Template from '../../Shared/components/layout';
 import Breadcrumb from '../../Shared/components/Breadcrumb/Breadcrumb';
 import ProductCard from '../../Shared/components/ProductCard/ProductCard';
+import ColorSelector from '../../Shared/components/ColorSelector/ColorSelector';
+import SizeSelector from '../../Shared/components/SizeSelector/SizeSelector';
+import ImageGallery from '../../Shared/components/ImageGallery/ImageGallery';
 import { formatPrice } from '../../Shared/utils/formatPrice';
 
 function StarRating({ rating = 4.5 }) {
@@ -160,13 +163,27 @@ export default function Show({ product, relatedProducts }) {
     const colors = [...new Map(
         product.variants
             .filter((v) => v.color)
-            .map((v) => [v.color.id, v.color])
+            .map((v) => {
+                const matching = product.variants.filter(
+                    (x) => x.color?.id === v.color.id &&
+                        (!selectedVariant?.size || x.size?.id === selectedVariant.size.id)
+                );
+                const inStock = matching.some((x) => (x.stock ?? 0) > 0);
+                return [v.color.id, { ...v.color, inStock }];
+            })
     ).values()];
 
     const sizes = [...new Map(
         product.variants
             .filter((v) => v.size)
-            .map((v) => [v.size.id, v.size])
+            .map((v) => {
+                const matching = product.variants.filter(
+                    (x) => x.size?.id === v.size.id &&
+                        (!selectedVariant?.color || x.color?.id === selectedVariant.color.id)
+                );
+                const inStock = matching.some((x) => (x.stock ?? 0) > 0);
+                return [v.size.id, { ...v.size, inStock }];
+            })
     ).values()];
 
     const handleAddToCart = () => {
@@ -178,8 +195,6 @@ export default function Show({ product, relatedProducts }) {
             preserveScroll: true,
         });
     };
-
-    const mainImage = product.images?.[activeImageIndex]?.url || product.images?.[0]?.url;
 
     return (
         <Template>
@@ -222,12 +237,13 @@ export default function Show({ product, relatedProducts }) {
                             </div>
                         )}
 
-                        {/* Main Image */}
-                        <div className="w-[383px] h-[530px] rounded-2xl overflow-hidden bg-neutral-100">
-                            <img
-                                src={mainImage || '/images/img_default.jpg'}
+                        {/* Main Image Gallery */}
+                        <div className="w-[383px]">
+                            <ImageGallery
+                                images={product.images}
                                 alt={product.name}
-                                className="w-full h-full object-cover"
+                                activeIndex={activeImageIndex}
+                                onIndexChange={setActiveImageIndex}
                             />
                         </div>
                     </div>
@@ -267,59 +283,34 @@ export default function Show({ product, relatedProducts }) {
                         </div>
 
                         {/* Variants — Colors */}
-                        {colors.length > 0 && (
-                            <div className="flex flex-col gap-2 mt-2">
-                                <span className="text-sm text-neutral-400">Color</span>
-                                <div className="flex gap-2">
-                                    {colors.map((color) => (
-                                        <button
-                                            key={color.id}
-                                            onClick={() => {
-                                                const variant = product.variants.find(
-                                                    (v) => v.color?.id === color.id
-                                                );
-                                                setSelectedVariant(variant);
-                                            }}
-                                            className={`w-10 h-10 rounded-full border-2 transition-colors ${
-                                                selectedVariant?.color?.id === color.id
-                                                    ? 'border-neutral-500'
-                                                    : 'border-neutral-100'
-                                            }`}
-                                            style={{ backgroundColor: color.hex || '#ccc' }}
-                                            title={color.name}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                        <div className="mt-2">
+                            <ColorSelector
+                                colors={colors}
+                                selectedId={selectedVariant?.color?.id}
+                                onSelect={(color) => {
+                                    const variant = product.variants.find(
+                                        (v) => v.color?.id === color.id &&
+                                            (!selectedVariant?.size || v.size?.id === selectedVariant.size.id)
+                                    );
+                                    setSelectedVariant(variant);
+                                }}
+                            />
+                        </div>
 
                         {/* Variants — Sizes */}
-                        {sizes.length > 0 && (
-                            <div className="flex flex-col gap-2 mt-2">
-                                <span className="text-sm text-neutral-400">Talle</span>
-                                <div className="flex gap-2">
-                                    {sizes.map((size) => (
-                                        <button
-                                            key={size.id}
-                                            onClick={() => {
-                                                const variant = product.variants.find(
-                                                    (v) => v.size?.id === size.id &&
-                                                        (!selectedVariant?.color || v.color?.id === selectedVariant.color.id)
-                                                );
-                                                setSelectedVariant(variant);
-                                            }}
-                                            className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors ${
-                                                selectedVariant?.size?.id === size.id
-                                                    ? 'border-neutral-500 bg-neutral-500 text-white'
-                                                    : 'border-neutral-300 text-neutral-500 hover:border-neutral-400'
-                                            }`}
-                                        >
-                                            {size.name}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                        <div className="mt-2">
+                            <SizeSelector
+                                sizes={sizes}
+                                selectedId={selectedVariant?.size?.id}
+                                onSelect={(size) => {
+                                    const variant = product.variants.find(
+                                        (v) => v.size?.id === size.id &&
+                                            (!selectedVariant?.color || v.color?.id === selectedVariant.color.id)
+                                    );
+                                    setSelectedVariant(variant);
+                                }}
+                            />
+                        </div>
 
                         {/* Divider */}
                         <hr className="border-neutral-100 mt-2" />
