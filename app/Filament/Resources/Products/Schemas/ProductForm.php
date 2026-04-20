@@ -8,7 +8,7 @@ use App\Models\Color;
 use App\Models\Size;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -34,53 +34,52 @@ class ProductForm
     {
         return $schema
             ->components([
-                Section::make('Nombre y descripción')->schema([
+                Hidden::make('type')->default(ProductTypeEnum::FISICO->value),
 
+                Section::make('Producto general')->schema([
+                    TextInput::make('sku')
+                        ->label('SKU')
+                        ->maxLength(255),
                     TextInput::make('name')
                         ->label('Nombre')
-                        ->required()
-                        ->live(onBlur: true)
-                        ->afterStateUpdated(fn ($state, $set, $get) => $get('slug') ?: $set('slug', \Illuminate\Support\Str::slug($state))),
-                    TextInput::make('slug')
-                        ->label('Slug')
-                        ->required()
-                        ->unique(ignoreRecord: true),
+                        ->required(),
                     RichEditor::make('description')
                         ->label('Descripción')
-                        ,
+                        ->toolbarButtons(['bold']),
                 ])->columnSpanFull(),
-                Section::make('Tipo de producto')->schema([
-                    Radio::make('type')
-                        ->hiddenLabel()
-                            ->options(ProductTypeEnum::class)
-                ])->columnSpanFull(),
+
                 Section::make('Precios')->schema([
                     Grid::make()->columns(4)->schema([
+                        TextInput::make('price_without_tax')
+                            ->label('Precio sin impuesto')
+                            ->postfix('$')
+                            ->rule('numeric'),
                         TextInput::make('price_sold')
                             ->label('Precio Venta')
                             ->postfix('$')
-                            ->numeric(),
+                            ->rule('numeric'),
                         TextInput::make('price_sales')
                             ->label('Precio Promocional')
                             ->postfix('$')
-                            ->numeric()
+                            ->rule('numeric')
                             ->live()
                             ->afterStateUpdated(fn ($state, $set, $get) => $set('profit_margin', self::calculateMargin($get('price_cost'), $state))),
                         TextInput::make('price_cost')
                             ->label('Precio Costo')
                             ->postfix('$')
-                            ->numeric()
+                            ->rule('numeric')
                             ->live()
                             ->afterStateUpdated(fn ($state, $set, $get) => $set('profit_margin', self::calculateMargin($state, $get('price_sales')))),
                         TextInput::make('profit_margin')
                             ->label('Margen de ganancia')
                             ->dehydrated(false)
                             ->postfix('%')
+                            ->rule('numeric')
                             ->disabled(),
                         TextInput::make('price_provider')
-                            ->label('Precio proveedor')
+                            ->label('Precio Proveedor')
                             ->postfix('$')
-                            ->numeric(),
+                            ->rule('numeric'),
                     ]),
                 ])->columnSpanFull(),
 
@@ -105,49 +104,48 @@ class ProductForm
                             ->label('Peso')
                             ->postfix('Kg')
                             ->placeholder('0.14')
-                            ->numeric(),
+                            ->rule('numeric'),
                         TextInput::make('dimension_length')
                             ->label('Profundidad')
                             ->postfix('cm')
                             ->placeholder('30')
-                            ->numeric(),
-                        TextInput::make('dimension_height')
+                            ->rule('numeric'),
+                        TextInput::make('dimension_width')
                             ->label('Ancho')
                             ->postfix('cm')
                             ->placeholder('30')
-                            ->numeric(),
-                        TextInput::make('dimension_with')
+                            ->rule('numeric'),
+                        TextInput::make('dimension_height')
                             ->label('Alto')
                             ->postfix('cm')
                             ->placeholder('30')
-                            ->numeric(),
+                            ->rule('numeric'),
                     ]),
                 ])->columnSpanFull(),
 
-
                 Section::make('Inventario')->schema([
-                    Radio::make('inventario_type')
-                        ->hiddenLabel()
+                    Select::make('inventario_type')
+                        ->label('Tipo de inventario')
                         ->dehydrated(false)
                         ->options(ProductStatusEnum::class)
-                        ->default(ProductStatusEnum::OUT_STOCK->value)
+                        ->default(ProductStatusEnum::IN_STOCK->value)
+                        ->selectablePlaceholder(false)
                         ->afterStateHydrated(function ($state, $set, $get) {
                             $stock = $get('stock');
-                            $set('inventario_type', is_null($stock) ? ProductStatusEnum::OUT_STOCK->value : ProductStatusEnum::IN_STOCK->value);
+                            $set('inventario_type', is_null($stock)
+                                ? ProductStatusEnum::OUT_STOCK->value
+                                : ProductStatusEnum::IN_STOCK->value);
+                        })
+                        ->afterStateUpdated(function ($state, $set) {
+                            if ($state === ProductStatusEnum::OUT_STOCK->value) {
+                                $set('stock', null);
+                            }
                         })
                         ->live(),
                     TextInput::make('stock')
                         ->label('Cantidad')
-                        ->numeric()
-                        ->hidden(function($get) {
-                            if (is_null($get('stock')) && $get('inventario_type')->value === ProductStatusEnum::OUT_STOCK->value){
-                                return true;
-                            }
-
-                            return false;
-                        }
-
-                        ),
+                        ->rule('numeric')
+                        ->hidden(fn ($get) => $get('inventario_type') === ProductStatusEnum::OUT_STOCK->value),
                 ])
                     ->columnSpanFull()
                     ->hidden(fn ($get) => !empty($get('variants'))),
@@ -199,8 +197,22 @@ class ProductForm
                                 $priceCost = $get('price_cost');
                                 $priceProvider = $get('price_provider');
                                 $stock = $get('stock') ?? 0;
+                                $baseSku = $get('sku');
 
                                 $newVariants = [];
+
+                                $makeVariant = function ($colorId, $sizeId) use ($priceSold, $priceSales, $priceCost, $priceProvider, $stock, $baseSku) {
+                                    return [
+                                        'sku' => $baseSku,
+                                        'color_id' => $colorId,
+                                        'size_id' => $sizeId,
+                                        'price_sold' => $priceSold,
+                                        'price_sales' => $priceSales,
+                                        'price_cost' => $priceCost,
+                                        'price_provider' => $priceProvider,
+                                        'stock' => $stock,
+                                    ];
+                                };
 
                                 if (!empty($colors) && !empty($sizes)) {
                                     foreach ($colors as $colorId) {
@@ -210,15 +222,7 @@ class ProductForm
                                                 ($v['size_id'] ?? null) == $sizeId
                                             );
                                             if (!$exists) {
-                                                $newVariants[] = [
-                                                    'color_id' => $colorId,
-                                                    'size_id' => $sizeId,
-                                                    'price_sold' => $priceSold,
-                                                    'price_sales' => $priceSales,
-                                                    'price_cost' => $priceCost,
-                                                    'price_provider' => $priceProvider,
-                                                    'stock' => $stock,
-                                                ];
+                                                $newVariants[] = $makeVariant($colorId, $sizeId);
                                             }
                                         }
                                     }
@@ -229,15 +233,7 @@ class ProductForm
                                             empty($v['size_id'])
                                         );
                                         if (!$exists) {
-                                            $newVariants[] = [
-                                                'color_id' => $colorId,
-                                                'size_id' => null,
-                                                'price_sold' => $priceSold,
-                                                'price_sales' => $priceSales,
-                                                'price_cost' => $priceCost,
-                                                'price_provider' => $priceProvider,
-                                                'stock' => $stock,
-                                            ];
+                                            $newVariants[] = $makeVariant($colorId, null);
                                         }
                                     }
                                 } elseif (!empty($sizes)) {
@@ -247,15 +243,7 @@ class ProductForm
                                             ($v['size_id'] ?? null) == $sizeId
                                         );
                                         if (!$exists) {
-                                            $newVariants[] = [
-                                                'color_id' => null,
-                                                'size_id' => $sizeId,
-                                                'price_sold' => $priceSold,
-                                                'price_sales' => $priceSales,
-                                                'price_cost' => $priceCost,
-                                                'price_provider' => $priceProvider,
-                                                'stock' => $stock,
-                                            ];
+                                            $newVariants[] = $makeVariant(null, $sizeId);
                                         }
                                     }
                                 }
@@ -268,7 +256,10 @@ class ProductForm
                         ->hiddenLabel()
                         ->addable(false)
                         ->schema([
-                            Grid::make()->columns(5)->schema([
+                            Grid::make()->columns(6)->schema([
+                                TextInput::make('sku')
+                                    ->label('SKU')
+                                    ->maxLength(255),
                                 Select::make('color_id')
                                     ->label('Color')
                                     ->options(Color::pluck('name', 'id'))
@@ -283,11 +274,11 @@ class ProductForm
                                     ->placeholder('Sin talle'),
                                 TextInput::make('price_sold')
                                     ->label('Precio Venta')
-                                    ->numeric()
+                                    ->rule('numeric')
                                     ->postfix('$'),
                                 TextInput::make('stock')
                                     ->label('Stock')
-                                    ->numeric(),
+                                    ->rule('numeric'),
                                 SpatieMediaLibraryFileUpload::make('variant_image')
                                     ->label('Imagen')
                                     ->collection('variant')
@@ -302,6 +293,7 @@ class ProductForm
                                 ->icon('heroicon-o-pencil-square')
                                 ->modalHeading('Editar variante')
                                 ->fillForm(fn (array $arguments, $get) => [
+                                    'sku' => $get("variants.{$arguments['item']}.sku"),
                                     'color_id' => $get("variants.{$arguments['item']}.color_id"),
                                     'size_id' => $get("variants.{$arguments['item']}.size_id"),
                                     'price_sold' => $get("variants.{$arguments['item']}.price_sold"),
@@ -315,8 +307,11 @@ class ProductForm
                                     'dimension_length' => $get("variants.{$arguments['item']}.dimension_length"),
                                 ])
                                 ->schema([
-                                    Section::make('Color y Talle')->schema([
-                                        Grid::make()->columns(2)->schema([
+                                    Section::make('Identificación')->schema([
+                                        Grid::make()->columns(3)->schema([
+                                            TextInput::make('sku')
+                                                ->label('SKU')
+                                                ->maxLength(255),
                                             Select::make('color_id')
                                                 ->label('Color')
                                                 ->options(Color::pluck('name', 'id'))
@@ -332,49 +327,50 @@ class ProductForm
                                             TextInput::make('price_sold')
                                                 ->label('Precio Venta')
                                                 ->postfix('$')
-                                                ->numeric(),
+                                                ->rule('numeric'),
                                             TextInput::make('price_sales')
                                                 ->label('Precio Promocional')
                                                 ->postfix('$')
-                                                ->numeric(),
+                                                ->rule('numeric'),
                                             TextInput::make('price_cost')
                                                 ->label('Precio Costo')
                                                 ->postfix('$')
-                                                ->numeric(),
+                                                ->rule('numeric'),
                                             TextInput::make('price_provider')
                                                 ->label('Precio Proveedor')
                                                 ->postfix('$')
-                                                ->numeric(),
+                                                ->rule('numeric'),
                                         ]),
                                     ]),
                                     Section::make('Inventario')->schema([
                                         TextInput::make('stock')
                                             ->label('Stock')
-                                            ->numeric(),
+                                            ->rule('numeric'),
                                     ]),
                                     Section::make('Peso y dimensiones')->schema([
                                         Grid::make()->columns(4)->schema([
                                             TextInput::make('dimension_weight')
                                                 ->label('Peso')
                                                 ->postfix('Kg')
-                                                ->numeric(),
+                                                ->rule('numeric'),
                                             TextInput::make('dimension_length')
                                                 ->label('Profundidad')
                                                 ->postfix('cm')
-                                                ->numeric(),
-                                            TextInput::make('dimension_height')
+                                                ->rule('numeric'),
+                                            TextInput::make('dimension_width')
                                                 ->label('Ancho')
                                                 ->postfix('cm')
-                                                ->numeric(),
-                                            TextInput::make('dimension_width')
+                                                ->rule('numeric'),
+                                            TextInput::make('dimension_height')
                                                 ->label('Alto')
                                                 ->postfix('cm')
-                                                ->numeric(),
+                                                ->rule('numeric'),
                                         ]),
                                     ]),
                                 ])
                                 ->action(function (array $data, array $arguments, $get, $set) {
                                     $index = $arguments['item'];
+                                    $set("variants.{$index}.sku", $data['sku']);
                                     $set("variants.{$index}.color_id", $data['color_id']);
                                     $set("variants.{$index}.size_id", $data['size_id']);
                                     $set("variants.{$index}.price_sold", $data['price_sold']);
@@ -414,7 +410,6 @@ class ProductForm
                         }),
                 ])
                     ->columnSpanFull(),
-
             ]);
     }
 }

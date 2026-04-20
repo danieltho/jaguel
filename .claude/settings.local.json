@@ -1,6 +1,13 @@
 {
   "permissions": {
     "allow": [
+      "Skill(update-config)",
+      "Read(//Users/danielalbertothomannom/.claude/**)",
+      "Bash(command -v terminal-notifier)",
+      "Bash(terminal-notifier -help)",
+      "mcp__figma__get_design_context",
+      "mcp__figma__get_metadata",
+      "mcp__figma__get_screenshot",
       "Bash(php artisan migrate:*)",
       "Bash(php artisan:*)",
       "Bash(/opt/homebrew/opt/php@8.3/bin/php artisan make:migration:*)",
