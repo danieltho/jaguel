@@ -16,6 +16,7 @@ class ProductVariant extends Model implements HasMedia
     public $timestamps = false;
     protected $fillable = [
         'product_id',
+        'sku',
         'price_sold',
         'price_sales',
         'price_provider',
