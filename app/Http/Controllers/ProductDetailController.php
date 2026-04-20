@@ -89,8 +89,10 @@ class ProductDetailController extends Controller
             'id' => $product->id,
             'name' => $product->name,
             'slug' => $product->slug,
+            'sku' => $product->sku,
             'description' => $product->description,
             'price' => $priceSold,
+            'price_without_tax' => $product->price_without_tax,
             'discount' => $discountData,
             'images' => $images,
             'category' => $product->category ? [
