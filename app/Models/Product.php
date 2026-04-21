@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\ScaledPrice;
 use App\Enums\ProductTypeEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -39,7 +40,12 @@ class Product extends Model implements HasMedia
     ];
 
     protected $casts = [
-        'type' => ProductTypeEnum::class
+        'type' => ProductTypeEnum::class,
+        'price_sold' => ScaledPrice::class,
+        'price_without_tax' => ScaledPrice::class,
+        'price_sales' => ScaledPrice::class,
+        'price_provider' => ScaledPrice::class,
+        'price_cost' => ScaledPrice::class,
     ];
 
     protected static function booted(): void

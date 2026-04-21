@@ -3,32 +3,32 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: laravel-app
+    container_name: app
     restart: unless-stopped
     working_dir: /var/www
     volumes:
       - ./:/var/www
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
     networks:
-      - laravel
+      - jaguelapp
     depends_on:
       - db
 
   node:
     image: node:20-alpine
-    container_name: laravel-node
+    container_name: node
     working_dir: /var/www
     volumes:
       - ./:/var/www
     ports:
       - "5173:5173"
     networks:
-      - laravel
+      - jaguelapp
     command: sh -c "npm install && npm run dev"
 
   nginx:
     image: nginx:alpine
-    container_name: laravel-nginx
+    container_name: nginx
     restart: unless-stopped
     ports:
       - "8000:80"
@@ -36,13 +36,13 @@ services:
       - ./:/var/www
       - ./docker/nginx/conf.d:/etc/nginx/conf.d
     networks:
-      - laravel
+      - jaguelapp
     depends_on:
       - app
 
   db:
     image: mysql:8.0
-    container_name: laravel-db
+    container_name: db
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: ${DB_DATABASE:-laravel}
@@ -54,8 +54,8 @@ services:
     volumes:
       - ./docker/mysql/data:/var/lib/mysql
     networks:
-      - laravel
+      - jaguelapp
 
 networks:
-  laravel:
+  jaguelapp:
     driver: bridge

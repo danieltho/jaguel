@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Head, router } from '@inertiajs/react';
 import {
     Minus,
@@ -29,25 +29,60 @@ function InfoItem({ icon, title, description }) {
     );
 }
 
-export default function Show({ product, relatedProducts }) {
+export default function Show({ product, relatedProducts, initialVariantSku }) {
     const [quantity, setQuantity] = useState(1);
-    const [selectedVariant, setSelectedVariant] = useState(null);
+    const [selectedVariant, setSelectedVariant] = useState(() => {
+        if (!product.variants?.length) return null;
+        if (initialVariantSku) {
+            const match = product.variants.find((v) => v.sku === initialVariantSku);
+            if (match) return match;
+        }
+        return product.variants[0];
+    });
+
+    useEffect(() => {
+        if (!selectedVariant?.sku || typeof window === 'undefined') return;
+        const desiredPath = `/producto/${product.slug}/${selectedVariant.sku}`;
+        if (window.location.pathname !== desiredPath) {
+            const url = new URL(window.location.href);
+            url.pathname = desiredPath;
+            window.history.replaceState({}, '', url.toString());
+        }
+    }, [selectedVariant?.sku, product.slug]);
     const [activeImageIndex, setActiveImageIndex] = useState(0);
     const [personalization, setPersonalization] = useState('NO');
     const [personalizationOpen, setPersonalizationOpen] = useState(false);
 
-    const hasDiscount = !!product.discount;
-    const finalPrice = hasDiscount ? product.discount.new_price : product.price;
+    const display = selectedVariant
+        ? (() => {
+            const sold = selectedVariant.price_sold ?? product.price;
+            const sales = selectedVariant.price_sales;
+            const onPromo = sales != null && sales > 0 && sales < sold;
+            return {
+                sku: selectedVariant.sku || product.sku,
+                originalPrice: sold,
+                finalPrice: onPromo ? sales : sold,
+                hasDiscount: onPromo,
+                discountPercentage: onPromo
+                    ? Math.round(((sold - sales) / sold) * 100)
+                    : null,
+            };
+        })()
+        : {
+            sku: product.sku,
+            originalPrice: product.price,
+            finalPrice: product.discount?.new_price ?? product.price,
+            hasDiscount: !!product.discount,
+            discountPercentage: product.discount?.percentage ?? null,
+        };
 
     const sizes = [...new Map(
         product.variants
             .filter((v) => v.size)
             .map((v) => {
-                const matching = product.variants.filter(
-                    (x) => x.size?.id === v.size.id &&
-                        (!selectedVariant?.color || x.color?.id === selectedVariant.color.id)
+                const inStock = product.variants.some(
+                    (x) => x.size?.id === v.size.id && (x.stock ?? 0) > 0
                 );
-                const inStock = matching.some((x) => (x.stock ?? 0) > 0);
                 return [v.size.id, { ...v.size, inStock }];
             })
     ).values()];
@@ -56,11 +91,9 @@ export default function Show({ product, relatedProducts }) {
         product.variants
             .filter((v) => v.color)
             .map((v) => {
-                const matching = product.variants.filter(
-                    (x) => x.color?.id === v.color.id &&
-                        (!selectedVariant?.size || x.size?.id === selectedVariant.size.id)
+                const inStock = product.variants.some(
+                    (x) => x.color?.id === v.color.id && (x.stock ?? 0) > 0
                 );
-                const inStock = matching.some((x) => (x.stock ?? 0) > 0);
                 return [v.color.id, { ...v.color, inStock }];
             })
     ).values()];
@@ -166,9 +199,9 @@ export default function Show({ product, relatedProducts }) {
                                     {product.category.name}
                                 </span>
                             )}
-                            {product.sku && (
+                            {display.sku && (
                                 <p className="flex-1 text-sm text-neutral-500">
-                                    SKU: {product.sku}
+                                    SKU: {display.sku}
                                 </p>
                             )}
                         </div>
@@ -190,17 +223,17 @@ export default function Show({ product, relatedProducts }) {
                         {/* Price + Subtax */}
                         <div className="flex flex-col gap-2 justify-center">
                             <div className="flex items-center gap-2">
-                                {hasDiscount && (
+                                {display.hasDiscount && (
                                     <span className="text-[32px] font-normal line-through text-neutral-500">
-                                        {formatPrice(product.price)}
+                                        {formatPrice(display.originalPrice)}
                                     </span>
                                 )}
                                 <span className="text-[40px] font-bold text-neutral-500">
-                                    {formatPrice(finalPrice)}
+                                    {formatPrice(display.finalPrice)}
                                 </span>
-                                {hasDiscount && product.discount.percentage && (
+                                {display.hasDiscount && display.discountPercentage && (
                                     <span className="bg-carmesi-100 h-[31px] px-1.5 py-1 rounded-full text-lg font-semibold text-carmesi-300 flex items-center">
-                                        -{product.discount.percentage}%
+                                        -{display.discountPercentage}%
                                     </span>
                                 )}
                             </div>
@@ -220,25 +253,25 @@ export default function Show({ product, relatedProducts }) {
                                         <div className="flex gap-2.5 items-center flex-wrap">
                                             {sizes.map((size) => {
                                                 const isSelected = selectedVariant?.size?.id === size.id;
-                                                const base = 'size-8 rounded-md text-sm font-medium flex items-center justify-center';
-                                                const style = !size.inStock
-                                                    ? 'bg-neutral-200 text-neutral-300 cursor-not-allowed'
-                                                    : isSelected
-                                                    ? 'bg-oxido-50 border-2 border-moss-300 text-neutral-500 cursor-pointer'
-                                                    : 'bg-oxido-50 text-neutral-500 cursor-pointer hover:border-2 hover:border-moss-300';
+                                                const base = 'size-8 rounded-md text-sm font-medium flex items-center justify-center cursor-pointer';
+                                                const style = isSelected
+                                                    ? 'bg-oxido-50 border-2 border-moss-300 text-neutral-500'
+                                                    : 'bg-oxido-50 text-neutral-500 hover:border-2 hover:border-moss-300';
+                                                const stockStyle = !size.inStock ? 'opacity-50 line-through' : '';
                                                 return (
                                                     <button
                                                         key={size.id}
                                                         type="button"
-                                                        disabled={!size.inStock}
+                                                        title={!size.inStock ? 'Sin stock' : undefined}
                                                         onClick={() => {
-                                                            const variant = product.variants.find(
+                                                            const exact = product.variants.find(
                                                                 (v) => v.size?.id === size.id &&
                                                                     (!selectedVariant?.color || v.color?.id === selectedVariant.color.id)
                                                             );
-                                                            setSelectedVariant(variant);
+                                                            const fallback = product.variants.find((v) => v.size?.id === size.id);
+                                                            setSelectedVariant(exact || fallback);
                                                         }}
-                                                        className={`${base} ${style}`}
+                                                        className={`${base} ${style} ${stockStyle}`}
                                                     >
                                                         {size.name}
                                                     </button>
@@ -259,16 +292,17 @@ export default function Show({ product, relatedProducts }) {
                                                     <button
                                                         key={color.id}
                                                         type="button"
-                                                        disabled={!color.inStock}
+                                                        title={!color.inStock ? `${color.name} - sin stock` : color.name}
                                                         onClick={() => {
-                                                            const variant = product.variants.find(
+                                                            const exact = product.variants.find(
                                                                 (v) => v.color?.id === color.id &&
                                                                     (!selectedVariant?.size || v.size?.id === selectedVariant.size.id)
                                                             );
-                                                            setSelectedVariant(variant);
+                                                            const fallback = product.variants.find((v) => v.color?.id === color.id);
+                                                            setSelectedVariant(exact || fallback);
                                                         }}
                                                         aria-label={color.name}
-                                                        className={`size-8 rounded-md relative ${border} ${color.inStock ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                                                        className={`size-8 rounded-md relative cursor-pointer ${border}`}
                                                         style={{ backgroundColor: color.hex || '#000' }}
                                                     >
                                                         {!color.inStock && (
@@ -340,14 +374,24 @@ export default function Show({ product, relatedProducts }) {
                                     <Plus size={20} weight="bold" className="text-oxido-50" />
                                 </button>
                             </div>
-                            <button
-                                type="button"
-                                onClick={handleAddToCart}
-                                className="flex items-center gap-2.5 h-[41px] px-6 py-2.5 bg-oxido-300 border border-oxido-300 rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                            >
-                                <ShoppingCart size={24} className="text-oxido-50" />
-                                <span className="text-sm font-medium text-oxido-50">Añadir al Carrito</span>
-                            </button>
+                            {(() => {
+                                const outOfStock = selectedVariant != null && (selectedVariant.stock ?? 0) <= 0;
+                                return (
+                                    <button
+                                        type="button"
+                                        onClick={handleAddToCart}
+                                        disabled={outOfStock}
+                                        className={`flex items-center gap-2.5 h-[41px] px-6 py-2.5 bg-oxido-300 border border-oxido-300 rounded-lg transition-opacity ${
+                                            outOfStock ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:opacity-90'
+                                        }`}
+                                    >
+                                        <ShoppingCart size={24} className="text-oxido-50" />
+                                        <span className="text-sm font-medium text-oxido-50">
+                                            {outOfStock ? 'Sin stock' : 'Añadir al Carrito'}
+                                        </span>
+                                    </button>
+                                );
+                            })()}
                         </div>
                     </div>
                 </div>

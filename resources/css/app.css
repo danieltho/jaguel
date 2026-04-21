@@ -7,31 +7,74 @@
 @source '../**/*.jsx';
 
 @theme {
-    /* Typography */
+    /* Typography — Montserrat (300/400/500/600/700/800) */
     --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
-    /* Oxido — primary brand color (rust) */
-    --color-oxido-50: #F4EFEB;
-    --color-oxido-300: #934D10;
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
 
-    /* Neutral — text and surfaces */
-    --color-neutral-50: #F8F8F9;
+    /* Type scale — size / line-height (Figma: H1 24, H2 18, H3 16, Body 14, Footer 12) */
+    --text-xs: 12px;
+    --text-xs--line-height: 16.8px;
+
+    --text-sm: 14px;
+    --text-sm--line-height: 19.2px;
+
+    --text-base: 16px;
+    --text-base--line-height: 26.4px;
+
+    --text-lg: 18px;
+    --text-lg--line-height: 31.2px;
+
+    --text-2xl: 24px;
+    --text-2xl--line-height: 48px;
+
+    /* Óxido — Primary (rust) */
+    --color-oxido-50: #F4EFEB;  /* Surface */
+    --color-oxido-100: #D4B59E;
+    --color-oxido-200: #B58150;
+    --color-oxido-300: #934D10; /* Primary */
+
+    /* Carmesí — Secondary */
+    --color-carmesi-50: #E5D5D4;
+    --color-carmesi-100: #CBA2A7;
+    --color-carmesi-200: #AB5C57;
+    --color-carmesi-300: #802F2D; /* Secondary */
+
+    /* Neutral — Text & backgrounds */
+    --color-neutral-50: #F8F8F9;  /* bg */
     --color-neutral-100: #F5F5F5;
     --color-neutral-200: #D9D9D6;
     --color-neutral-300: #9EA2A2;
     --color-neutral-400: #707372;
-    --color-neutral-500: #202322;
+    --color-neutral-500: #202322; /* Text */
 
-    /* Moss — footer, tags */
+    /* Moss — Footer / tags */
     --color-moss-50: #EEEDEA;
+    --color-moss-100: #B9BBB1;
     --color-moss-200: #A1A389;
     --color-moss-300: #4F4934;
 
-    /* Carmesí — discount badges */
-    --color-carmesi-100: #CBA2A7;
-    --color-carmesi-300: #802F2D;
+    /* Error — Alert */
+    --color-error-50: #FAD1D3;
+    --color-error-100: #DD6368;
+    --color-error-300: #CB343B; /* Alert */
 
-    /* Success — feedback / selected states */
+    /* Warning */
+    --color-warning-50: #FFFBEA;
+    --color-warning-100: #FCE588;
+    --color-warning-300: #EAC535;
+
+    /* Success */
+    --color-success-50: #E3E9E2;
+    --color-success-100: #A3B8A0;
+    --color-success-300: #547C50;
+
+    /* Alias preserved for backwards compatibility (prefer success-50) */
     --color-success-bg-100: #E3E9E2;
 }

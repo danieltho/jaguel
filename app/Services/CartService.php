@@ -103,7 +103,7 @@ class CartService
         session()->forget('cart_coupon');
     }
 
-    public function getSubtotal(): int
+    public function getSubtotal(): float
     {
         $cart = session('cart', []);
         if (empty($cart)) {
@@ -168,7 +168,7 @@ class CartService
         return $productId.'-'.($variantId ?? 'null');
     }
 
-    private function getItemPrice(?Product $product, ?ProductVariant $variant): int
+    private function getItemPrice(?Product $product, ?ProductVariant $variant): float
     {
         if (! $product) {
             return 0;

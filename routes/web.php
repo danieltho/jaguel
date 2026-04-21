@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class);
 
-Route::get('/producto/{slug}', [ProductDetailController::class, 'show'])->name('products.show');
+Route::get('/producto/{slug}/{variantSku?}', [ProductDetailController::class, 'show'])->name('products.show');
 
 Route::prefix('productos')->name('products.')->group(function () {
     Route::get('/', [ProductListingController::class, 'index'])->name('index');
