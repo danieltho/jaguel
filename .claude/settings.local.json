@@ -42,7 +42,18 @@
       "mcp__claude_ai_Figma__get_design_context",
       "Bash(docker compose *)",
       "Bash(docker system df *)",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Bash(curl -s -o /dev/null -w \"Home: %{http_code}\\\\nProductos: %{http_code}\\\\n\" http://localhost:8000/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:8000/productos)",
+      "Bash(curl -s http://localhost:8000/productos -H \"Accept: text/html\")",
+      "Bash(curl -s http://localhost:8000/productos -H \"Accept: application/json\" -H \"X-Inertia: true\" -H \"X-Inertia-Version: \")",
+      "Bash(curl -s http://localhost:8000/productos -H \"X-Inertia: true\" -H \"X-Inertia-Version: v1\" -H \"Accept: text/html, application/xhtml+xml\")",
+      "Bash(curl -s -L http://localhost:8000/productos)",
+      "Bash(curl -s -L http://localhost:8000/)",
+      "Bash(curl *)",
+      "Bash(lsof -nP -iTCP:5173 -sTCP:LISTEN)",
+      "Bash(ps -p 31937 -o pid,command)",
+      "Bash(kill 31937)"
     ]
   }
 }

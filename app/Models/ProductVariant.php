@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\ScaledPrice;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -14,6 +15,14 @@ class ProductVariant extends Model implements HasMedia
     use InteractsWithMedia;
 
     public $timestamps = false;
+
+    protected $casts = [
+        'price_sold' => ScaledPrice::class,
+        'price_sales' => ScaledPrice::class,
+        'price_provider' => ScaledPrice::class,
+        'price_cost' => ScaledPrice::class,
+    ];
+
     protected $fillable = [
         'product_id',
         'sku',

@@ -27,6 +27,10 @@ class ProductsTable
                 TextColumn::make('id')
                     ->label('ID')
                     ->sortable(),
+                TextColumn::make('sku')
+                    ->label('SKU')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('name')
                     ->label('Título')
                     ->url(fn (Product $record): string => ProductResource::getUrl('edit', ['record' => $record]))

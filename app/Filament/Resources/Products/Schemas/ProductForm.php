@@ -5,10 +5,12 @@ namespace App\Filament\Resources\Products\Schemas;
 use App\Enums\ProductStatusEnum;
 use App\Enums\ProductTypeEnum;
 use App\Models\Color;
+use App\Models\Product;
 use App\Models\Size;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -18,6 +20,8 @@ use Filament\Schemas\Components\Actions as SchemaActions;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 class ProductForm
 {
@@ -50,36 +54,37 @@ class ProductForm
 
                 Section::make('Precios')->schema([
                     Grid::make()->columns(4)->schema([
-                        TextInput::make('price_without_tax')
-                            ->label('Precio sin impuesto')
+                        TextInput::make('price_cost')
+                            ->label('Precio Costo')
+                            ->postfix('$')
+                            ->rule('numeric')
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(fn ($state, $set, $get) => $set('profit_margin', self::calculateMargin($state, $get('price_sales')))),
+                        TextInput::make('price_provider')
+                            ->label('Precio Proveedor')
                             ->postfix('$')
                             ->rule('numeric'),
                         TextInput::make('price_sold')
                             ->label('Precio Venta')
                             ->postfix('$')
                             ->rule('numeric'),
+                        TextInput::make('price_without_tax')
+                            ->label('Precio sin impuesto')
+                            ->postfix('$')
+                            ->rule('numeric'),
                         TextInput::make('price_sales')
                             ->label('Precio Promocional')
                             ->postfix('$')
                             ->rule('numeric')
-                            ->live()
+                            ->live(onBlur: true)
                             ->afterStateUpdated(fn ($state, $set, $get) => $set('profit_margin', self::calculateMargin($get('price_cost'), $state))),
-                        TextInput::make('price_cost')
-                            ->label('Precio Costo')
-                            ->postfix('$')
-                            ->rule('numeric')
-                            ->live()
-                            ->afterStateUpdated(fn ($state, $set, $get) => $set('profit_margin', self::calculateMargin($state, $get('price_sales')))),
                         TextInput::make('profit_margin')
                             ->label('Margen de ganancia')
                             ->dehydrated(false)
                             ->postfix('%')
                             ->rule('numeric')
-                            ->disabled(),
-                        TextInput::make('price_provider')
-                            ->label('Precio Proveedor')
-                            ->postfix('$')
-                            ->rule('numeric'),
+                            ->disabled()
+                            ->afterStateHydrated(fn ($set, $get) => $set('profit_margin', self::calculateMargin($get('price_cost'), $get('price_sales')))),
                     ]),
                 ])->columnSpanFull(),
 
@@ -160,6 +165,7 @@ class ProductForm
                             ->modalSubmitActionLabel('Generar')
                             ->fillForm(function ($get) {
                                 $currentVariants = $get('variants') ?? [];
+
                                 $selectedColors = collect($currentVariants)
                                     ->pluck('color_id')
                                     ->filter()
@@ -173,12 +179,46 @@ class ProductForm
                                     ->values()
                                     ->toArray();
 
+                                $colorMap = $selectedColors
+                                    ? Color::whereIn('id', $selectedColors)->pluck('name', 'id')
+                                    : collect();
+                                $sizeMap = $selectedSizes
+                                    ? Size::whereIn('id', $selectedSizes)->pluck('name', 'id')
+                                    : collect();
+
+                                $existingCombos = collect($currentVariants)
+                                    ->map(function ($v) use ($colorMap, $sizeMap) {
+                                        $color = isset($v['color_id']) ? ($colorMap[$v['color_id']] ?? null) : null;
+                                        $size = isset($v['size_id']) ? ($sizeMap[$v['size_id']] ?? null) : null;
+
+                                        return collect([$color, $size])->filter()->implode(' / ');
+                                    })
+                                    ->filter()
+                                    ->unique()
+                                    ->values()
+                                    ->toArray();
+
                                 return [
                                     'selected_colors' => $selectedColors,
                                     'selected_sizes' => $selectedSizes,
+                                    'existing_combos' => $existingCombos,
                                 ];
                             })
                             ->schema([
+                                Placeholder::make('existing_variants')
+                                    ->label('Combinaciones ya creadas')
+                                    ->content(function ($get) {
+                                        $combos = $get('existing_combos') ?? [];
+                                        if (empty($combos)) {
+                                            return new HtmlString('<span class="text-sm text-gray-500">Aún no hay variantes. Seleccioná colores y/o talles para crear las primeras.</span>');
+                                        }
+                                        $badges = collect($combos)
+                                            ->map(fn (string $combo) => '<span class="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-700 dark:text-gray-200">'.e($combo).'</span>')
+                                            ->implode(' ');
+
+                                        return new HtmlString('<div class="flex flex-wrap gap-2">'.$badges.'</div>');
+                                    }),
+                                Hidden::make('existing_combos'),
                                 CheckboxList::make('selected_colors')
                                     ->label('Colores')
                                     ->options(Color::pluck('name', 'id'))
@@ -188,7 +228,7 @@ class ProductForm
                                     ->options(Size::pluck('name', 'id'))
                                     ->columns(4),
                             ])
-                            ->action(function (array $data, $get, $set) {
+                            ->action(function (array $data, $get, $set, ?Product $record) {
                                 $colors = $data['selected_colors'] ?? [];
                                 $sizes = $data['selected_sizes'] ?? [];
                                 $currentVariants = $get('variants') ?? [];
@@ -197,13 +237,26 @@ class ProductForm
                                 $priceCost = $get('price_cost');
                                 $priceProvider = $get('price_provider');
                                 $stock = $get('stock') ?? 0;
-                                $baseSku = $get('sku');
+
+                                $title = (string) ($get('name') ?? '');
+                                $letters = preg_replace('/[^A-Z]/', '', strtoupper(Str::ascii($title)));
+                                $prefix = str_pad(substr($letters, 0, 4), 4, 'X');
+                                $idPart = $record?->id ? '00'.$record->id : '';
+
+                                $colorMap = $colors ? Color::whereIn('id', $colors)->pluck('name', 'id') : collect();
+                                $sizeMap = $sizes ? Size::whereIn('id', $sizes)->pluck('name', 'id') : collect();
+
+                                $normalize = fn (?string $value) => $value
+                                    ? preg_replace('/[^A-Z0-9]/', '', strtoupper(Str::ascii($value)))
+                                    : '';
 
                                 $newVariants = [];
 
-                                $makeVariant = function ($colorId, $sizeId) use ($priceSold, $priceSales, $priceCost, $priceProvider, $stock, $baseSku) {
+                                $makeVariant = function ($colorId, $sizeId) use ($prefix, $idPart, $colorMap, $sizeMap, $normalize, $priceSold, $priceSales, $priceCost, $priceProvider, $stock) {
+                                    $suffix = $normalize($colorMap[$colorId] ?? null).$normalize($sizeMap[$sizeId] ?? null);
+
                                     return [
-                                        'sku' => $baseSku,
+                                        'sku' => $prefix.$idPart.($suffix !== '' ? '-'.$suffix : ''),
                                         'color_id' => $colorId,
                                         'size_id' => $sizeId,
                                         'price_sold' => $priceSold,
@@ -286,6 +339,13 @@ class ProductForm
                                     ->image()
                                     ->imageEditor(),
                             ]),
+                            Hidden::make('price_sales'),
+                            Hidden::make('price_cost'),
+                            Hidden::make('price_provider'),
+                            Hidden::make('dimension_weight'),
+                            Hidden::make('dimension_height'),
+                            Hidden::make('dimension_width'),
+                            Hidden::make('dimension_length'),
                         ])
                         ->extraItemActions([
                             Action::make('edit_variant')

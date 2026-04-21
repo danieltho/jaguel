@@ -11,12 +11,13 @@ class ProductDetailController extends Controller
 {
     public function __construct(private CouponService $couponService) {}
 
-    public function show(string $slug): Response
+    public function show(string $slug, ?string $variantSku = null): Response
     {
         $product = Product::where('slug', $slug)
             ->where('is_active', true)
             ->with([
                 'category.categoryGroup',
+                'variants' => fn ($q) => $q->orderBy('sort_order')->orderBy('id'),
                 'variants.color',
                 'variants.size',
                 'variants.media',
@@ -36,6 +37,7 @@ class ProductDetailController extends Controller
         return Inertia::render('Products/Show', [
             'product' => $this->formatProductDetail($product),
             'relatedProducts' => $relatedProducts,
+            'initialVariantSku' => $variantSku,
         ]);
     }
 
@@ -70,10 +72,11 @@ class ProductDetailController extends Controller
 
         $variants = $product->variants->map(fn ($variant) => [
             'id' => $variant->id,
+            'sku' => $variant->sku,
             'color' => $variant->color ? [
                 'id' => $variant->color->id,
                 'name' => $variant->color->name,
-                'hex' => $variant->color->hex ?? null,
+                'hex' => $variant->color->rgb_color,
             ] : null,
             'size' => $variant->size ? [
                 'id' => $variant->size->id,
