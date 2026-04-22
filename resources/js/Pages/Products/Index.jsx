@@ -76,21 +76,20 @@ export default function ProductsIndex() {
 
     return (
         <Template>
-            {/* Breadcrumb */}
-            <section className="px-[60px] pt-[24px] pb-[16px]">
-                <Breadcrumb items={breadcrumbItems} />
-            </section>
+            <div className="mx-auto flex max-w-360 flex-col gap-6 px-15">
+                {/* Breadcrumb */}
+                <section className="py-6">
+                    <Breadcrumb items={breadcrumbItems} />
+                </section>
 
-            {/* Title + Subcategories */}
-            <section className="py-[30px]">
-                <div className="flex flex-col items-center gap-4">
-                    <h1 className="text-[32px] font-medium text-neutral-500 text-center">
+                {/* Title + Category tabs */}
+                <section className="flex flex-col items-center justify-center gap-4 p-4">
+                    <h1 className="text-center text-2xl font-bold text-neutral-500">
                         {pageTitle}
                     </h1>
 
-                    {/* Group tabs (when showing all products) */}
                     {groupTabs.length > 0 && (
-                        <div className="flex gap-2.5">
+                        <div className="flex items-center justify-center gap-2.5">
                             {groupTabs.map((tab) => (
                                 <TagButton
                                     key={tab.slug}
@@ -101,9 +100,8 @@ export default function ProductsIndex() {
                         </div>
                     )}
 
-                    {/* Subcategory tabs (when filtering by group) */}
                     {subcategories.length > 0 && (
-                        <div className="flex gap-2.5">
+                        <div className="flex items-center justify-center gap-2.5">
                             <TagButton
                                 label="Todos"
                                 href={`/productos/${activeGroup.slug}`}
@@ -119,46 +117,41 @@ export default function ProductsIndex() {
                             ))}
                         </div>
                     )}
-                </div>
-            </section>
+                </section>
 
-            {/* Sort + Product Grid */}
-            <section className="px-[60px] pb-16">
-                <div className="max-w-[1320px] mx-auto">
-                    {/* Sort */}
-                    <div className="flex justify-end mb-6">
+                {/* Sort + Product Grid */}
+                <section className="flex flex-col gap-6 pb-16">
+                    <div className="flex items-center justify-end">
                         <SortDropdown value={sort} onChange={handleSortChange} />
                     </div>
 
-                    {/* Product Grid */}
-                    <div className="grid grid-cols-4 gap-6">
+                    <div className="grid grid-cols-4 gap-x-6 gap-y-16">
                         {allProducts.map((product) => (
                             <ProductCard key={product.id} product={product} />
                         ))}
                     </div>
 
-                    {/* Infinite scroll sentinel */}
                     <div ref={sentinelRef} className="h-4" />
 
                     {loadingMore && (
                         <div className="flex justify-center py-8">
-                            <div className="w-8 h-8 border-2 border-oxido-300 border-t-transparent rounded-full animate-spin" />
+                            <div className="h-8 w-8 animate-spin rounded-full border-2 border-oxido-300 border-t-transparent" />
                         </div>
                     )}
 
                     {!hasMore && allProducts.length > 0 && (
-                        <p className="text-center text-neutral-400 text-sm py-8">
+                        <p className="py-8 text-center text-sm text-neutral-400">
                             No hay más productos para mostrar
                         </p>
                     )}
 
                     {allProducts.length === 0 && (
-                        <p className="text-center text-neutral-400 text-lg py-16">
+                        <p className="py-16 text-center text-lg text-neutral-400">
                             No se encontraron productos
                         </p>
                     )}
-                </div>
-            </section>
+                </section>
+            </div>
         </Template>
     );
 }

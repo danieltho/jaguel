@@ -1,8 +1,7 @@
 export default function TagButton({ label, href, isActive = false, onClick }) {
-    const base = 'px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer';
-    const active = 'bg-moss-300 text-oxido-50';
-    const inactive = 'bg-moss-50 text-moss-300 hover:bg-moss-200';
-    const classes = `${base} ${isActive ? active : inactive}`;
+    const base = 'p-2.5 text-xs font-medium text-neutral-500 text-center cursor-pointer transition-colors';
+    const state = isActive ? 'underline underline-offset-4' : 'hover:underline hover:underline-offset-4';
+    const classes = `${base} ${state}`;
 
     if (href) {
         return (
@@ -13,7 +12,7 @@ export default function TagButton({ label, href, isActive = false, onClick }) {
     }
 
     return (
-        <button onClick={onClick} className={classes}>
+        <button type="button" onClick={onClick} className={classes}>
             {label}
         </button>
     );
