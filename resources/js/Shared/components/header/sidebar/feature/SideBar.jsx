@@ -1,94 +1,143 @@
-import { XIcon,MagnifyingGlassIcon,ShoppingBagIcon, UserIcon, CaretDownIcon } from '@phosphor-icons/react';
+import {
+    XIcon,
+    MagnifyingGlassIcon,
+    ShoppingBagIcon,
+    CaretDownIcon,
+} from '@phosphor-icons/react';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
-import {useSidebar} from '../../../../hook/useSidebar';
+import { Link, usePage } from '@inertiajs/react';
+import { useSidebar } from '../../../../hook/useSidebar';
 import Logo from '../../../logo/Logo';
 import { useCategoryContext } from '../../../../context/CategoryContext';
 
 export default function SideBar() {
-  
-  const { isMenuOpen, closeMenu } = useSidebar();
-  const { categories, loading, baseUrl }  = useCategoryContext();
- 
-  if (!isMenuOpen) return null;
+    const { isMenuOpen, closeMenu } = useSidebar();
+    const { categories, loading, baseUrl } = useCategoryContext();
+    const { customer } = usePage().props;
 
-  return (
-    <div className='absolute top-0 left-0 w-[405px]  rounded-r-xl  grid grid-rows-1 grid-cols-3  gap-[17px]  h-screen  z-30 bg-white'>
-      <div className='bg-oxido-50 rounded-r-xl overflow-hidden  col-span-1  p-7  flex flex-col items-center  gap-6'>
-        <button className='hover:cursor-pointer' onClick={closeMenu} >
-          <XIcon size={24} />
-        </button>
-        <a href="">
-          <MagnifyingGlassIcon size={24} />
-        </a>
-        <a href="">
-          <UserIcon size={24} />
-        </a>
-        <a href="">
-          <ShoppingBagIcon size={24} />
-        </a>
-      </div>
-      <div className='bg-oxido-50 rounded-xl overflow-hidden  col-span-2 px-6 py-7 flex flex-col justify-start gap-6'>
-        <div className='flex justify-center w-full mb-8.25'>
-          <Logo/>
+    if (!isMenuOpen) return null;
+
+    return (
+        <div className="fixed top-0 left-0 z-30 flex h-screen items-start gap-4.25 p-4.25">
+            <aside className="flex h-full w-20 flex-col items-start gap-6 rounded-xl bg-oxido-50 p-7">
+                <button
+                    type="button"
+                    onClick={closeMenu}
+                    aria-label="Cerrar menú"
+                    className="cursor-pointer text-neutral-500"
+                >
+                    <XIcon size={24} />
+                </button>
+                <Link
+                    href="/carrito"
+                    onClick={closeMenu}
+                    aria-label="Carrito"
+                    className="text-neutral-500"
+                >
+                    <ShoppingBagIcon size={24} />
+                </Link>
+            </aside>
+
+            <aside className="flex h-full w-75 flex-col justify-between rounded-xl bg-oxido-50 px-6 py-7">
+                <div className="flex flex-col items-center gap-8.25">
+                    <Logo />
+
+                    <nav className="flex w-full flex-col">
+                        <Link
+                            href="/buscar"
+                            onClick={closeMenu}
+                            aria-label="Buscar"
+                            className="flex items-center rounded-[10px] px-2 py-2.5 text-neutral-500"
+                        >
+                            <MagnifyingGlassIcon size={24} />
+                        </Link>
+
+                        <NavItem href="/" label="Inicio" onNavigate={closeMenu} />
+
+                        {loading && (
+                            <p className="px-4 py-3 text-xs font-medium text-neutral-400">
+                                Cargando categorías…
+                            </p>
+                        )}
+
+                        {categories.map((category) =>
+                            category.children?.length ? (
+                                <NavDropdown
+                                    key={category.id}
+                                    category={category}
+                                    baseUrl={baseUrl}
+                                    onNavigate={closeMenu}
+                                />
+                            ) : (
+                                <NavItem
+                                    key={category.id}
+                                    href={`${baseUrl}${category.path}`}
+                                    label={category.name}
+                                    onNavigate={closeMenu}
+                                />
+                            )
+                        )}
+                    </nav>
+                </div>
+
+                {!customer && (
+                    <div className="flex w-full flex-col">
+                        <NavItem
+                            href="/cuenta/login"
+                            label="Iniciar Sesión"
+                            onNavigate={closeMenu}
+                        />
+                        <NavItem
+                            href="/cuenta/registro"
+                            label="Crear Cuenta"
+                            onNavigate={closeMenu}
+                        />
+                    </div>
+                )}
+            </aside>
         </div>
-        <nav className='flex flex-col gap-3'>
-          <a href="#" className=''>Inicio</a>
-          {loading && <p>Cargando categorías...</p>}
-          {/* {categories.map((category) => (
-            <a key={category.id} href={`${baseUrl}${category.path}`} className=''>{category.name}</a>
-          ))} */}
+    );
+}
 
-          {categories.map((category) => 
-            category.children ? (
-              <NavItemDropdown 
-                key={category.id}
-                category={category}
-              />
-            ) : (
-              <NavItem 
-                key={category.id} 
-                label={category.name} 
-                href={`${baseUrl}${category.path}`} 
-              />
-            )
-          )}
-        </nav>
-      </div>
-    </div>
-    
-  );
-};
+function NavItem({ href, label, onNavigate }) {
+    return (
+        <Link
+            href={href}
+            onClick={onNavigate}
+            className="flex h-12 items-center px-4 py-3 text-xs font-medium text-neutral-500"
+        >
+            {label}
+        </Link>
+    );
+}
 
-const NavItem = ({ label, href }) => {
-  return (<a href={href} className=''>{label}</a>);
-};
+function NavDropdown({ category, baseUrl, onNavigate }) {
+    return (
+        <Disclosure>
+            {({ open }) => (
+                <div className="flex w-full flex-col gap-1">
+                    <DisclosureButton className="flex h-11 w-full cursor-pointer items-center justify-between rounded-lg px-4 text-xs font-medium text-neutral-500">
+                        <span>{category.name}</span>
+                        <CaretDownIcon
+                            size={24}
+                            className={`transition-transform ${open ? 'rotate-180' : ''}`}
+                        />
+                    </DisclosureButton>
 
-const NavItemDropdown = ({ category }) => {
-  return (
-    <Disclosure>
-      {({ open }) => (
-        <>
-          <DisclosureButton className="flex w-full justify-between hover:cursor-pointer">
-            {category.name}
-            <CaretDownIcon
-              size={24}
-              className={`transition ${open ? "rotate-180" : ""}`}
-            />
-          </DisclosureButton>
-
-          <DisclosurePanel >
-            {category.children.map((child, j) => (
-              <a
-                key={j}
-                href={child.path}
-                className="block px-8 py-2 hover:underline hover:cursor-pointer"
-              >
-                {child.name}
-              </a>
-            ))}
-          </DisclosurePanel>
-        </>
-      )}
-    </Disclosure>
-  );
-};
+                    <DisclosurePanel className="flex flex-col">
+                        {category.children.map((child) => (
+                            <Link
+                                key={child.id}
+                                href={`${baseUrl}${child.path}`}
+                                onClick={onNavigate}
+                                className="flex h-11 items-center px-4 text-xs font-medium text-neutral-400"
+                            >
+                                {child.name}
+                            </Link>
+                        ))}
+                    </DisclosurePanel>
+                </div>
+            )}
+        </Disclosure>
+    );
+}

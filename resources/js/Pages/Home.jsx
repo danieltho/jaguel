@@ -10,98 +10,100 @@ export default function Home() {
 
     return (
         <Template isHomePage={true}>
-            {/* Hero + Category Banners (Bento) */}
-            <section className="px-[60px] py-[10px]">
-                <div className="max-w-[1320px] mx-auto flex flex-col gap-6">
-                    {/* Hero Section */}
-                    <div className="relative w-full h-[608px] rounded-[20px] overflow-hidden flex flex-col justify-center pl-6">
-                        <img
-                            src="/images/hero-home.jpg"
-                            alt="Hero"
-                            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-                        />
-                        <div className="relative z-[1] flex flex-col gap-2.5 max-w-[874px]">
-                            <h1 className="text-[40px] font-semibold text-white leading-none">
-                                Reconectando con la Tradición
-                            </h1>
-                            <p className="text-xl font-semibold text-[#f0f0f3]">
-                                Todos tus productos favoritos en un solo lugar.
-                            </p>
-                        </div>
-                        <a
-                            href="/productos"
-                            className="relative z-[1] mt-4 inline-flex w-fit h-10 items-center justify-center px-6 py-2.5 bg-oxido-300 border border-oxido-300 text-oxido-50 text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
-                        >
-                            Ver Nuestros Productos
-                        </a>
+            
+                {/* Hero Section */}
+                <section className="relative -mt-25 flex h-152 w-full flex-col justify-center gap-6 overflow-hidden px-15 pt-25">
+                    <img
+                        src="/images/hero-home.jpg"
+                        alt=""
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 size-full object-cover"
+                    />
+                    <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 bg-linear-to-b from-black/10 from-38% to-black/60"
+                    />
+                    <div className="relative flex w-md flex-col gap-2.5">
+                        <h1 className="text-[32px] font-bold text-white">
+                            Tienda de Mates y Cuchillería Artesanal
+                        </h1>
+                        <p className="text-lg font-semibold text-neutral-50">
+                            Descubre nuestra colección premium de mates, cuchillos y accesorios en un solo lugar.
+                        </p>
                     </div>
+                    <a
+                        href="/productos"
+                        className="relative inline-flex h-10 w-fit items-center justify-center rounded-lg border border-oxido-300 bg-oxido-300 px-6 py-2.5 text-xs font-medium text-oxido-50 transition-opacity hover:opacity-90"
+                    >
+                        Explorar Catálogo
+                    </a>
+                </section>
 
-                    {/* Category Banners */}
-                    <div className="flex gap-6">
+                {/* Categories */}
+                <section className="px-15">
+                    <div className="mx-auto flex max-w-330 items-center gap-4">
                         {categoryGroups?.map((group) => (
                             <CategoryBanner key={group.id} group={group} />
                         ))}
                     </div>
-                </div>
-            </section>
-
-            {/* Section Title */}
-            <section className="py-[30px]">
-                <div className="flex flex-col items-center">
-                    <h2 className="text-[32px] font-medium text-neutral-500 text-center">
-                        Productos Destacados
-                    </h2>
-                </div>
-            </section>
-
-            {/* Featured Products */}
-            <section className="px-[60px] py-8">
-                <div className="max-w-[1320px] mx-auto flex flex-col items-center gap-8">
-                    <div className="grid grid-cols-4 gap-6 w-full">
-                        {featuredProducts?.map((product) => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
+                </section>
+            
+                {/* Productos Destacados */}
+                <section className="px-15 pt-12">
+                    <div className="mx-auto flex max-w-330 flex-col items-center gap-4">
+                        <h2 className="text-center text-2xl font-bold text-carmesi-300">
+                            Productos Destacados
+                        </h2>
+                        <div className="flex w-full items-start gap-6">
+                            {featuredProducts?.map((product) => (
+                                <div key={product.id} className="flex-1 min-w-0">
+                                    <ProductCard product={product} />
+                                </div>
+                            ))}
+                        </div>
+                        <a
+                            href="/productos"
+                            className="inline-flex h-10 items-center justify-center rounded-lg border border-oxido-300 bg-oxido-300 px-6 py-2.5 text-xs font-medium text-oxido-50 transition-opacity hover:opacity-90"
+                        >
+                            Descubre la Colección
+                        </a>
                     </div>
-                    <a
-                        href="/productos"
-                        className="inline-flex h-10 items-center justify-center px-6 py-2.5 bg-oxido-300 border border-oxido-300 text-oxido-50 text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
-                    >
-                        Ver Todo
-                    </a>
-                </div>
-            </section>
+                </section>
 
-            {/* Custom / Personalization Banner */}
-            <section className="px-[60px] py-8">
-                <div className="max-w-[1320px] mx-auto relative h-[655px] rounded-[20px] overflow-hidden flex flex-col items-end justify-between p-[50px]">
-                    <img
-                        src="/images/custom-banner.jpg"
-                        alt="Tu toque personal"
-                        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-                    />
-                    <div className="absolute inset-0 bg-black/20 rounded-[20px]" />
-                    <div className="relative z-[1] flex flex-col justify-between h-full w-full">
-                        <div className="flex flex-col gap-2.5 max-w-[387px]">
-                            <h2 className="text-[40px] font-semibold text-neutral-50 leading-tight">
+                {/* Custom / Personalization Banner */}
+                <section className="px-15 pt-12">
+                    <div className="relative mx-auto flex h-163.75 max-w-330 flex-col justify-between overflow-hidden rounded-[20px] p-12.5">
+                        <img
+                            src="/images/custom-banner.jpg"
+                            alt=""
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-0 size-full object-cover"
+                        />
+                        <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-0 bg-black/20"
+                        />
+                        <div className="relative flex max-w-96.75 flex-col gap-2.5 text-neutral-50">
+                            <h2 className="text-[32px] font-bold">
                                 Tu toque personal en nuestra historia
                             </h2>
-                            <p className="text-xl font-semibold text-neutral-50">
+                            <p className="text-lg font-semibold">
                                 Personalización en productos seleccionados
                             </p>
                         </div>
                         <a
                             href="#"
-                            className="inline-flex w-fit h-9 items-center gap-2.5 px-4 py-2.5 bg-oxido-300 border border-oxido-300 text-oxido-50 text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+                            className="relative inline-flex h-9 w-50.75 items-center justify-center gap-2.5 rounded-lg border border-oxido-300 bg-oxido-300 px-4 py-2.5 text-sm font-medium text-oxido-50 transition-opacity hover:opacity-90"
                         >
                             <WhatsappLogo size={24} />
                             Más Información
                         </a>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            {/* Newsletter */}
-            <Newsletter />
+                {/* Newsletter */}
+                <Newsletter />
+            
         </Template>
     );
 }

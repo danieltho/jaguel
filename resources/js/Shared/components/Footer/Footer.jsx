@@ -1,84 +1,79 @@
+import { Link } from '@inertiajs/react';
 import { InstagramLogo, WhatsappLogo } from '@phosphor-icons/react';
 import { useCategoryContext } from '../../context/CategoryContext';
 
 export default function Footer() {
-    const { categories } = useCategoryContext();
+    const { categories, baseUrl } = useCategoryContext();
 
     return (
-        <footer className="bg-moss-200 overflow-hidden">
-            <div className="max-w-[1440px] mx-auto pt-[72px] px-[60px]">
-                <div className="flex justify-between">
-                    {/* Contact info */}
-                    <div className="flex gap-[104px]">
-                        <div className="text-neutral-50">
-                            <p className="text-xl font-medium">
-                                Calle 37 N° 1242
-                            </p>
-                            <p className="text-xl font-medium">
-                                Miramar, Buenos Aires
-                            </p>
-                            <div className="mt-4 flex flex-col gap-2.5">
-                                <p className="text-xl font-medium">+54 (226) 352 4989</p>
-                                <p className="text-base font-medium">eljaguel.miramar@gmail.com</p>
-                            </div>
+        <footer className="bg-moss-200 text-white">
+            <div className="mx-auto flex max-w-360 flex-col items-center gap-4 px-15 py-12">
+                <div className="flex w-full flex-col items-start justify-between gap-10 md:flex-row md:gap-6">
+                    <div className="flex flex-col gap-6 self-stretch md:justify-between">
+                        <p className="font-extrabold tracking-wider text-[32px] leading-none">
+                            EL JAGÜEL
+                        </p>
+                        <div className="flex gap-3">
+                            <a
+                                href="#"
+                                aria-label="WhatsApp"
+                                className="flex size-8.75 items-center justify-center rounded-full border border-white transition-colors hover:bg-white/10"
+                            >
+                                <WhatsappLogo size={20} />
+                            </a>
+                            <a
+                                href="#"
+                                aria-label="Instagram"
+                                className="flex size-8.75 items-center justify-center rounded-full border border-white transition-colors hover:bg-white/10"
+                            >
+                                <InstagramLogo size={20} />
+                            </a>
                         </div>
                     </div>
 
-                    {/* Navigation */}
-                    <div className="flex gap-[151px]">
-                        <div className="flex flex-col gap-6">
-                            <h3 className="text-lg font-semibold text-white">Inicio</h3>
-                            <div className="flex flex-col gap-2.5">
-                                <a href="/" className="text-base font-medium text-white opacity-65 hover:opacity-100 transition-opacity">
-                                    Nosotros
-                                </a>
-                                <a href="#" className="text-base font-medium text-white opacity-65 hover:opacity-100 transition-opacity">
-                                    Carrito
-                                </a>
+                    <div className="flex flex-col gap-4 text-base font-medium text-neutral-50">
+                        <div>
+                            <p>Calle 37 N° 1242</p>
+                            <p>Miramar, Buenos Aires</p>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <p>+54 9 223 312-3981</p>
+                            <p>eljaguelcriollo@gmail.com</p>
+                        </div>
+                    </div>
+
+                    <div className="hidden items-start gap-12 text-sm lg:flex">
+                        <div className="flex w-18.25 flex-col gap-4">
+                            <Link href="/" className="font-medium">
+                                Inicio
+                            </Link>
+                            <div className="flex flex-col gap-2.5 font-normal opacity-70">
+                                <a href="/nosotros">Nosotros</a>
+                                <Link href="/carrito">Carrito</Link>
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-6">
-                            <h3 className="text-lg font-semibold text-white">Categoría</h3>
-                            <div className="grid grid-cols-2 gap-x-[60px] gap-y-2.5">
-                                {categories.map((cat) => (
-                                    <a
-                                        key={cat.id}
-                                        href={cat.path}
-                                        className="text-base font-medium text-white opacity-65 hover:opacity-100 transition-opacity"
-                                    >
-                                        {cat.name}
-                                    </a>
-                                ))}
+                        {categories.length > 0 && (
+                            <div className="flex flex-col gap-4">
+                                <p className="font-medium">Categoría</p>
+                                <div className="flex flex-col gap-2.5 font-normal opacity-70">
+                                    {categories.map((cat) => (
+                                        <Link
+                                            key={cat.id}
+                                            href={`${baseUrl}${cat.path}`}
+                                        >
+                                            {cat.name}
+                                        </Link>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 
-                {/* Bottom bar */}
-                <div className="flex items-center justify-between mt-12 pb-6">
-                    <div className="flex gap-4">
-                        <a href="#" className="w-[35px] h-[35px] rounded-full border border-white flex items-center justify-center text-white hover:bg-white/10 transition-colors">
-                            <InstagramLogo size={20} />
-                        </a>
-                        <a href="#" className="w-[35px] h-[35px] rounded-full border border-white flex items-center justify-center text-white hover:bg-white/10 transition-colors">
-                            <WhatsappLogo size={20} />
-                        </a>
-                    </div>
-                    <p className="text-sm text-white">
-                        A product of <span className="font-semibold">Ophelia Studio</span>
-                    </p>
-                    <p className="text-sm text-white">
-                        &copy; 2026 El Jagüel. All rights reserved.
-                    </p>
-                </div>
-
-                {/* Wordmark */}
-                <div className="mt-4 mb-[-20px]">
-                    <p className="text-[120px] font-semibold text-white/20 leading-none tracking-wider text-center">
-                        EL JAGÜEL
-                    </p>
-                </div>
+                <p className="w-full text-center text-xs">
+                    &copy; 2026 El Jaguel. All rights reserved
+                </p>
             </div>
         </footer>
     );

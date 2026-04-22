@@ -2,21 +2,26 @@ export default function CategoryBanner({ group }) {
     return (
         <a
             href={`/productos/${group.slug}`}
-            className="relative flex-1 h-[280px] rounded-[20px] overflow-hidden block group"
+            className="relative flex h-78 flex-1 flex-col items-start justify-end overflow-hidden p-6 group"
         >
             {group.image ? (
                 <img
                     src={group.image}
-                    alt={group.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    alt=""
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-105"
                     loading="lazy"
                 />
             ) : (
-                <div className="w-full h-full bg-neutral-100" />
+                <div className="absolute inset-0 bg-neutral-100" />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/10 flex items-end p-6">
-                <span className="text-oxido-50 font-medium text-2xl">{group.name}</span>
-            </div>
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 bg-linear-to-b from-black/10 to-black/60"
+            />
+            <span className="relative text-lg font-semibold uppercase text-oxido-50 underline">
+                {group.name}
+            </span>
         </a>
     );
 }
