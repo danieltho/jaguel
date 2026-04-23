@@ -53,7 +53,8 @@
       "Bash(curl *)",
       "Bash(lsof -nP -iTCP:5173 -sTCP:LISTEN)",
       "Bash(ps -p 31937 -o pid,command)",
-      "Bash(kill 31937)"
+      "Bash(kill 31937)",
+      "Bash(npx eslint *)"
     ]
   }
 }

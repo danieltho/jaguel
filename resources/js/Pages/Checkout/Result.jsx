@@ -1,18 +1,19 @@
 import { Head, Link } from '@inertiajs/react';
 import logoImg from '../../Shared/components/logo/img/logo.png';
+import { OutlineButton } from '../../Shared/components/CheckoutLayout/CheckoutButton';
 
 const STATUS_CONFIG = {
     approved: {
-        title: '!Gracias por su compra!',
-        message: 'Su orden fue confirmada, recibira novedades del estado de su compra por via mail.',
+        title: '¡Gracias por su compra!',
+        message: 'Su orden fue confirmada, recibirá novedades del estado de su compra por vía mail.',
     },
     pending: {
-        title: '!Gracias por su compra!',
-        message: 'Su pago esta siendo procesado. Recibira novedades del estado de su compra por via mail.',
+        title: '¡Gracias por su compra!',
+        message: 'Su pago está siendo procesado. Recibirá novedades del estado de su compra por vía mail.',
     },
     rejected: {
         title: 'Pago Rechazado',
-        message: 'No pudimos procesar tu pago. Por favor, intenta nuevamente o usa otro metodo de pago.',
+        message: 'No pudimos procesar tu pago. Por favor, intentá nuevamente o usá otro medio de pago.',
     },
     cancelled: {
         title: 'Compra Cancelada',
@@ -27,55 +28,53 @@ export default function Result({ status, orderId, paymentMethod }) {
     return (
         <>
             <Head title={config.title} />
-            <div className="min-h-screen bg-neutral-50 flex flex-col">
-                {/* Logo header */}
-                <header className="w-full py-6 flex justify-center">
-                    <Link href="/">
-                        <img src={logoImg} className="h-[31px]" alt="El Jaguel" />
+            <div className="flex min-h-screen flex-col bg-neutral-50">
+                <header className="flex justify-center px-15 py-[30px]">
+                    <Link href="/" aria-label="El Jaguel">
+                        <img src={logoImg} className="h-[54px] w-auto object-contain" alt="El Jaguel" />
                     </Link>
                 </header>
 
-                {/* Centered content */}
-                <div className="flex-1 flex items-center justify-center">
-                    <div className="text-center max-w-md px-4">
-                        <h1 className="text-[32px] font-medium text-neutral-500">
-                            {config.title}
-                        </h1>
-
-                        {orderId && (
-                            <p className="text-sm text-neutral-400 mt-2">
-                                Orden #{orderId}
+                <main className="flex flex-1 items-center justify-center px-4">
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="flex flex-col items-center gap-2.5 px-4 py-[30px]">
+                            <h1 className="text-center text-lg font-semibold text-neutral-500">
+                                {config.title}
+                            </h1>
+                            <p className="max-w-[338px] text-center text-xs text-neutral-500">
+                                {config.message}
                             </p>
-                        )}
-
-                        <p className="text-sm text-neutral-500 mt-4">
-                            {config.message}
-                        </p>
+                            {orderId && (
+                                <p className="text-xs text-neutral-400">Orden #{orderId}</p>
+                            )}
+                        </div>
 
                         {paymentMethod?.description && status === 'pending' && (
-                            <div className="mt-6 p-4 bg-white border border-neutral-200 rounded-[8px] text-left">
-                                <p className="text-sm font-semibold text-neutral-500 mb-2">{paymentMethod.title}</p>
-                                <p className="text-sm text-neutral-500 whitespace-pre-line">{paymentMethod.description}</p>
+                            <div className="max-w-md rounded-lg border border-neutral-200 bg-white p-4 text-left">
+                                <p className="mb-2 text-sm font-semibold text-neutral-500">
+                                    {paymentMethod.title}
+                                </p>
+                                <p className="whitespace-pre-line text-sm text-neutral-500">
+                                    {paymentMethod.description}
+                                </p>
                             </div>
                         )}
 
-                        <Link
-                            href="/"
-                            className="inline-block mt-8 px-6 py-2.5 border border-oxido-300 text-oxido-300 rounded-[8px] text-sm font-medium hover:bg-oxido-50 transition-colors"
-                        >
-                            Volver al Inicio
-                        </Link>
-
-                        {showRetry && (
-                            <Link
-                                href="/checkout/pago"
-                                className="inline-block mt-3 ml-3 px-6 py-2.5 bg-oxido-300 text-oxido-50 rounded-[8px] text-sm font-medium hover:opacity-90 transition-opacity"
-                            >
-                                Intentar de Nuevo
-                            </Link>
-                        )}
+                        <div className="flex items-center gap-3">
+                            <OutlineButton as={Link} href="/">
+                                Volver al Inicio
+                            </OutlineButton>
+                            {showRetry && (
+                                <Link
+                                    href="/checkout/pago"
+                                    className="inline-flex h-10 items-center justify-center rounded-lg border border-oxido-300 bg-oxido-300 px-6 text-xs font-medium text-oxido-50 transition-opacity hover:opacity-90"
+                                >
+                                    Intentar de Nuevo
+                                </Link>
+                            )}
+                        </div>
                     </div>
-                </div>
+                </main>
             </div>
         </>
     );

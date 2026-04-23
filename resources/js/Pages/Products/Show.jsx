@@ -22,9 +22,35 @@ function InfoItem({ icon, title, description }) {
         <div className="flex gap-4 items-center px-2.5 py-2 rounded-2xl flex-1 min-w-0">
             <div className="shrink-0 text-neutral-500">{icon}</div>
             <div className="flex flex-col gap-[5px] text-neutral-500 leading-normal">
-                <p className="text-base font-semibold">{title}</p>
-                <p className="text-sm font-normal">{description}</p>
+                <p className="text-sm font-semibold">{title}</p>
+                <p className="text-xs font-normal">{description}</p>
             </div>
+        </div>
+    );
+}
+
+function QuantityStepper({ quantity, onChange }) {
+    return (
+        <div className="flex gap-4 items-center">
+            <button
+                type="button"
+                onClick={() => onChange(Math.max(1, quantity - 1))}
+                aria-label="Restar"
+                className="size-[41px] bg-moss-300 rounded-md flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
+            >
+                <Minus size={20} weight="bold" className="text-oxido-50" />
+            </button>
+            <div className="w-[112px] h-[41px] bg-oxido-50 rounded-md flex items-center justify-center">
+                <span className="text-xs font-medium text-neutral-500">{quantity}</span>
+            </div>
+            <button
+                type="button"
+                onClick={() => onChange(quantity + 1)}
+                aria-label="Sumar"
+                className="size-[41px] bg-moss-300 rounded-md flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
+            >
+                <Plus size={20} weight="bold" className="text-oxido-50" />
+            </button>
         </div>
     );
 }
@@ -208,7 +234,13 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
 
                         {/* Title + Description */}
                         <div className="flex flex-col gap-2.5 text-neutral-500 w-full">
-                            <h1 className="text-[32px] font-semibold leading-normal">
+                            <h1
+                                className={
+                                    hasComposite
+                                        ? 'text-[32px] font-semibold leading-normal'
+                                        : 'text-2xl font-bold leading-normal'
+                                }
+                            >
                                 {product.name}
                             </h1>
 
@@ -224,40 +256,49 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                         <div className="flex flex-col gap-2 justify-center">
                             <div className="flex items-center gap-2">
                                 {display.hasDiscount && (
-                                    <span className="text-[32px] font-normal line-through text-neutral-500">
+                                    <span
+                                        className={`font-normal line-through text-neutral-500 ${
+                                            hasComposite ? 'text-[32px]' : 'text-lg'
+                                        }`}
+                                    >
                                         {formatPrice(display.originalPrice)}
                                     </span>
                                 )}
-                                <span className="text-[40px] font-bold text-neutral-500">
+                                <span
+                                    className={`font-bold text-neutral-500 ${
+                                        hasComposite ? 'text-[40px]' : 'text-[32px]'
+                                    }`}
+                                >
                                     {formatPrice(display.finalPrice)}
                                 </span>
                                 {display.hasDiscount && display.discountPercentage && (
-                                    <span className="bg-carmesi-100 h-[31px] px-1.5 py-1 rounded-full text-lg font-semibold text-carmesi-300 flex items-center">
+                                    <span className="bg-carmesi-100 h-[31px] px-1.5 py-1 rounded-full text-sm font-bold text-carmesi-300 flex items-center">
                                         -{display.discountPercentage}%
                                     </span>
                                 )}
                             </div>
                             {product.price_without_tax > 0 && (
-                                <p className="text-sm text-neutral-500">
+                                <p className="text-xs text-neutral-500">
                                     (precio sin impuestos nacionales: {formatPrice(product.price_without_tax)})
                                 </p>
                             )}
                         </div>
 
-                        {/* Variants: Compuesto vs Personalizable */}
-                        {hasComposite ? (
+                        {/* Variants — Talle & Color (compuesto) */}
+                        {hasComposite && (
                             <div className="flex gap-8 items-start">
                                 {sizes.length > 0 && (
                                     <div className="flex flex-col gap-4">
-                                        <p className="text-base font-semibold text-neutral-500">Talle</p>
+                                        <p className="text-sm font-bold text-neutral-500">Talle</p>
                                         <div className="flex gap-2.5 items-center flex-wrap">
                                             {sizes.map((size) => {
                                                 const isSelected = selectedVariant?.size?.id === size.id;
-                                                const base = 'size-8 rounded-md text-sm font-medium flex items-center justify-center cursor-pointer';
-                                                const style = isSelected
-                                                    ? 'bg-oxido-50 border-2 border-moss-300 text-neutral-500'
-                                                    : 'bg-oxido-50 text-neutral-500 hover:border-2 hover:border-moss-300';
-                                                const stockStyle = !size.inStock ? 'opacity-50 line-through' : '';
+                                                const base = 'size-8 rounded-md text-xs font-medium flex items-center justify-center cursor-pointer';
+                                                const style = !size.inStock
+                                                    ? 'bg-neutral-200 text-neutral-300 line-through'
+                                                    : isSelected
+                                                        ? 'bg-oxido-50 border-2 border-moss-300 text-neutral-500'
+                                                        : 'bg-oxido-50 text-neutral-500 hover:border-2 hover:border-moss-300';
                                                 return (
                                                     <button
                                                         key={size.id}
@@ -271,7 +312,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                                                             const fallback = product.variants.find((v) => v.size?.id === size.id);
                                                             setSelectedVariant(exact || fallback);
                                                         }}
-                                                        className={`${base} ${style} ${stockStyle}`}
+                                                        className={`${base} ${style}`}
                                                     >
                                                         {size.name}
                                                     </button>
@@ -283,7 +324,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
 
                                 {colors.length > 0 && (
                                     <div className="flex flex-col gap-4">
-                                        <p className="text-base font-semibold text-neutral-500">Color</p>
+                                        <p className="text-sm font-bold text-neutral-500">Color</p>
                                         <div className="flex gap-2.5 items-center flex-wrap">
                                             {colors.map((color) => {
                                                 const isSelected = selectedVariant?.color?.id === color.id;
@@ -317,82 +358,76 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                                     </div>
                                 )}
                             </div>
-                        ) : (
-                            <div className="flex flex-col gap-2.5">
-                                <label className="text-sm text-neutral-500">Personalización</label>
-                                <div className="relative w-[252px]">
-                                    <button
-                                        type="button"
-                                        onClick={() => setPersonalizationOpen((v) => !v)}
-                                        className="bg-oxido-50 h-11 w-full px-4 rounded-lg flex items-center justify-between text-sm font-medium text-neutral-500 cursor-pointer"
-                                    >
-                                        <span>{personalization}</span>
-                                        <CaretDown size={20} />
-                                    </button>
-                                    {personalizationOpen && (
-                                        <ul className="absolute z-10 mt-1 w-full bg-oxido-50 rounded-lg shadow-[0_4px_20px_0_rgba(214,216,224,0.25)] overflow-hidden">
-                                            {['SI', 'NO'].map((opt) => (
-                                                <li key={opt}>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setPersonalization(opt);
-                                                            setPersonalizationOpen(false);
-                                                        }}
-                                                        className="w-full h-11 px-4 text-left text-sm font-medium text-neutral-400 hover:bg-moss-50 transition-colors"
-                                                    >
-                                                        {opt}
-                                                    </button>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
-                                </div>
-                            </div>
                         )}
 
-                        {/* Cantidad + Añadir al Carrito */}
-                        <div className="flex gap-6 items-center">
-                            <div className="flex gap-4 items-center">
-                                <button
-                                    type="button"
-                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                    aria-label="Restar"
-                                    className="size-[41px] bg-moss-300 rounded-md flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
-                                >
-                                    <Minus size={20} weight="bold" className="text-oxido-50" />
-                                </button>
-                                <div className="w-[112px] h-[41px] bg-oxido-50 rounded-md flex items-center justify-center">
-                                    <span className="text-sm font-medium text-neutral-500">{quantity}</span>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => setQuantity(quantity + 1)}
-                                    aria-label="Sumar"
-                                    className="size-[41px] bg-moss-300 rounded-md flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
-                                >
-                                    <Plus size={20} weight="bold" className="text-oxido-50" />
-                                </button>
+                        {/* Action row — layout differs by product type */}
+                        {hasComposite ? (
+                            <div className="flex gap-6 items-center">
+                                <QuantityStepper quantity={quantity} onChange={setQuantity} />
+                                {(() => {
+                                    const outOfStock = selectedVariant != null && (selectedVariant.stock ?? 0) <= 0;
+                                    return (
+                                        <button
+                                            type="button"
+                                            onClick={handleAddToCart}
+                                            disabled={outOfStock}
+                                            className={`flex items-center gap-2.5 h-[41px] px-6 py-2.5 bg-oxido-300 border border-oxido-300 rounded-lg transition-opacity ${
+                                                outOfStock ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:opacity-90'
+                                            }`}
+                                        >
+                                            <ShoppingCart size={24} className="text-oxido-50" />
+                                            <span className="text-xs font-medium text-oxido-50">
+                                                {outOfStock ? 'Sin stock' : 'Añadir al Carrito'}
+                                            </span>
+                                        </button>
+                                    );
+                                })()}
                             </div>
-                            {(() => {
-                                const outOfStock = selectedVariant != null && (selectedVariant.stock ?? 0) <= 0;
-                                return (
-                                    <button
-                                        type="button"
-                                        onClick={handleAddToCart}
-                                        disabled={outOfStock}
-                                        className={`flex items-center gap-2.5 h-[41px] px-6 py-2.5 bg-oxido-300 border border-oxido-300 rounded-lg transition-opacity ${
-                                            outOfStock ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:opacity-90'
-                                        }`}
-                                    >
-                                        <ShoppingCart size={24} className="text-oxido-50" />
-                                        <span className="text-sm font-medium text-oxido-50">
-                                            {outOfStock ? 'Sin stock' : 'Añadir al Carrito'}
-                                        </span>
-                                    </button>
-                                );
-                            })()}
-                        </div>
+                        ) : (
+                            <>
+                                <QuantityStepper quantity={quantity} onChange={setQuantity} />
+
+                                <div className="flex flex-col gap-2.5">
+                                    <label className="text-xs text-neutral-500">Personalización</label>
+                                    <div className="relative w-[252px]">
+                                        <button
+                                            type="button"
+                                            onClick={() => setPersonalizationOpen((v) => !v)}
+                                            className="bg-oxido-50 h-11 w-full px-4 rounded-lg flex items-center justify-between text-xs font-medium text-neutral-500 cursor-pointer"
+                                        >
+                                            <span>{personalization}</span>
+                                            <CaretDown size={20} />
+                                        </button>
+                                        {personalizationOpen && (
+                                            <ul className="absolute z-10 mt-1 w-full bg-oxido-50 rounded-lg shadow-[0_4px_20px_0_rgba(214,216,224,0.25)] overflow-hidden">
+                                                {['SI', 'NO'].map((opt) => (
+                                                    <li key={opt}>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setPersonalization(opt);
+                                                                setPersonalizationOpen(false);
+                                                            }}
+                                                            className="w-full h-11 px-4 text-left text-xs font-medium text-neutral-400 hover:bg-moss-50 transition-colors"
+                                                        >
+                                                            {opt}
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={handleAddToCart}
+                                    className="w-[252px] h-[41px] bg-oxido-300 border border-oxido-300 rounded-lg flex items-center justify-center text-xs font-medium text-oxido-50 cursor-pointer hover:opacity-90 transition-opacity"
+                                >
+                                    Añadir al Carrito
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
 
