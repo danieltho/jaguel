@@ -90,6 +90,7 @@ class ProductForm
 
                 SpatieMediaLibraryFileUpload::make('files')
                     ->label('Imágenes')
+                    ->collection('default')
                     ->disk('public')
                     ->directory('product/original')
                     ->panelLayout('grid')

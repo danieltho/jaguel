@@ -1,10 +1,10 @@
+import { useState } from 'react';
 import {
     XIcon,
     MagnifyingGlassIcon,
     ShoppingBagIcon,
     CaretDownIcon,
 } from '@phosphor-icons/react';
-import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
 import { Link, usePage } from '@inertiajs/react';
 import { useSidebar } from '../../../../hook/useSidebar';
 import Logo from '../../../logo/Logo';
@@ -14,8 +14,13 @@ export default function SideBar() {
     const { isMenuOpen, closeMenu } = useSidebar();
     const { categories, loading, baseUrl } = useCategoryContext();
     const { customer } = usePage().props;
+    const [openCategoryId, setOpenCategoryId] = useState(null);
 
     if (!isMenuOpen) return null;
+
+    const toggleCategory = (id) => {
+        setOpenCategoryId((current) => (current === id ? null : id));
+    };
 
     return (
         <div className="fixed top-0 left-0 z-30 flex h-screen items-start gap-4.25 p-4.25">
@@ -66,6 +71,8 @@ export default function SideBar() {
                                     key={category.id}
                                     category={category}
                                     baseUrl={baseUrl}
+                                    isOpen={openCategoryId === category.id}
+                                    onToggle={() => toggleCategory(category.id)}
                                     onNavigate={closeMenu}
                                 />
                             ) : (
@@ -111,33 +118,39 @@ function NavItem({ href, label, onNavigate }) {
     );
 }
 
-function NavDropdown({ category, baseUrl, onNavigate }) {
-    return (
-        <Disclosure>
-            {({ open }) => (
-                <div className="flex w-full flex-col gap-1">
-                    <DisclosureButton className="flex h-11 w-full cursor-pointer items-center justify-between rounded-lg px-4 text-xs font-medium text-neutral-500">
-                        <span>{category.name}</span>
-                        <CaretDownIcon
-                            size={24}
-                            className={`transition-transform ${open ? 'rotate-180' : ''}`}
-                        />
-                    </DisclosureButton>
+function NavDropdown({ category, baseUrl, isOpen, onToggle, onNavigate }) {
+    const panelId = `sidebar-category-${category.id}`;
 
-                    <DisclosurePanel className="flex flex-col">
-                        {category.children.map((child) => (
-                            <Link
-                                key={child.id}
-                                href={`${baseUrl}${child.path}`}
-                                onClick={onNavigate}
-                                className="flex h-11 items-center px-4 text-xs font-medium text-neutral-400"
-                            >
-                                {child.name}
-                            </Link>
-                        ))}
-                    </DisclosurePanel>
+    return (
+        <div className="flex w-full flex-col gap-1">
+            <button
+                type="button"
+                onClick={onToggle}
+                aria-expanded={isOpen}
+                aria-controls={panelId}
+                className="flex h-11 w-full cursor-pointer items-center justify-between rounded-lg px-4 text-xs font-medium text-neutral-500"
+            >
+                <span>{category.name}</span>
+                <CaretDownIcon
+                    size={24}
+                    className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                />
+            </button>
+
+            {isOpen && (
+                <div id={panelId} className="flex flex-col">
+                    {category.children.map((child) => (
+                        <Link
+                            key={child.id}
+                            href={`${baseUrl}${child.path}`}
+                            onClick={onNavigate}
+                            className="flex h-11 items-center px-4 text-xs font-medium text-neutral-400"
+                        >
+                            {child.name}
+                        </Link>
+                    ))}
                 </div>
             )}
-        </Disclosure>
+        </div>
     );
 }
