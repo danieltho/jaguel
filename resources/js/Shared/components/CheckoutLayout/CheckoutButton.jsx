@@ -5,8 +5,7 @@ export function PrimaryButton({ children, disabled, className = '', ...props }) 
     return (
         <button
             disabled={disabled}
-            className={`w-full py-3.5 bg-oxido-300 text-oxido-50 font-medium text-sm rounded-[8px]
-                hover:opacity-90 transition-opacity disabled:opacity-50 ${className}`}
+            className={`h-10 rounded-lg border border-oxido-300 bg-oxido-300 px-6 text-xs font-medium text-oxido-50 transition-opacity hover:opacity-90 disabled:opacity-50 ${className}`}
             {...props}
         >
             {children}
@@ -14,14 +13,39 @@ export function PrimaryButton({ children, disabled, className = '', ...props }) 
     );
 }
 
-export function BackButton({ href, children = 'Volver' }) {
+export function OutlineButton({ children, className = '', as: Component = 'button', ...props }) {
     return (
-        <Link
-            href={href}
-            className="inline-flex items-center gap-2 px-4 py-2 border border-oxido-300 text-oxido-300 rounded-[8px] text-sm font-medium hover:bg-oxido-50 transition-colors"
+        <Component
+            className={`inline-flex h-9 items-center justify-center rounded-lg border border-oxido-300 px-4 text-sm font-medium text-oxido-300 transition-colors hover:bg-oxido-50 ${className}`}
+            {...props}
         >
+            {children}
+        </Component>
+    );
+}
+
+export function BackButton({ href, onClick, children = 'Volver' }) {
+    const content = (
+        <>
             <CaretLeft size={16} weight="bold" />
             {children}
+        </>
+    );
+
+    const className =
+        'inline-flex h-9 items-center gap-2.5 rounded-lg border border-oxido-300 px-4 text-sm font-medium text-oxido-300 transition-colors hover:bg-oxido-50';
+
+    if (onClick) {
+        return (
+            <button type="button" onClick={onClick} className={className}>
+                {content}
+            </button>
+        );
+    }
+
+    return (
+        <Link href={href} className={className}>
+            {content}
         </Link>
     );
 }

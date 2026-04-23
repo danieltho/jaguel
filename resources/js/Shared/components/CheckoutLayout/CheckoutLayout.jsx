@@ -1,76 +1,133 @@
 import { Link } from '@inertiajs/react';
-import { ShoppingCart, Truck, CreditCard, Check } from '@phosphor-icons/react';
+import {
+    ShoppingCart,
+    Truck,
+    CreditCard,
+    InstagramLogo,
+    WhatsappLogo,
+    ArrowsClockwise,
+    House,
+} from '@phosphor-icons/react';
 import logoImg from '../logo/img/logo.png';
 
 const STEPS = [
-    { label: 'Carrito', icon: ShoppingCart, coversSteps: [1, 2] },
-    { label: 'Entrega', icon: Truck, coversSteps: [3] },
-    { label: 'Pago', icon: CreditCard, coversSteps: [4] },
+    { label: 'Carrito', icon: ShoppingCart },
+    { label: 'Entrega', icon: Truck },
+    { label: 'Pago', icon: CreditCard },
 ];
 
-function StepIndicator({ step, currentStep, isLast }) {
-    const isActive = step.coversSteps.includes(currentStep);
-    const isCompleted = step.coversSteps.every((s) => s < currentStep);
-    const isFuture = !isActive && !isCompleted;
-
-    const Icon = isCompleted ? Check : step.icon;
-
-    let circleClasses = 'w-[46px] h-[46px] rounded-full border-2 flex items-center justify-center shrink-0';
-    if (isCompleted) {
-        circleClasses += ' border-moss-300 bg-moss-300 text-white';
-    } else if (isActive) {
-        circleClasses += ' border-moss-300 text-moss-300';
-    } else {
-        circleClasses += ' border-neutral-300 text-neutral-300 opacity-40';
-    }
-
-    let lineClasses = 'flex-1 h-[2px]';
-    if (isCompleted) {
-        lineClasses += ' bg-moss-300';
-    } else {
-        lineClasses += ' bg-neutral-300 opacity-40';
-    }
-
+function StepIndicator({ currentStep }) {
     return (
-        <>
-            <div className="flex flex-col items-center gap-1">
-                <div className={circleClasses}>
-                    <Icon size={22} weight={isCompleted ? 'bold' : 'regular'} />
-                </div>
+        <div className="opacity-60 px-15 py-[30px]">
+            <div className="mx-auto flex w-full max-w-[696px] items-center px-6">
+                {STEPS.map((step, i) => {
+                    const isActive = i + 1 === currentStep;
+                    const isCompleted = i + 1 < currentStep;
+                    const isHighlighted = isActive || isCompleted;
+                    const Icon = step.icon;
+
+                    return (
+                        <div key={step.label} className="flex flex-1 items-center last:flex-none">
+                            <div
+                                className={`flex size-[46px] shrink-0 items-center justify-center rounded-full border-2 ${
+                                    isHighlighted
+                                        ? 'border-moss-300 text-moss-300'
+                                        : 'border-moss-100 text-moss-100'
+                                }`}
+                                aria-current={isActive ? 'step' : undefined}
+                                aria-label={step.label}
+                            >
+                                <Icon size={22} weight={isHighlighted ? 'regular' : 'regular'} />
+                            </div>
+                            {i < STEPS.length - 1 && (
+                                <div
+                                    className={`h-0.5 flex-1 ${
+                                        isCompleted ? 'bg-moss-300' : 'bg-moss-100'
+                                    }`}
+                                />
+                            )}
+                        </div>
+                    );
+                })}
             </div>
-            {!isLast && <div className={lineClasses} />}
-        </>
+        </div>
     );
 }
 
-export default function CheckoutLayout({ children, currentStep = 1 }) {
+function InfoBar() {
+    const items = [
+        { icon: ArrowsClockwise, title: 'CAMBIOS Y DEVOLUCIONES', body: 'Tenés 30 días para cambiar tu pedido.' },
+        { icon: CreditCard, title: 'MEDIOS DE PAGO', body: 'Transferencia Bancaria o Mercado Pago.' },
+        { icon: House, title: 'RETIROS', body: 'Retirá tu pedido gratis en nuestro punto.' },
+        { icon: Truck, title: 'ENVÍO GRATIS', body: 'Con un monto mínimo de $80.000.' },
+    ];
+
     return (
-        <div className="min-h-screen bg-neutral-50">
-            {/* Logo header */}
-            <header className="w-full py-6 flex justify-center">
-                <Link href="/">
-                    <img src={logoImg} className="h-[31px]" alt="El Jaguel" />
+        <div className="px-15 py-15">
+            <div className="mx-auto flex max-w-[1320px] flex-wrap items-center justify-center gap-x-[50px] gap-y-6">
+                {items.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                        <div key={item.title} className="flex min-w-0 flex-1 items-center gap-4">
+                            <Icon size={24} className="shrink-0 text-neutral-500" />
+                            <div className="flex min-w-0 flex-col gap-[5px] text-neutral-500">
+                                <p className="text-sm font-bold">{item.title}</p>
+                                <p className="text-sm">{item.body}</p>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+function CheckoutFooter() {
+    return (
+        <footer className="px-15 py-5">
+            <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 text-moss-300">
+                <p className="w-32 text-xs">© 2026 El Jaguel. All rights reserved</p>
+                <p className="text-center text-xs whitespace-nowrap">
+                    A product of{' '}
+                    <span className="text-sm font-semibold">Ophelia Studio</span>
+                </p>
+                <div className="flex items-center gap-2">
+                    <a
+                        href="#"
+                        aria-label="WhatsApp"
+                        className="flex size-[35px] items-center justify-center rounded-full border border-moss-300 transition-colors hover:bg-moss-300/10"
+                    >
+                        <WhatsappLogo size={18} />
+                    </a>
+                    <a
+                        href="#"
+                        aria-label="Instagram"
+                        className="flex size-[35px] items-center justify-center rounded-full border border-moss-300 transition-colors hover:bg-moss-300/10"
+                    >
+                        <InstagramLogo size={18} />
+                    </a>
+                </div>
+            </div>
+        </footer>
+    );
+}
+
+export default function CheckoutLayout({ children, currentStep = 1, showInfoBar = true }) {
+    return (
+        <div className="flex min-h-screen flex-col bg-neutral-50">
+            <header className="flex justify-center px-15 py-[30px]">
+                <Link href="/" aria-label="El Jaguel">
+                    <img src={logoImg} className="h-[54px] w-auto object-contain" alt="El Jaguel" />
                 </Link>
             </header>
 
-            {/* Step indicators */}
-            <div className="max-w-[500px] mx-auto px-4 pb-6">
-                <div className="flex items-center gap-3">
-                    {STEPS.map((step, i) => (
-                        <StepIndicator
-                            key={step.label}
-                            step={step}
-                            currentStep={currentStep}
-                            isLast={i === STEPS.length - 1}
-                        />
-                    ))}
-                </div>
-            </div>
+            <StepIndicator currentStep={currentStep} />
 
-            {/* Content */}
-            <main className="pb-12">
-                {children}
-            </main>
+            <main className="flex-1 pb-10">{children}</main>
+
+            {showInfoBar && <InfoBar />}
+
+            <CheckoutFooter />
         </div>
     );
 }

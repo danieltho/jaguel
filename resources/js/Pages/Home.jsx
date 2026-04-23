@@ -40,8 +40,8 @@ export default function Home() {
                 </section>
 
                 {/* Categories */}
-                <section className="px-15">
-                    <div className="mx-auto flex max-w-330 items-center gap-4">
+                <section className="">
+                    <div className="mx-auto flex items-center">
                         {categoryGroups?.map((group) => (
                             <CategoryBanner key={group.id} group={group} />
                         ))}
@@ -49,8 +49,8 @@ export default function Home() {
                 </section>
             
                 {/* Productos Destacados */}
-                <section className="px-15 pt-12">
-                    <div className="mx-auto flex max-w-330 flex-col items-center gap-4">
+                <section className="pt-12">
+                    <div className="mx-auto flex flex-col items-center gap-4">
                         <h2 className="text-center text-2xl font-bold text-carmesi-300">
                             Productos Destacados
                         </h2>
@@ -71,8 +71,8 @@ export default function Home() {
                 </section>
 
                 {/* Custom / Personalization Banner */}
-                <section className="px-15 pt-12">
-                    <div className="relative mx-auto flex h-163.75 max-w-330 flex-col justify-between overflow-hidden rounded-[20px] p-12.5">
+                <section className="pt-12">
+                    <div className="relative mx-auto flex h-163.75 flex-col justify-between overflow-hidden p-12.5">
                         <img
                             src="/images/custom-banner.jpg"
                             alt=""

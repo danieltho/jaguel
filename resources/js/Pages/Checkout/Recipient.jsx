@@ -3,6 +3,10 @@ import CheckoutLayout from '../../Shared/components/CheckoutLayout/CheckoutLayou
 import CheckoutInput from '../../Shared/components/CheckoutLayout/CheckoutInput';
 import { PrimaryButton, BackButton } from '../../Shared/components/CheckoutLayout/CheckoutButton';
 import OrderSummary from '../../Shared/components/CheckoutLayout/OrderSummary';
+import {
+    SectionHeading,
+    Checkbox,
+} from '../../Shared/components/CheckoutLayout/CheckoutPrimitives';
 
 export default function Recipient({ customer, deliveryType, summary }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -24,115 +28,110 @@ export default function Recipient({ customer, deliveryType, summary }) {
     };
 
     return (
-        <CheckoutLayout currentStep={3}>
+        <CheckoutLayout currentStep={2}>
             <Head title="Datos del Destinatario" />
-            <div className="max-w-[1320px] mx-auto px-4">
-                <div className="flex gap-6">
-                    {/* Form */}
-                    <div className="flex-1">
-                        <BackButton href={deliveryType === 'pickup' ? '/checkout/contacto' : '/checkout/entrega'} />
+            <div className="mx-auto w-full max-w-[1320px] px-15 py-[30px]">
+                <form onSubmit={handleSubmit} className="flex flex-col gap-2.5">
+                    <BackButton href={deliveryType === 'pickup' ? '/checkout/contacto' : '/checkout/entrega'} />
 
-                        <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-6">
-                            {/* Recipient data */}
-                            <div>
-                                <h2 className="text-[32px] font-medium text-neutral-500 mb-4">Datos del Destinatario</h2>
-                                <div className="flex flex-col gap-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <CheckoutInput
-                                            type="text"
-                                            value={data.firstname}
-                                            onChange={(e) => setData('firstname', e.target.value)}
-                                            placeholder="Nombre"
-                                            error={errors.firstname}
-                                        />
-                                        <CheckoutInput
-                                            type="text"
-                                            value={data.lastname}
-                                            onChange={(e) => setData('lastname', e.target.value)}
-                                            placeholder="Apellido"
-                                            error={errors.lastname}
-                                        />
-                                    </div>
+                    <div className="flex items-start justify-between gap-6">
+                        <div className="flex w-[872px] flex-col items-end gap-4">
+                            <div className="flex w-full flex-col gap-2.5">
+                                <SectionHeading>Datos del Destinatario</SectionHeading>
+
+                                <div className="grid grid-cols-2 gap-2.5">
                                     <CheckoutInput
-                                        type="tel"
-                                        value={data.phone}
-                                        onChange={(e) => setData('phone', e.target.value)}
-                                        placeholder="Telefono"
-                                        error={errors.phone}
-                                    />
-                                    <CheckoutInput
+                                        label="Nombre*"
                                         type="text"
-                                        value={data.address}
-                                        onChange={(e) => setData('address', e.target.value)}
-                                        placeholder="Direccion"
-                                        error={errors.address}
+                                        value={data.firstname}
+                                        onChange={(e) => setData('firstname', e.target.value)}
+                                        placeholder="Nombre"
+                                        error={errors.firstname}
                                     />
                                     <CheckoutInput
+                                        label="Apellido*"
                                         type="text"
-                                        value={data.department}
-                                        onChange={(e) => setData('department', e.target.value)}
-                                        placeholder="Departamento / Piso (Opcional)"
+                                        value={data.lastname}
+                                        onChange={(e) => setData('lastname', e.target.value)}
+                                        placeholder="Apellido"
+                                        error={errors.lastname}
                                     />
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <CheckoutInput
-                                            type="text"
-                                            value={data.city}
-                                            onChange={(e) => setData('city', e.target.value)}
-                                            placeholder="Ciudad"
-                                            error={errors.city}
-                                        />
-                                        <CheckoutInput
-                                            type="text"
-                                            value={data.state}
-                                            onChange={(e) => setData('state', e.target.value)}
-                                            placeholder="Provincia"
-                                            error={errors.state}
-                                        />
-                                    </div>
+                                </div>
+                                <CheckoutInput
+                                    label="Teléfono*"
+                                    type="tel"
+                                    value={data.phone}
+                                    onChange={(e) => setData('phone', e.target.value)}
+                                    placeholder="+54 9 ..."
+                                    error={errors.phone}
+                                />
+                                <CheckoutInput
+                                    label="Dirección*"
+                                    type="text"
+                                    value={data.address}
+                                    onChange={(e) => setData('address', e.target.value)}
+                                    placeholder="Calle y número"
+                                    error={errors.address}
+                                />
+                                <CheckoutInput
+                                    label="Departamento / Piso (Opcional)"
+                                    type="text"
+                                    value={data.department}
+                                    onChange={(e) => setData('department', e.target.value)}
+                                    placeholder="Depto / Piso"
+                                />
+                                <div className="grid grid-cols-2 gap-2.5">
+                                    <CheckoutInput
+                                        label="Ciudad*"
+                                        type="text"
+                                        value={data.city}
+                                        onChange={(e) => setData('city', e.target.value)}
+                                        placeholder="Ciudad"
+                                        error={errors.city}
+                                    />
+                                    <CheckoutInput
+                                        label="Provincia*"
+                                        type="text"
+                                        value={data.state}
+                                        onChange={(e) => setData('state', e.target.value)}
+                                        placeholder="Provincia"
+                                        error={errors.state}
+                                    />
                                 </div>
                             </div>
 
-                            {/* Billing */}
-                            <div>
-                                <h2 className="text-[32px] font-medium text-neutral-500 mb-4">Datos de Facturacion</h2>
-                                <div className="flex flex-col gap-4">
-                                    <CheckoutInput
-                                        type="text"
-                                        value={data.document_number}
-                                        onChange={(e) => setData('document_number', e.target.value)}
-                                        placeholder="DNI / CUIT"
-                                        error={errors.document_number}
-                                    />
-                                    <label className="flex items-center gap-3 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={data.wants_factura_a}
-                                            onChange={(e) => {
-                                                setData('wants_factura_a', e.target.checked);
-                                                if (e.target.checked) {
-                                                    setData('document_type', 'CUIT');
-                                                } else {
-                                                    setData('document_type', 'DNI');
-                                                }
-                                            }}
-                                            className="w-4 h-4 rounded border-neutral-300 text-oxido-300 focus:ring-oxido-300"
-                                        />
-                                        <span className="text-sm text-neutral-500">Factura A</span>
-                                    </label>
-                                </div>
+                            <div className="flex w-full flex-col gap-2.5">
+                                <SectionHeading>Datos de Facturación</SectionHeading>
+
+                                <CheckoutInput
+                                    label="DNI / CUIT*"
+                                    type="text"
+                                    value={data.document_number}
+                                    onChange={(e) => setData('document_number', e.target.value)}
+                                    placeholder="DNI o CUIT"
+                                    error={errors.document_number}
+                                />
+                                <Checkbox
+                                    id="wants-factura-a"
+                                    checked={data.wants_factura_a}
+                                    onChange={(e) => {
+                                        setData('wants_factura_a', e.target.checked);
+                                        setData('document_type', e.target.checked ? 'CUIT' : 'DNI');
+                                    }}
+                                    label="Factura A"
+                                />
                             </div>
 
-                            <PrimaryButton type="submit" disabled={processing}>
-                                Continuar
+                            <PrimaryButton type="submit" disabled={processing} className="w-[280px]">
+                                Continuar para el Pago
                             </PrimaryButton>
-                        </form>
-                    </div>
+                        </div>
 
-                    {/* Summary sidebar */}
-                    <div className="w-[424px] shrink-0 hidden lg:block">
-                        <OrderSummary {...summary} />
+                        <aside className="w-[424px] shrink-0 px-2.5 py-4">
+                            <OrderSummary {...summary} />
+                        </aside>
                     </div>
-                </div>
+                </form>
             </div>
         </CheckoutLayout>
     );

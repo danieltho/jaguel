@@ -70,74 +70,56 @@ export default function ImageGallery({
                 onClose={() => setIsFullscreen(false)}
                 className="relative z-50"
             >
-                <div className="fixed inset-0 bg-black/70" aria-hidden="true" />
-
-                <div className="fixed inset-0 flex items-center justify-center p-4">
-                    <DialogPanel className="relative w-full max-w-[650px] aspect-[650/867] rounded-[20px] overflow-hidden bg-oxido-50">
-                        <img
-                            src={current?.url || '/images/img_default.jpg'}
-                            alt={alt}
-                            className="absolute inset-0 w-full h-full object-contain"
-                        />
-
+                <DialogPanel className="fixed inset-0 bg-oxido-50/95 flex flex-col">
+                    <header className="flex items-center justify-between px-15 pt-[30px] pb-[30px]">
+                        <p className="text-base font-medium text-neutral-500">{alt}</p>
                         <button
                             type="button"
                             onClick={() => setIsFullscreen(false)}
                             aria-label="Cerrar"
-                            className="absolute top-4 right-4 size-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-neutral-500 cursor-pointer transition-colors z-10"
+                            className="size-8 flex items-center justify-center text-neutral-500 cursor-pointer hover:opacity-70 transition-opacity"
                         >
-                            <X size={20} weight="bold" />
+                            <X size={32} weight="bold" />
                         </button>
+                    </header>
 
-                        {hasMultiple && (
-                            <>
-                                <button
-                                    type="button"
-                                    onClick={() => setIndex(index - 1)}
-                                    aria-label="Imagen anterior"
-                                    className="absolute left-2 top-1/2 -translate-y-1/2 size-16 flex items-center justify-center text-oxido-300 cursor-pointer hover:opacity-70 transition-opacity z-10"
-                                >
-                                    <CaretLeft size={32} weight="bold" />
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setIndex(index + 1)}
-                                    aria-label="Imagen siguiente"
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 size-16 flex items-center justify-center text-oxido-300 cursor-pointer hover:opacity-70 transition-opacity z-10"
-                                >
-                                    <CaretRight size={32} weight="bold" />
-                                </button>
-                            </>
-                        )}
+                    <div className="flex-1 flex items-center justify-center px-15 pb-[60px] min-h-0">
+                        <div className="relative h-full w-full max-w-[900px] flex flex-col items-center justify-end gap-6">
+                            <img
+                                src={current?.url || '/images/img_default.jpg'}
+                                alt={alt}
+                                className="absolute inset-0 w-full h-full object-contain"
+                            />
 
-                        {hasMultiple && (
-                            <div className="absolute bottom-0 inset-x-0 flex items-end justify-center gap-6 pb-[60px] z-10">
-                                {images.map((img, idx) => {
-                                    const isActive = idx === index;
-                                    return (
-                                        <button
-                                            key={img.id ?? idx}
-                                            type="button"
-                                            onClick={() => setIndex(idx)}
-                                            aria-label={`Ver imagen ${idx + 1}`}
-                                            className={`relative w-[88px] h-[106px] rounded-[10px] overflow-hidden bg-oxido-50 cursor-pointer transition-all ${
-                                                isActive
-                                                    ? 'ring-2 ring-moss-300'
-                                                    : 'hover:opacity-80'
-                                            }`}
-                                        >
-                                            <img
-                                                src={img.thumb || img.url}
-                                                alt=""
-                                                className="absolute inset-0 w-full h-full object-cover"
-                                            />
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </DialogPanel>
-                </div>
+                            {hasMultiple && (
+                                <div className="relative flex gap-6 items-center z-10">
+                                    {images.map((img, idx) => {
+                                        const isActive = idx === index;
+                                        return (
+                                            <button
+                                                key={img.id ?? idx}
+                                                type="button"
+                                                onClick={() => setIndex(idx)}
+                                                aria-label={`Ver imagen ${idx + 1}`}
+                                                className={`w-[88px] h-[106px] rounded-[10px] overflow-hidden bg-oxido-50 cursor-pointer transition-all ${
+                                                    isActive
+                                                        ? 'ring-2 ring-moss-300'
+                                                        : 'hover:opacity-80'
+                                                }`}
+                                            >
+                                                <img
+                                                    src={img.thumb || img.url}
+                                                    alt=""
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </DialogPanel>
             </Dialog>
         </>
     );
