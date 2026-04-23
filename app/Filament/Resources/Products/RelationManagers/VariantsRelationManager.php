@@ -51,6 +51,7 @@ class VariantsRelationManager extends RelationManager
                     ->relationship('size', 'name')
                     ->preload(),
                 SpatieMediaLibraryFileUpload::make('images')
+                    ->collection('variant')
                     ->disk('public')
                     ->directory('product/original')
                     ->panelLayout('grid')

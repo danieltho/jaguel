@@ -54,7 +54,29 @@
       "Bash(lsof -nP -iTCP:5173 -sTCP:LISTEN)",
       "Bash(ps -p 31937 -o pid,command)",
       "Bash(kill 31937)",
-      "Bash(npx eslint *)"
+      "Bash(npx eslint *)",
+      "Bash(cp \"/Users/danielalbertothomannom/Downloads/producto test simple.png\" /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguelweb/database/seeders/assets/products/test-simple.png)",
+      "Bash(cp \"/Users/danielalbertothomannom/Downloads/producto simple personalizado.png\" /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguelweb/database/seeders/assets/products/test-personalizado.png)",
+      "Bash(cp \"/Users/danielalbertothomannom/Downloads/producto simple variante.png\" /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguelweb/database/seeders/assets/products/test-variante.png)",
+      "Bash(git -C /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguelweb diff --stat package.json package-lock.json)",
+      "Bash(npx tsc *)",
+      "Bash(git -C /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguel-e2e status)",
+      "Bash(git add *)",
+      "Bash(git -C /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguel-e2e log --oneline -5)",
+      "Bash(git -C /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguel-e2e config user.name)",
+      "Bash(git -C /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguel-e2e config user.email)",
+      "Bash(git config *)",
+      "Bash(git -C /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguelweb log -1 --format='%an <%ae>')",
+      "Bash(git -C /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguel-e2e log -1 --format='%an <%ae>')",
+      "Bash(perl -i -pe \"s/\\('price_\\(?:sold|sales\\)'\\\\s*=>\\\\s*\\)\\(\\\\d+\\)/\\\\$1 . int\\(\\\\$2 \\\\/ 100\\)/ge\" database/seeders/ProductSeeder.php)",
+      "Bash(git -C /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguel-e2e config user.email \"g.danieltho@gmail.com\")",
+      "Bash(git -C /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguel-e2e config user.name \"Daniel Alberto Thomann\")",
+      "Bash(git *)",
+      "Bash(cp \"/Users/danielalbertothomannom/Downloads/cat mates.jpg\" /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguelweb/database/seeders/assets/category-groups/mates.jpg)",
+      "Bash(cp \"/Users/danielalbertothomannom/Downloads/cat accesorios.jpg\" /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguelweb/database/seeders/assets/category-groups/accesorios.jpg)",
+      "Bash(cp \"/Users/danielalbertothomannom/Downloads/cat cuchillos .jpg\" /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguelweb/database/seeders/assets/category-groups/cuchillos.jpg)",
+      "Bash(sed -n '85,105p' /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguelweb/app/Filament/Resources/Products/Schemas/ProductForm.php)",
+      "Bash(sed -n '48,80p' /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguelweb/app/Filament/Resources/Products/RelationManagers/VariantsRelationManager.php)"
     ]
   }
 }

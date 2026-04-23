@@ -40,6 +40,7 @@ class CategoryGroupResource extends Resource
                     ->required()
                     ->unique(ignoreRecord: true),
                 SpatieMediaLibraryFileUpload::make('image')
+                ->collection('default')
                 ->disk('public')
                 ->downloadable()
             ]);
@@ -56,6 +57,7 @@ class CategoryGroupResource extends Resource
                 ->counts('categories')
                 ->sortable(),
                 SpatieMediaLibraryImageColumn::make('image')
+                ->collection('default')
                 ->conversion('thumb-md')
             ])
             ->filters([
