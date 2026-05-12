@@ -16,11 +16,11 @@ class ProductVariantResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquare3Stack3d;
 
-    protected static ?string $navigationLabel = 'Variantes';
+    protected static ?string $navigationLabel = 'Variables de productos';
 
-    protected static ?string $modelLabel = 'Variante';
+    protected static ?string $modelLabel = 'Variable de producto';
 
-    protected static ?string $pluralModelLabel = 'Variantes';
+    protected static ?string $pluralModelLabel = 'Variables de productos';
 
     protected static ?int $navigationSort = 3;
 

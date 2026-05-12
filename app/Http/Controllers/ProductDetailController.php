@@ -85,7 +85,7 @@ class ProductDetailController extends Controller
             'price_sold' => $variant->price_sold,
             'price_sales' => $variant->price_sales,
             'stock' => $variant->stock,
-            'image' => $variant->getFirstMediaUrl('variant', 'thumb') ?: null,
+            'image' => $variant->getFirstMediaUrl('variant') ?: null,
         ]);
 
         return [
@@ -137,7 +137,7 @@ class ProductDetailController extends Controller
             'slug' => $product->slug,
             'price' => $priceSold,
             'discount' => $discountData,
-            'image' => $product->getFirstMediaUrl('default', 'thumb'),
+            'image' => $product->getFirstMediaUrl('default'),
             'category' => $product->category?->name,
             'group_slug' => $product->category?->categoryGroup?->slug,
         ];

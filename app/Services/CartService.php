@@ -46,8 +46,8 @@ class CartService
                 'variant_id' => $variant?->id,
                 'name' => $product->name,
                 'slug' => $product->slug,
-                'image' => $variant?->getFirstMediaUrl('variant', 'thumb')
-                    ?: $product->getFirstMediaUrl('default', 'thumb'),
+                'image' => $variant?->getFirstMediaUrl('variant')
+                    ?: $product->getFirstMediaUrl('default'),
                 'color' => $variant?->color?->name,
                 'size' => $variant?->size?->name,
                 'unit_price' => $unitPrice,

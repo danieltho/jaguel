@@ -23,6 +23,12 @@ class OrderResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    protected static ?string $navigationLabel = 'Pedidos';
+
+    protected static ?string $modelLabel = 'Pedido';
+
+    protected static ?string $pluralModelLabel = 'Pedidos';
+
     public static function form(Schema $schema): Schema
     {
         return OrderForm::configure($schema);

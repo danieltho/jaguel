@@ -59,7 +59,7 @@ class PaymentMethodResource extends Resource
                     ->maxLength(255),
 
                 Textarea::make('description')
-                    ->label('Descripcion')
+                    ->label('Observaciones')
                     ->columnSpanFull(),
 
                 TextInput::make('max_installments')

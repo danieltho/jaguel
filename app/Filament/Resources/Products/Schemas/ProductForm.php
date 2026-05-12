@@ -91,8 +91,6 @@ class ProductForm
                 SpatieMediaLibraryFileUpload::make('files')
                     ->label('Imágenes')
                     ->collection('default')
-                    ->disk('public')
-                    ->directory('product/original')
                     ->panelLayout('grid')
                     ->image()
                     ->multiple()
@@ -100,7 +98,6 @@ class ProductForm
                     ->preserveFilenames()
                     ->downloadable()
                     ->responsiveImages()
-                    ->imageEditor()
                     ->conversion('thumb')
                     ->columnSpanFull(),
 
@@ -156,13 +153,13 @@ class ProductForm
                     ->columnSpanFull()
                     ->hidden(fn ($get) => !empty($get('variants'))),
 
-                Section::make('Variantes')->schema([
+                Section::make('Variables de productos')->schema([
                     SchemaActions::make([
                         Action::make('generate_variants')
-                            ->label('Generar variantes')
+                            ->label('Generar variabless')
                             ->icon('heroicon-o-plus-circle')
-                            ->modalHeading('Seleccionar variantes')
-                            ->modalDescription('Seleccioná los colores y/o talles para generar las variantes del producto.')
+                            ->modalHeading('Seleccionar variables')
+                            ->modalDescription('Seleccioná los colores y/o talles para generar las variables del producto.')
                             ->modalSubmitActionLabel('Generar')
                             ->fillForm(function ($get) {
                                 $currentVariants = $get('variants') ?? [];
@@ -211,7 +208,7 @@ class ProductForm
                                     ->content(function ($get) {
                                         $combos = $get('existing_combos') ?? [];
                                         if (empty($combos)) {
-                                            return new HtmlString('<span class="text-sm text-gray-500">Aún no hay variantes. Seleccioná colores y/o talles para crear las primeras.</span>');
+                                            return new HtmlString('<span class="text-sm text-gray-500">Aún no hay variables. Seleccioná colores y/o talles para crear las primeras.</span>');
                                         }
                                         $badges = collect($combos)
                                             ->map(fn (string $combo) => '<span class="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-700 dark:text-gray-200">'.e($combo).'</span>')
@@ -336,9 +333,7 @@ class ProductForm
                                 SpatieMediaLibraryFileUpload::make('variant_image')
                                     ->label('Imagen')
                                     ->collection('variant')
-                                    ->disk('public')
-                                    ->image()
-                                    ->imageEditor(),
+                                    ->image(),
                             ]),
                             Hidden::make('price_sales'),
                             Hidden::make('price_cost'),

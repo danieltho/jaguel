@@ -19,7 +19,7 @@ class HomeController extends Controller
                 'id' => $group->id,
                 'name' => $group->name,
                 'slug' => $group->slug,
-                'image' => $group->getFirstMediaUrl('default', 'thumb-xl'),
+                'image' => $group->getFirstMediaUrl('default'),
                 'categories' => $group->categories->map(fn ($cat) => [
                     'id' => $cat->id,
                     'name' => $cat->name,
@@ -72,7 +72,7 @@ class HomeController extends Controller
             'slug' => $product->slug,
             'price' => $priceSold,
             'discount' => $discountData,
-            'image' => $product->getFirstMediaUrl('default', 'thumb'),
+            'image' => $product->getFirstMediaUrl('default'),
             'category' => $product->category?->name,
             'group_slug' => $product->category?->categoryGroup?->slug,
         ];

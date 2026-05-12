@@ -54,7 +54,7 @@ class SearchController extends Controller
             'slug' => $product->slug,
             'price' => $priceSold,
             'discount' => $discountData,
-            'image' => $product->getFirstMediaUrl('default', 'thumb'),
+            'image' => $product->getFirstMediaUrl('default'),
             'category' => $product->category?->name,
             'group_slug' => $product->category?->categoryGroup?->slug,
         ];

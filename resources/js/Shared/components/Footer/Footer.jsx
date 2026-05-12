@@ -1,18 +1,17 @@
 import { Link } from '@inertiajs/react';
 import { InstagramLogo, WhatsappLogo } from '@phosphor-icons/react';
 import { useCategoryContext } from '../../context/CategoryContext';
+import Logo from '../logo/Logo';
 
 export default function Footer() {
     const { categories, baseUrl } = useCategoryContext();
 
     return (
         <footer className="bg-moss-200 text-white">
-            <div className="mx-auto flex max-w-360 flex-col items-center gap-4 px-15 py-12">
+            <div className="mx-auto flex-col items-center gap-4 px-15 py-12">
                 <div className="flex w-full flex-col items-start justify-between gap-10 md:flex-row md:gap-6">
                     <div className="flex flex-col gap-6 self-stretch md:justify-between">
-                        <p className="font-extrabold tracking-wider text-[32px] leading-none">
-                            EL JAGÜEL
-                        </p>
+                        <Logo />
                         <div className="flex gap-3">
                             <a
                                 href="#"
@@ -48,7 +47,6 @@ export default function Footer() {
                                 Inicio
                             </Link>
                             <div className="flex flex-col gap-2.5 font-normal opacity-70">
-                                <a href="/nosotros">Nosotros</a>
                                 <Link href="/carrito">Carrito</Link>
                             </div>
                         </div>
@@ -70,7 +68,6 @@ export default function Footer() {
                         )}
                     </div>
                 </div>
-
                 <p className="w-full text-center text-xs">
                     &copy; 2026 El Jaguel. All rights reserved
                 </p>
