@@ -21,6 +21,8 @@ class Order extends Model
         'coupon_id',
         'payment_method_id',
         'payment_status',
+        'mp_preference_id',
+        'mp_payment_id',
         'status',
         'document_number',
         'document_type',
@@ -79,6 +81,11 @@ class Order extends Model
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function paymentTransactions(): HasMany
+    {
+        return $this->hasMany(PaymentTransaction::class);
     }
 
     public function recalculateTotals(): void

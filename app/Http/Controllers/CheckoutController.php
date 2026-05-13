@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\PaymentMethod;
 use App\Services\CartService;
 use App\Services\CouponService;
+use App\Services\EmailVerificationService;
 use App\Services\MercadoPagoService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -19,6 +20,7 @@ class CheckoutController extends Controller
     public function __construct(
         private CartService $cartService,
         private MercadoPagoService $mercadoPagoService,
+        private EmailVerificationService $emailVerificationService,
     ) {}
 
     // Step 1: Contact (email + delivery type)
@@ -45,7 +47,40 @@ class CheckoutController extends Controller
         $validated = $request->validate([
             'email' => 'required|email|max:255',
             'delivery_type' => 'required|string|in:pickup,shipping',
+            'verification_code' => 'nullable|string|size:6',
         ]);
+
+        $email = strtolower(trim($validated['email']));
+        $loggedInCustomer = $request->user('customer');
+        $isLoggedInWithSameEmail = $loggedInCustomer
+            && strtolower($loggedInCustomer->email) === $email;
+
+        if (! $isLoggedInWithSameEmail && ! $this->emailVerificationService->isEmailVerified($email)) {
+            if (empty($validated['verification_code'])) {
+                try {
+                    $this->emailVerificationService->sendCode($email, $request);
+                } catch (\Throwable $e) {
+                    return back()->withErrors(['email' => $e->getMessage()])->withInput();
+                }
+
+                return back()
+                    ->withErrors(['verification_code' => 'Te enviamos un código a tu email. Ingresalo para continuar.'])
+                    ->withInput()
+                    ->with('verification_required', true);
+            }
+
+            try {
+                $this->emailVerificationService->verify($email, $validated['verification_code']);
+            } catch (\Throwable $e) {
+                return back()
+                    ->withErrors(['verification_code' => $e->getMessage()])
+                    ->withInput()
+                    ->with('verification_required', true);
+            }
+        }
+
+        unset($validated['verification_code']);
+        $validated['email'] = $email;
 
         session(['checkout_contact' => $validated]);
 
@@ -188,6 +223,12 @@ class CheckoutController extends Controller
             ->orderBy('sort_order')
             ->get(['id', 'type', 'title', 'subtitle', 'description', 'max_installments']);
 
+        if (! $this->mercadoPagoService->isConfigured()) {
+            $paymentMethods = $paymentMethods->reject(
+                fn (PaymentMethod $m) => $m->type === PaymentMethodTypeEnum::CREDIT_CARD
+            )->values();
+        }
+
         return Inertia::render('Checkout/Payment', [
             'contact' => $contact,
             'delivery' => $delivery,
@@ -214,6 +255,13 @@ class CheckoutController extends Controller
         }
 
         $paymentMethod = PaymentMethod::findOrFail($request->input('payment_method_id'));
+
+        if ($paymentMethod->type === PaymentMethodTypeEnum::CREDIT_CARD
+            && ! $this->mercadoPagoService->isConfigured()) {
+            return back()->withErrors([
+                'payment_method_id' => 'El pago con tarjeta no está disponible en este momento.',
+            ]);
+        }
 
         // Resolve or create customer from email
         $customer = $this->resolveCustomer($customer, $contact, $recipient);
@@ -323,12 +371,26 @@ class CheckoutController extends Controller
 
         if ($orderId) {
             $order = Order::with('paymentMethod')->find($orderId);
+
+            if ($order && $order->payment_status === PaymentStatusEnum::PENDING) {
+                $this->mercadoPagoService->syncOrderFromMp($order);
+                $order->refresh();
+            }
+
             if ($order?->paymentMethod) {
                 $paymentMethodData = [
                     'type' => $order->paymentMethod->type->value,
                     'title' => $order->paymentMethod->title,
                     'description' => $order->paymentMethod->description,
                 ];
+            }
+
+            if ($order && $status === 'pending') {
+                $status = match ($order->payment_status) {
+                    PaymentStatusEnum::PAID => 'approved',
+                    PaymentStatusEnum::FAILED => 'rejected',
+                    default => 'pending',
+                };
             }
         }
 
@@ -346,9 +408,24 @@ class CheckoutController extends Controller
 
     public function webhook(Request $request)
     {
-        $this->mercadoPagoService->handleWebhook($request->all());
+        $ok = $this->mercadoPagoService->handleWebhook($request);
 
-        return response()->json(['ok' => true]);
+        return response()->json(['ok' => $ok], $ok ? 200 : 401);
+    }
+
+    public function sendEmailCode(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email|max:255',
+        ]);
+
+        try {
+            $this->emailVerificationService->sendCode($validated['email'], $request);
+        } catch (\Throwable $e) {
+            return back()->withErrors(['email' => $e->getMessage()])->withInput();
+        }
+
+        return back()->with('verification_resent', true);
     }
 
     private function resolveCustomer(?Customer $authenticatedCustomer, array $contact, array $recipient): ?Customer

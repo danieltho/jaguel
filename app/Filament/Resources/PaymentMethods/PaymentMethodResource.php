@@ -15,7 +15,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
@@ -69,23 +68,6 @@ class PaymentMethodResource extends Resource
                     ->maxValue(12)
                     ->visible(fn ($get) => $get('type') === PaymentMethodTypeEnum::CREDIT_CARD->value)
                     ->helperText('Solo para tarjetas de credito/debito'),
-
-                Section::make('Configuracion Mercado Pago')
-                    ->schema([
-                        TextInput::make('mercadopago_public_key')
-                            ->label('Public Key')
-                            ->maxLength(255)
-                            ->helperText('Public Key de Mercado Pago'),
-
-                        TextInput::make('mercadopago_access_token')
-                            ->label('Access Token')
-                            ->password()
-                            ->maxLength(255)
-                            ->helperText('Access Token de Mercado Pago'),
-                    ])
-                    ->columns(2)
-                    ->visible(fn ($get) => $get('type') === PaymentMethodTypeEnum::CREDIT_CARD->value)
-                    ->collapsible(),
 
                 TextInput::make('sort_order')
                     ->label('Orden')

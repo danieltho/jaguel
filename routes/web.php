@@ -47,6 +47,9 @@ Route::get('/buscar', [SearchController::class, 'index'])->name('search');
 Route::prefix('checkout')->name('checkout.')->group(function () {
     Route::get('/contacto', [CheckoutController::class, 'showContact'])->name('contact');
     Route::post('/contacto', [CheckoutController::class, 'saveContact']);
+    Route::post('/contacto/reenviar-codigo', [CheckoutController::class, 'sendEmailCode'])
+        ->middleware('throttle:10,1')
+        ->name('contact.resend-code');
     Route::get('/entrega', [CheckoutController::class, 'showDelivery'])->name('delivery');
     Route::post('/entrega', [CheckoutController::class, 'saveDelivery']);
     Route::get('/destinatario', [CheckoutController::class, 'showRecipient'])->name('recipient');
@@ -57,4 +60,5 @@ Route::prefix('checkout')->name('checkout.')->group(function () {
 });
 
 Route::post('/webhook/mercadopago', [CheckoutController::class, 'webhook'])
+    ->middleware('throttle:120,1')
     ->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);

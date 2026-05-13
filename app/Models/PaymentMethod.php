@@ -16,8 +16,6 @@ class PaymentMethod extends Model
         'subtitle',
         'description',
         'max_installments',
-        'mercadopago_public_key',
-        'mercadopago_access_token',
         'is_active',
         'sort_order',
     ];

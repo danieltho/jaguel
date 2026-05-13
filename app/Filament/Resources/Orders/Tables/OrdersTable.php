@@ -4,9 +4,16 @@ namespace App\Filament\Resources\Orders\Tables;
 
 use App\Enums\OrderStatusEnum;
 use App\Enums\PaymentStatusEnum;
+use App\Models\Order;
+use App\Services\MercadoPagoService;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -80,7 +87,134 @@ class OrdersTable
                     ->options(OrderStatusEnum::class),
             ])
             ->recordActions([
-                EditAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    Action::make('syncMpStatus')
+                        ->label('Sincronizar con MP')
+                        ->icon(Heroicon::OutlinedArrowPath)
+                        ->visible(fn (Order $record) => filled($record->mp_preference_id)
+                            || filled($record->mp_payment_id))
+                        ->action(function (Order $record) {
+                            $service = app(MercadoPagoService::class);
+
+                            if (filled($record->mp_payment_id)) {
+                                $payment = $service->getPayment($record->mp_payment_id);
+                                if ($payment) {
+                                    $service->handleWebhookPayload($record, $payment);
+
+                                    Notification::make()
+                                        ->title('Estado actualizado: '.$record->fresh()->payment_status->getLabel())
+                                        ->success()
+                                        ->send();
+
+                                    return;
+                                }
+                            }
+
+                            $found = $service->syncOrderFromMp($record);
+
+                            if (! $found) {
+                                Notification::make()
+                                    ->title('No se encontraron pagos en Mercado Pago')
+                                    ->body('Es posible que el comprador aún no haya pagado o que el link aún no se haya usado.')
+                                    ->warning()
+                                    ->send();
+
+                                return;
+                            }
+
+                            Notification::make()
+                                ->title('Estado actualizado: '.$record->fresh()->payment_status->getLabel())
+                                ->success()
+                                ->send();
+                        }),
+                    Action::make('paymentLink')
+                        ->label('Link de pago MP')
+                        ->icon(Heroicon::OutlinedLink)
+                        ->color('info')
+                        ->visible(fn (Order $record) => $record->paymentMethod?->type === \App\Enums\PaymentMethodTypeEnum::CREDIT_CARD
+                            && in_array($record->payment_status, [PaymentStatusEnum::PENDING, PaymentStatusEnum::FAILED], true))
+                        ->modalHeading('Link de pago Mercado Pago')
+                        ->modalDescription('Copia este link y envialo al comprador. Caduca en 24 horas.')
+                        ->modalSubmitAction(false)
+                        ->modalCancelActionLabel('Cerrar')
+                        ->fillForm(function (Order $record) {
+                            try {
+                                $preference = app(MercadoPagoService::class)->createPreference($record);
+
+                                if ($record->payment_status === PaymentStatusEnum::FAILED) {
+                                    $record->update(['payment_status' => PaymentStatusEnum::PENDING]);
+                                }
+
+                                return ['init_point' => $preference['init_point']];
+                            } catch (\Throwable $e) {
+                                Notification::make()
+                                    ->title('Error generando link')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->send();
+
+                                return ['init_point' => ''];
+                            }
+                        })
+                        ->schema([
+                            TextInput::make('init_point')
+                                ->label('Link de pago')
+                                ->readOnly()
+                                ->suffixAction(
+                                    Action::make('copy')
+                                        ->icon(Heroicon::OutlinedClipboardDocument)
+                                        ->action(function ($state, $livewire) {
+                                            $livewire->js('navigator.clipboard.writeText('.json_encode($state).')');
+                                        })
+                                ),
+                        ]),
+                    Action::make('refund')
+                        ->label('Reembolsar')
+                        ->icon(Heroicon::OutlinedReceiptRefund)
+                        ->color('danger')
+                        ->visible(fn (Order $record) => $record->payment_status === PaymentStatusEnum::PAID
+                            && filled($record->mp_payment_id))
+                        ->schema([
+                            TextInput::make('amount')
+                                ->label('Monto a reembolsar (ARS)')
+                                ->numeric()
+                                ->minValue(1)
+                                ->helperText('Dejar vacío para reembolso total.')
+                                ->default(fn (Order $record) => $record->total),
+                            TextInput::make('confirmation')
+                                ->label('Escribí REEMBOLSAR para confirmar')
+                                ->required()
+                                ->rule('in:REEMBOLSAR'),
+                        ])
+                        ->action(function (Order $record, array $data) {
+                            $service = app(MercadoPagoService::class);
+
+                            try {
+                                $amount = ! empty($data['amount'])
+                                    ? (int) round((float) $data['amount'])
+                                    : null;
+
+                                $service->refundPayment($record->mp_payment_id, $amount);
+
+                                $payment = $service->getPayment($record->mp_payment_id);
+                                if ($payment) {
+                                    $service->handleWebhookPayload($record, $payment);
+                                }
+
+                                Notification::make()
+                                    ->title('Reembolso solicitado')
+                                    ->success()
+                                    ->send();
+                            } catch (\Throwable $e) {
+                                Notification::make()
+                                    ->title('Error en el reembolso')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

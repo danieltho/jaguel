@@ -1,5 +1,6 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { MapPin, Truck } from '@phosphor-icons/react';
+import { useEffect, useState } from 'react';
 import CheckoutLayout from '../../Shared/components/CheckoutLayout/CheckoutLayout';
 import CheckoutInput from '../../Shared/components/CheckoutLayout/CheckoutInput';
 import { PrimaryButton, OutlineButton, BackButton } from '../../Shared/components/CheckoutLayout/CheckoutButton';
@@ -25,19 +26,63 @@ const DELIVERY_OPTIONS = [
     },
 ];
 
+const RESEND_COOLDOWN_SECONDS = 60;
+
 export default function Contact({ customer, summary }) {
-    const { auth } = usePage().props || {};
+    const page = usePage();
+    const { auth, flash } = page.props || {};
     const isAuthenticated = !!auth?.customer;
 
     const { data, setData, post, processing, errors } = useForm({
         email: customer.email || '',
         wants_newsletter: false,
         delivery_type: 'pickup',
+        verification_code: '',
     });
+
+    const [verificationRequired, setVerificationRequired] = useState(false);
+    const [cooldown, setCooldown] = useState(0);
+
+    useEffect(() => {
+        if (flash?.verification_required) {
+            setVerificationRequired(true);
+            setCooldown(RESEND_COOLDOWN_SECONDS);
+        }
+        if (flash?.verification_resent) {
+            setCooldown(RESEND_COOLDOWN_SECONDS);
+        }
+    }, [flash?.verification_required, flash?.verification_resent]);
+
+    useEffect(() => {
+        if (cooldown <= 0) return;
+        const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+        return () => clearTimeout(timer);
+    }, [cooldown]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post('/checkout/contacto');
+        post('/checkout/contacto', {
+            preserveScroll: true,
+        });
+    };
+
+    const handleResend = () => {
+        if (cooldown > 0) return;
+        router.post(
+            '/checkout/contacto/reenviar-codigo',
+            { email: data.email },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => setCooldown(RESEND_COOLDOWN_SECONDS),
+            },
+        );
+    };
+
+    const handleChangeEmail = () => {
+        setVerificationRequired(false);
+        setData('verification_code', '');
+        setCooldown(0);
     };
 
     return (
@@ -60,7 +105,55 @@ export default function Contact({ customer, summary }) {
                                     placeholder="ejemplo@correo.com"
                                     error={errors.email}
                                     required
+                                    disabled={verificationRequired}
                                 />
+
+                                {verificationRequired && (
+                                    <div className="flex flex-col gap-2 rounded-md border border-amber-200 bg-amber-50 p-3">
+                                        <p className="text-sm text-amber-900">
+                                            Te enviamos un código de 6 dígitos a <strong>{data.email}</strong>.
+                                            Revisá tu bandeja de entrada y la carpeta de spam.
+                                        </p>
+
+                                        <CheckoutInput
+                                            label="Código de verificación*"
+                                            type="text"
+                                            inputMode="numeric"
+                                            maxLength={6}
+                                            value={data.verification_code}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'verification_code',
+                                                    e.target.value.replace(/\D/g, '').slice(0, 6),
+                                                )
+                                            }
+                                            placeholder="000000"
+                                            error={errors.verification_code}
+                                            required
+                                        />
+
+                                        <div className="flex items-center gap-3 text-sm">
+                                            <button
+                                                type="button"
+                                                onClick={handleResend}
+                                                disabled={cooldown > 0}
+                                                className="text-blue-700 underline disabled:cursor-not-allowed disabled:text-gray-400"
+                                            >
+                                                {cooldown > 0
+                                                    ? `Reenviar código en ${cooldown}s`
+                                                    : 'Reenviar código'}
+                                            </button>
+                                            <span className="text-gray-400">·</span>
+                                            <button
+                                                type="button"
+                                                onClick={handleChangeEmail}
+                                                className="text-blue-700 underline"
+                                            >
+                                                Cambiar email
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <Checkbox
                                     id="wants-newsletter"
@@ -98,7 +191,7 @@ export default function Contact({ customer, summary }) {
                             </div>
 
                             <PrimaryButton type="submit" disabled={processing} className="w-[280px]">
-                                Continuar
+                                {verificationRequired ? 'Verificar y continuar' : 'Continuar'}
                             </PrimaryButton>
                         </div>
 

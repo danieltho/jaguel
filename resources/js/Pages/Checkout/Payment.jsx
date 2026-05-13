@@ -161,18 +161,26 @@ export default function Payment({ contact, delivery, recipient, paymentMethods, 
                                     </p>
                                 )}
 
-                                <PrimaryButton
-                                    type="button"
-                                    onClick={handlePlaceOrder}
-                                    disabled={processing || !selectedMethodId}
-                                    className="w-[280px] self-end"
-                                >
-                                    {processing
-                                        ? 'Procesando...'
-                                        : isCreditCard
-                                            ? 'Realizar Pago'
-                                            : 'Realizar Pedido'}
-                                </PrimaryButton>
+                                <div className="flex w-full flex-col items-end gap-2">
+                                    <PrimaryButton
+                                        type="button"
+                                        onClick={handlePlaceOrder}
+                                        disabled={processing || !selectedMethodId}
+                                        className="w-[280px]"
+                                    >
+                                        {processing
+                                            ? 'Procesando...'
+                                            : isCreditCard
+                                                ? 'Realizar Pago'
+                                                : 'Realizar Pedido'}
+                                    </PrimaryButton>
+                                    <Link
+                                        href="/carrito"
+                                        className="text-xs text-neutral-500 underline hover:text-neutral-700"
+                                    >
+                                        Cancelar y volver al carrito
+                                    </Link>
+                                </div>
                             </div>
                         </div>
 

@@ -2,7 +2,9 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Widgets\StatsOverview;
+use App\Filament\Widgets\PaymentsChart;
+use App\Filament\Widgets\PaymentStatsOverview;
+use App\Filament\Widgets\PendingPaymentsTable;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -41,7 +43,9 @@ class BackendPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                StatsOverview::class,
+                PaymentStatsOverview::class,
+                PaymentsChart::class,
+                PendingPaymentsTable::class,
             ])
             ->middleware([
                 EncryptCookies::class,

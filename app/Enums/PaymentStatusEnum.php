@@ -9,8 +9,8 @@ enum PaymentStatusEnum: string implements HasLabel, HasColor
 {
     case PENDING = 'pending';
     case PAID = 'paid';
-
     case FAILED = 'failed';
+    case REFUNDED = 'refunded';
 
     public function getLabel(): ?string
     {
@@ -18,6 +18,7 @@ enum PaymentStatusEnum: string implements HasLabel, HasColor
             self::PENDING => 'Pendiente',
             self::PAID => 'Pagado',
             self::FAILED => 'Fallido',
+            self::REFUNDED => 'Reembolsado',
         };
     }
 
@@ -27,6 +28,7 @@ enum PaymentStatusEnum: string implements HasLabel, HasColor
             self::PENDING => 'warning',
             self::PAID => 'success',
             self::FAILED => 'danger',
+            self::REFUNDED => 'gray',
         };
     }
 }

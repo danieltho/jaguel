@@ -2,24 +2,32 @@
 
 namespace App\Providers;
 
+use App\Services\SettingsService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        //
+        $this->app->singleton(SettingsService::class);
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        if ($token = config('services.mercadopago.access_token')) {
+        $this->configureMercadoPago();
+    }
+
+    private function configureMercadoPago(): void
+    {
+        try {
+            $settings = $this->app->make(SettingsService::class);
+            $token = $settings->get('mercadopago', 'access_token')
+                ?? config('services.mercadopago.access_token');
+        } catch (\Throwable $e) {
+            $token = config('services.mercadopago.access_token');
+        }
+
+        if ($token) {
             \MercadoPago\MercadoPagoConfig::setAccessToken($token);
         }
     }
