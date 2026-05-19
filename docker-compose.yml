@@ -6,24 +6,21 @@ services:
     working_dir: /var/www
     env_file:
       - .env
-    volumes:
-      - ./:/var/www
-      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
     networks:
       - jaguelapp
     depends_on:
-      db : 
+      db:
         condition: service_started
+
   nginx:
     image: nginx:alpine
     volumes:
-      - ./:/var/www
       - ./docker/nginx/conf.d:/etc/nginx/conf.d
     networks:
       - jaguelapp
     depends_on:
       - app
-  
+
   db:
     image: mysql:8.0
     env_file:
@@ -37,9 +34,9 @@ services:
       - mysql-data:/var/lib/mysql
     networks:
       - jaguelapp
-  
+
 volumes:
-    mysql-data:
+  mysql-data:
 
 networks:
   jaguelapp:

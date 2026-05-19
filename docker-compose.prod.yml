@@ -26,8 +26,5 @@ services:
       timeout: 5s
       retries: 5
 
-  node:
-    profiles: ["donotstart"]
-
 volumes:
   app_storage:
