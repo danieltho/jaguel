@@ -34,7 +34,7 @@ services:
     networks:
       - jaguelapp
   
-  volumes:
+volumes:
     mysql-data:
 
 networks:
