@@ -44,5 +44,10 @@ COPY --chown=$user:$user . /var/www
 USER $user
 RUN composer install --no-interaction --optimize-autoloader
 
+USER root
+RUN chmod +x /var/www/docker/deploy.sh /var/www/docker/entrypoint.sh
+USER $user
+
 EXPOSE 9000
+ENTRYPOINT ["/var/www/docker/entrypoint.sh"]
 CMD ["php-fpm"]

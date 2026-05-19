@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PaymentTransactions;
 
 use App\Enums\MpPaymentStatusEnum;
+use App\Filament\Clusters\MercadoPago;
 use App\Filament\Resources\PaymentTransactions\Pages\ListPaymentTransactions;
 use App\Filament\Resources\PaymentTransactions\Pages\ViewPaymentTransaction;
 use App\Models\PaymentTransaction;
@@ -26,15 +27,15 @@ class PaymentTransactionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
-    protected static ?string $navigationLabel = 'Transacciones MP';
+    protected static ?string $navigationLabel = 'Transacciones';
 
     protected static ?string $modelLabel = 'Transacción';
 
     protected static ?string $pluralModelLabel = 'Transacciones';
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Ventas';
+    protected static ?string $cluster = MercadoPago::class;
 
-    protected static ?int $navigationSort = 30;
+    protected static ?int $navigationSort = 20;
 
     public static function canCreate(): bool
     {

@@ -20,10 +20,25 @@ class MercadoPagoService
 
     public function isConfigured(): bool
     {
+        if (! $this->isEnabled()) {
+            return false;
+        }
+
         $token = $this->settings->get('mercadopago', 'access_token')
             ?? config('services.mercadopago.access_token');
 
         return filled($token);
+    }
+
+    public function isEnabled(): bool
+    {
+        $value = $this->settings->get('mercadopago', 'enabled');
+
+        if ($value === null) {
+            return true;
+        }
+
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
     }
 
     public function createPreference(Order $order): array
@@ -59,24 +74,24 @@ class MercadoPagoService
             ];
         }
 
+        $backUrls = $this->buildBackUrls();
+
         $preferenceData = [
             'items' => $items,
             'external_reference' => (string) $order->id,
             'metadata' => ['order_id' => $order->id],
             'payer' => $this->buildPayer($order),
-            'back_urls' => [
-                'success' => route('checkout.result', ['status' => 'approved']),
-                'failure' => route('checkout.result', ['status' => 'rejected']),
-                'pending' => route('checkout.result', ['status' => 'pending']),
-            ],
+            'back_urls' => $backUrls,
         ];
 
-        if (! app()->environment('local')) {
+        $hasPublicBackUrls = str_starts_with($backUrls['success'], 'https://');
+
+        if ($hasPublicBackUrls && ! app()->environment('local')) {
             $preferenceData['auto_return'] = 'all';
         }
 
-        $webhookUrl = url('/webhook/mercadopago');
-        if (! app()->environment('local') && str_starts_with($webhookUrl, 'https://')) {
+        $webhookUrl = $this->buildWebhookUrl();
+        if (str_starts_with($webhookUrl, 'https://') && ! app()->environment('local')) {
             $preferenceData['notification_url'] = $webhookUrl;
         }
 
@@ -259,6 +274,38 @@ class MercadoPagoService
             'mp_payment_id' => (string) $payment['id'],
             'payment_status' => $mpStatus->toPaymentStatus(),
         ])->saveQuietly();
+    }
+
+    private function buildBackUrls(): array
+    {
+        $base = rtrim((string) $this->settings->get('mercadopago', 'back_url_base'), '/');
+
+        if ($base === '') {
+            return [
+                'success' => route('checkout.result', ['status' => 'approved']),
+                'failure' => route('checkout.result', ['status' => 'rejected']),
+                'pending' => route('checkout.result', ['status' => 'pending']),
+            ];
+        }
+
+        $path = route('checkout.result', [], false);
+
+        return [
+            'success' => $base.$path.'?status=approved',
+            'failure' => $base.$path.'?status=rejected',
+            'pending' => $base.$path.'?status=pending',
+        ];
+    }
+
+    private function buildWebhookUrl(): string
+    {
+        $base = rtrim((string) $this->settings->get('mercadopago', 'back_url_base'), '/');
+
+        if ($base !== '') {
+            return $base.'/webhook/mercadopago';
+        }
+
+        return url('/webhook/mercadopago');
     }
 
     private function buildPayer(Order $order): array

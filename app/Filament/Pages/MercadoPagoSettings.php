@@ -2,11 +2,13 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Clusters\MercadoPago;
 use App\Services\SettingsService;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
@@ -17,13 +19,13 @@ class MercadoPagoSettings extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
 
-    protected static ?string $navigationLabel = 'Mercado Pago';
+    protected static ?string $navigationLabel = 'Configuración';
 
     protected static ?string $title = 'Configuración Mercado Pago';
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Configuración';
+    protected static ?string $cluster = MercadoPago::class;
 
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 10;
 
     protected string $view = 'filament.pages.mercado-pago-settings';
 
@@ -38,10 +40,12 @@ class MercadoPagoSettings extends Page
         $current = $settings->group(self::GROUP);
 
         $this->form->fill([
+            'enabled' => filter_var($current['enabled'] ?? true, FILTER_VALIDATE_BOOLEAN),
             'environment' => $current['environment'] ?? 'sandbox',
             'public_key' => $current['public_key'] ?? null,
             'access_token' => $current['access_token'] ?? null,
             'webhook_secret' => $current['webhook_secret'] ?? null,
+            'back_url_base' => $current['back_url_base'] ?? null,
         ]);
     }
 
@@ -49,6 +53,13 @@ class MercadoPagoSettings extends Page
     {
         return $schema
             ->components([
+                Section::make('Estado')
+                    ->schema([
+                        Toggle::make('enabled')
+                            ->label('Habilitar Mercado Pago')
+                            ->helperText('Cuando está desactivado, no se ofrece como método de pago en el checkout.'),
+                    ]),
+
                 Section::make('Entorno')
                     ->schema([
                         Select::make('environment')
@@ -82,6 +93,18 @@ class MercadoPagoSettings extends Page
                             ->revealable()
                             ->maxLength(255)
                             ->helperText('Secret para validar firma de webhooks. Configurado en panel MP > Webhooks.'),
+                    ])
+                    ->columns(1),
+
+                Section::make('URLs de retorno')
+                    ->description('URL pública base (con HTTPS) que MercadoPago usa para los botones "Volver al sitio". Si está vacío se usa APP_URL.')
+                    ->schema([
+                        TextInput::make('back_url_base')
+                            ->label('Back URL base')
+                            ->url()
+                            ->maxLength(255)
+                            ->placeholder('https://midominio.com')
+                            ->helperText('Sin barra final. Ej: https://midominio.com'),
                     ])
                     ->columns(1),
             ])
