@@ -1,3 +1,10 @@
+FROM node:20-alpine AS assets
+WORKDIR /var/www
+COPY package.json package-lock.json* vite.config.* ./
+COPY resources ./resources
+COPY public ./public
+RUN npm ci && npm run build
+
 FROM php:8.3-fpm
 
 # Arguments
@@ -39,6 +46,9 @@ RUN chown -R $user:$user /var/www
 
 # Copy application files
 COPY --chown=$user:$user . /var/www
+
+# Copy built assets from node stage
+COPY --from=assets --chown=$user:$user /var/www/public/build /var/www/public/build
 
 # Install dependencies
 USER $user
