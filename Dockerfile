@@ -58,6 +58,9 @@ RUN composer install --no-interaction --optimize-autoloader
 USER root
 RUN chmod +x /var/www/docker/deploy.sh /var/www/docker/entrypoint.sh
 
+# Snapshot del código para sincronizar en runtime
+RUN cp -a /var/www /opt/app-image
+
 EXPOSE 9000
 ENTRYPOINT ["/var/www/docker/entrypoint.sh"]
 CMD ["php-fpm"]
