@@ -16,7 +16,7 @@ services:
     volumes_from:
       - app
     volumes:
-      - ./:/var/www/public
+      - ./:/var/www/
       - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
 
   db:
