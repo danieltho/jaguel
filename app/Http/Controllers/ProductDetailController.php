@@ -66,8 +66,8 @@ class ProductDetailController extends Controller
 
         $images = $product->getMedia('default')->map(fn ($media) => [
             'id' => $media->id,
-            'url' => $media->getUrl('webp'),
-            'thumb' => $media->getUrl('thumb'),
+            'url' => $media->hasGeneratedConversion('webp') ? $media->getUrl('webp') : $media->getUrl(),
+            'thumb' => $media->hasGeneratedConversion('thumb') ? $media->getUrl('thumb') : $media->getUrl(),
         ])->values();
 
         $variants = $product->variants->map(fn ($variant) => [
