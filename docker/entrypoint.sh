@@ -1,7 +1,18 @@
 #!/usr/bin/env sh
 set -e
 
+# Sincronizar código de la imagen al volumen montado (preserva storage, .env, cache)
+rsync -a --delete \
+  --exclude='/storage' \
+  --exclude='/bootstrap/cache' \
+  --exclude='/.env' \
+  /opt/app-image/ /var/www/
+
 cd /var/www
+
+# Permisos del volumen (corremos como root acá)
+chown -R jaguelweb:www-data storage bootstrap/cache
+chmod -R 775 storage bootstrap/cache
 
 echo "Esperando a la base de datos..."
 until php -r "try { new PDO('mysql:host=' . (getenv('DB_HOST') ?: 'db') . ';port=' . (getenv('DB_PORT') ?: '3306'), getenv('DB_USERNAME') ?: 'laravel', getenv('DB_PASSWORD') ?: 'secret'); exit(0); } catch (Exception \$e) { exit(1); }" 2>/dev/null; do
@@ -26,6 +37,8 @@ if [ -n "$DB_DATABASE" ]; then
     "
 fi
 
-sh /var/www/docker/deploy.sh
+# Correr deploy como jaguelweb (no como root)
+su jaguelweb -c "sh /var/www/docker/deploy.sh"
 
+# Arrancar php-fpm como root (php-fpm hace su propio drop a www-data según su config)
 exec "$@"
