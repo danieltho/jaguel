@@ -5,6 +5,7 @@
 .env.docker
 vendor
 node_modules
+public/hot
 storage/*.key
 .phpunit.result.cache
 Homestead.json
