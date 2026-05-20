@@ -91,6 +91,7 @@ class ProductForm
                 SpatieMediaLibraryFileUpload::make('files')
                     ->label('Imágenes')
                     ->collection('default')
+                    ->disk('public')
                     ->panelLayout('grid')
                     ->image()
                     ->multiple()
@@ -333,6 +334,7 @@ class ProductForm
                                 SpatieMediaLibraryFileUpload::make('variant_image')
                                     ->label('Imagen')
                                     ->collection('variant')
+                                    ->disk('public')
                                     ->image(),
                             ]),
                             Hidden::make('price_sales'),
