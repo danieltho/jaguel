@@ -15,6 +15,7 @@ ARG uid=1000
 RUN apt-get update && apt-get install -y \
     git \
     curl \
+    rsync \
     libpng-dev \
     libjpeg-dev \
     libwebp-dev \
