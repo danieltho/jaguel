@@ -148,7 +148,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
             product_id: product.id,
             variant_id: selectedVariant?.id || null,
             quantity,
-            personalization: hasComposite ? null : personalization,
+            personalization: product.is_customizable && !hasComposite ? personalization : null,
         }, {
             preserveScroll: true,
         });
@@ -387,37 +387,39 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                             <>
                                 <QuantityStepper quantity={quantity} onChange={setQuantity} />
 
-                                <div className="flex flex-col gap-2.5">
-                                    <label className="text-xs text-neutral-500">Personalización</label>
-                                    <div className="relative w-[252px]">
-                                        <button
-                                            type="button"
-                                            onClick={() => setPersonalizationOpen((v) => !v)}
-                                            className="bg-oxido-50 h-11 w-full px-4 rounded-lg flex items-center justify-between text-xs font-medium text-neutral-500 cursor-pointer"
-                                        >
-                                            <span>{personalization}</span>
-                                            <CaretDown size={20} />
-                                        </button>
-                                        {personalizationOpen && (
-                                            <ul className="absolute z-10 mt-1 w-full bg-oxido-50 rounded-lg shadow-[0_4px_20px_0_rgba(214,216,224,0.25)] overflow-hidden">
-                                                {['SI', 'NO'].map((opt) => (
-                                                    <li key={opt}>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                setPersonalization(opt);
-                                                                setPersonalizationOpen(false);
-                                                            }}
-                                                            className="w-full h-11 px-4 text-left text-xs font-medium text-neutral-400 hover:bg-moss-50 transition-colors"
-                                                        >
-                                                            {opt}
-                                                        </button>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )}
+                                {product.is_customizable && (
+                                    <div className="flex flex-col gap-2.5">
+                                        <label className="text-xs text-neutral-500">Personalización</label>
+                                        <div className="relative w-[252px]">
+                                            <button
+                                                type="button"
+                                                onClick={() => setPersonalizationOpen((v) => !v)}
+                                                className="bg-oxido-50 h-11 w-full px-4 rounded-lg flex items-center justify-between text-xs font-medium text-neutral-500 cursor-pointer"
+                                            >
+                                                <span>{personalization}</span>
+                                                <CaretDown size={20} />
+                                            </button>
+                                            {personalizationOpen && (
+                                                <ul className="absolute z-10 mt-1 w-full bg-oxido-50 rounded-lg shadow-[0_4px_20px_0_rgba(214,216,224,0.25)] overflow-hidden">
+                                                    {['SI', 'NO'].map((opt) => (
+                                                        <li key={opt}>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setPersonalization(opt);
+                                                                    setPersonalizationOpen(false);
+                                                                }}
+                                                                className="w-full h-11 px-4 text-left text-xs font-medium text-neutral-400 hover:bg-moss-50 transition-colors"
+                                                            >
+                                                                {opt}
+                                                            </button>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
 
                                 <button
                                     type="button"

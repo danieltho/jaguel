@@ -80,7 +80,8 @@
       "Bash(awk '/^\\\\[2026-04-23 1[1-9]:/ || /^\\\\[2026-04-2[3-9]/ {last=NR} {lines[NR]=$0} END {for \\(i=last-5; i<=NR; i++\\) print lines[i]}' /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguelweb/storage/logs/laravel.log)",
       "Bash(docker image *)",
       "Bash(ls /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguelweb/storage/app/public/ 2>/dev/null; ls /Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguelweb/public/storage 2>/dev/null && echo \"symlink ok\" || echo \"NO SYMLINK\")",
-      "Read(//Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguelweb/public/**)"
+      "Read(//Users/danielalbertothomannom/workspace/ophelia/jaguel/jaguelweb/public/**)",
+      "Bash(composer show *)"
     ]
   }
 }

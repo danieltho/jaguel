@@ -21,6 +21,10 @@ class ProductVariant extends Model implements HasMedia
         'price_sales' => ScaledPrice::class,
         'price_provider' => ScaledPrice::class,
         'price_cost' => ScaledPrice::class,
+        'dimension_weight' => 'float',
+        'dimension_height' => 'float',
+        'dimension_width' => 'float',
+        'dimension_length' => 'float',
     ];
 
     protected $fillable = [

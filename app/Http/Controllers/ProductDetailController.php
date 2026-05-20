@@ -94,6 +94,7 @@ class ProductDetailController extends Controller
             'slug' => $product->slug,
             'sku' => $product->sku,
             'description' => $product->description,
+            'is_customizable' => $product->is_customizable,
             'price' => $priceSold,
             'price_without_tax' => $product->price_without_tax,
             'discount' => $discountData,

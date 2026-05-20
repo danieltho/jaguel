@@ -49,14 +49,14 @@ export default function Home() {
                 </section>
             
                 {/* Productos Destacados */}
-                <section className="pt-12">
-                    <div className="mx-auto flex flex-col items-center gap-4">
+                <section className="px-4 pt-12 sm:px-8 lg:px-15">
+                    <div className="mx-auto flex w-full max-w-330 flex-col items-center gap-4">
                         <h2 className="text-center text-2xl font-bold text-carmesi-300">
                             Productos Destacados
                         </h2>
-                        <div className="flex w-full items-start gap-6">
+                        <div className="grid w-full grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             {featuredProducts?.map((product) => (
-                                <div key={product.id} className="flex-1 min-w-0">
+                                <div key={product.id} className="min-w-0">
                                     <ProductCard product={product} />
                                 </div>
                             ))}

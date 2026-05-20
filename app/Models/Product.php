@@ -33,6 +33,7 @@ class Product extends Model implements HasMedia
         'category_id',
         'type',
         'is_active',
+        'is_customizable',
         'dimension_weight',
         'dimension_height',
         'dimension_width',
@@ -41,11 +42,17 @@ class Product extends Model implements HasMedia
 
     protected $casts = [
         'type' => ProductTypeEnum::class,
+        'is_active' => 'boolean',
+        'is_customizable' => 'boolean',
         'price_sold' => ScaledPrice::class,
         'price_without_tax' => ScaledPrice::class,
         'price_sales' => ScaledPrice::class,
         'price_provider' => ScaledPrice::class,
         'price_cost' => ScaledPrice::class,
+        'dimension_weight' => 'float',
+        'dimension_height' => 'float',
+        'dimension_width' => 'float',
+        'dimension_length' => 'float',
     ];
 
     protected static function booted(): void

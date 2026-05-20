@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Products\Tables;
 
 use App\Filament\Resources\Products\ProductResource;
+use App\Models\Category;
+use App\Models\CategoryGroup;
 use App\Models\Color;
 use App\Models\Product;
 use App\Models\Size;
@@ -77,6 +79,30 @@ class ProductsTable
                     ->query(fn (Builder $query, array $data): Builder => $query->when(
                         $data['sku'] ?? null,
                         fn (Builder $q, string $v) => $q->where('sku', 'like', "%{$v}%")
+                    )),
+                Filter::make('category_group_id')
+                    ->schema([
+                        Select::make('category_group_id')
+                            ->label('Grupo de categorías')
+                            ->options(fn () => CategoryGroup::orderBy('name')->pluck('name', 'id'))
+                            ->searchable()
+                            ->placeholder('Todos'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
+                        $data['category_group_id'] ?? null,
+                        fn (Builder $q, $v) => $q->whereHas('category', fn (Builder $cq) => $cq->where('category_group_id', $v))
+                    )),
+                Filter::make('category_id')
+                    ->schema([
+                        Select::make('category_id')
+                            ->label('Categoría')
+                            ->options(fn () => Category::orderBy('name')->pluck('name', 'id'))
+                            ->searchable()
+                            ->placeholder('Todas'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
+                        $data['category_id'] ?? null,
+                        fn (Builder $q, $v) => $q->where('category_id', $v)
                     )),
                 Filter::make('color_id')
                     ->schema([

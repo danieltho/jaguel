@@ -4,6 +4,8 @@ namespace App\Filament\Resources\Products\Schemas;
 
 use App\Enums\ProductStatusEnum;
 use App\Enums\ProductTypeEnum;
+use App\Models\Category;
+use App\Models\CategoryGroup;
 use App\Models\Color;
 use App\Models\Product;
 use App\Models\Size;
@@ -16,6 +18,7 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Actions as SchemaActions;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -50,6 +53,43 @@ class ProductForm
                     RichEditor::make('description')
                         ->label('Descripción')
                         ->toolbarButtons(['bold']),
+                    Toggle::make('is_customizable')
+                        ->label('Producto personalizado')
+                        ->helperText('Si está activo, el cliente podrá elegir si quiere personalizarlo en el detalle del producto.')
+                        ->default(false),
+                    Grid::make()->columns(2)->schema([
+                        Select::make('category_group_id')
+                            ->label('Grupo de categorías')
+                            ->options(CategoryGroup::orderBy('name')->pluck('name', 'id'))
+                            ->searchable()
+                            ->preload()
+                            ->dehydrated(false)
+                            ->live()
+                            ->afterStateHydrated(function ($state, $set, $get) {
+                                $categoryId = $get('category_id');
+                                if ($categoryId) {
+                                    $set('category_group_id', Category::find($categoryId)?->category_group_id);
+                                }
+                            })
+                            ->afterStateUpdated(function ($state, $set, $get) {
+                                $categoryId = $get('category_id');
+                                if ($categoryId && Category::find($categoryId)?->category_group_id != $state) {
+                                    $set('category_id', null);
+                                }
+                            }),
+                        Select::make('category_id')
+                            ->label('Categoría')
+                            ->options(function ($get) {
+                                $groupId = $get('category_group_id');
+                                $query = Category::orderBy('name');
+                                if ($groupId) {
+                                    $query->where('category_group_id', $groupId);
+                                }
+                                return $query->pluck('name', 'id');
+                            })
+                            ->searchable()
+                            ->preload(),
+                    ]),
                 ])->columnSpanFull(),
 
                 Section::make('Precios')->schema([
@@ -108,22 +148,30 @@ class ProductForm
                             ->label('Peso')
                             ->postfix('Kg')
                             ->placeholder('0.14')
-                            ->rule('numeric'),
+                            ->numeric()
+                            ->step(0.01)
+                            ->inputMode('decimal'),
                         TextInput::make('dimension_length')
                             ->label('Profundidad')
                             ->postfix('cm')
                             ->placeholder('30')
-                            ->rule('numeric'),
+                            ->numeric()
+                            ->step(0.01)
+                            ->inputMode('decimal'),
                         TextInput::make('dimension_width')
                             ->label('Ancho')
                             ->postfix('cm')
                             ->placeholder('30')
-                            ->rule('numeric'),
+                            ->numeric()
+                            ->step(0.01)
+                            ->inputMode('decimal'),
                         TextInput::make('dimension_height')
                             ->label('Alto')
                             ->postfix('cm')
                             ->placeholder('30')
-                            ->rule('numeric'),
+                            ->numeric()
+                            ->step(0.01)
+                            ->inputMode('decimal'),
                     ]),
                 ])->columnSpanFull(),
 
@@ -157,7 +205,7 @@ class ProductForm
                 Section::make('Variables de productos')->schema([
                     SchemaActions::make([
                         Action::make('generate_variants')
-                            ->label('Generar variabless')
+                            ->label('Generar variables')
                             ->icon('heroicon-o-plus-circle')
                             ->modalHeading('Seleccionar variables')
                             ->modalDescription('Seleccioná los colores y/o talles para generar las variables del producto.')
@@ -410,19 +458,27 @@ class ProductForm
                                             TextInput::make('dimension_weight')
                                                 ->label('Peso')
                                                 ->postfix('Kg')
-                                                ->rule('numeric'),
+                                                ->numeric()
+                                                ->step(0.01)
+                                                ->inputMode('decimal'),
                                             TextInput::make('dimension_length')
                                                 ->label('Profundidad')
                                                 ->postfix('cm')
-                                                ->rule('numeric'),
+                                                ->numeric()
+                                                ->step(0.01)
+                                                ->inputMode('decimal'),
                                             TextInput::make('dimension_width')
                                                 ->label('Ancho')
                                                 ->postfix('cm')
-                                                ->rule('numeric'),
+                                                ->numeric()
+                                                ->step(0.01)
+                                                ->inputMode('decimal'),
                                             TextInput::make('dimension_height')
                                                 ->label('Alto')
                                                 ->postfix('cm')
-                                                ->rule('numeric'),
+                                                ->numeric()
+                                                ->step(0.01)
+                                                ->inputMode('decimal'),
                                         ]),
                                     ]),
                                 ])
