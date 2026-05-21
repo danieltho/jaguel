@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Clusters\Shipping;
 use App\Services\SettingsService;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -14,15 +15,15 @@ use Filament\Support\Icons\Heroicon;
 
 class ShippingSenderSettings extends Page
 {
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
 
-    protected static ?string $navigationLabel = 'Datos de envío (remitente)';
+    protected static ?string $navigationLabel = 'Configuración';
 
     protected static ?string $title = 'Datos de envío (remitente)';
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Configuración';
+    protected static ?string $cluster = Shipping::class;
 
-    protected static ?int $navigationSort = 30;
+    protected static ?int $navigationSort = 10;
 
     protected string $view = 'filament.pages.shipping-sender-settings';
 

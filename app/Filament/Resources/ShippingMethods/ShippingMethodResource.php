@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ShippingMethods;
 
+use App\Filament\Clusters\Shipping;
 use App\Filament\Resources\ShippingMethods\Pages\ManageShippingMethods;
 use App\Models\ShippingMethod;
 use BackedEnum;
@@ -25,7 +26,7 @@ class ShippingMethodResource extends Resource
 {
     protected static ?string $model = ShippingMethod::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedListBullet;
 
     protected static ?string $navigationLabel = 'Medios de envío';
 
@@ -33,9 +34,9 @@ class ShippingMethodResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Medios de envío';
 
-    protected static string|null|\UnitEnum $navigationGroup = 'Configuración';
+    protected static ?string $cluster = Shipping::class;
 
-    protected static ?int $navigationSort = 25;
+    protected static ?int $navigationSort = 20;
 
     public static function form(Schema $schema): Schema
     {
