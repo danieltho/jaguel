@@ -15,7 +15,7 @@ class OrderShippingLabelController extends Controller
         $sender = $settings->group(ShippingSenderSettings::GROUP);
 
         return view('shipping-label', [
-            'orders' => collect([$order->load('items.product')]),
+            'orders' => collect([$order->load('items')]),
             'sender' => $sender,
         ]);
     }
@@ -30,7 +30,7 @@ class OrderShippingLabelController extends Controller
 
         abort_if($ids->isEmpty(), 404);
 
-        $orders = Order::with('items.product')
+        $orders = Order::with('items')
             ->whereIn('id', $ids)
             ->orderBy('order_number')
             ->get();

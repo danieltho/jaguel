@@ -8,7 +8,6 @@ import {
     ArrowsClockwise,
     House,
 } from '@phosphor-icons/react';
-import logoImg from '../logo/img/logo.png';
 
 const STEPS = [
     { label: 'Carrito', icon: ShoppingCart },
@@ -117,7 +116,7 @@ export default function CheckoutLayout({ children, currentStep = 1, showInfoBar 
         <div className="flex min-h-screen flex-col bg-neutral-50">
             <header className="flex justify-center px-15 py-[30px]">
                 <Link href="/" aria-label="El Jaguel">
-                    <img src={logoImg} className="h-[54px] w-auto object-contain" alt="El Jaguel" />
+                    <img src="/images/logo.svg" className="h-[54px] w-auto object-contain" alt="El Jaguel" />
                 </Link>
             </header>
 

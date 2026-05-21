@@ -138,11 +138,22 @@ class CartService
             ->first();
 
         if (! $coupon) {
-            return ['success' => false, 'message' => 'Cupón no encontrado'];
+            return ['success' => false, 'message' => 'Cupón no encontrado o inactivo'];
         }
 
         $couponService = app(CouponService::class);
-        $discount = $couponService->calculateDiscount($coupon, $this->getSubtotal());
+        $subtotal = $this->getSubtotal();
+
+        $validation = $couponService->validateCoupon($coupon, null, null, $subtotal);
+        if (! ($validation['valid'] ?? false)) {
+            return ['success' => false, 'message' => $validation['message'] ?? 'Cupón no válido'];
+        }
+
+        $discount = $couponService->calculateDiscount($coupon, $subtotal);
+
+        if ($discount <= 0) {
+            return ['success' => false, 'message' => 'El cupón no genera descuento sobre este carrito.'];
+        }
 
         session(['cart_coupon' => [
             'id' => $coupon->id,

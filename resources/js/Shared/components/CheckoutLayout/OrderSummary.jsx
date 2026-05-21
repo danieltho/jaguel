@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { Tag } from '@phosphor-icons/react';
 import { formatPrice } from '../../utils/formatPrice';
 
@@ -62,11 +62,15 @@ export default function OrderSummary({
     showCouponInput = true,
 }) {
     const [code, setCode] = useState('');
+    const flash = usePage().props.flash ?? {};
 
     const handleApplyCoupon = (e) => {
         e.preventDefault();
         if (!code.trim()) return;
-        router.post('/carrito/cupon', { code: code.trim() }, { preserveScroll: true });
+        router.post('/carrito/cupon', { code: code.trim() }, {
+            preserveScroll: true,
+            onSuccess: () => setCode(''),
+        });
     };
 
     const handleRemoveCoupon = () => {
@@ -155,6 +159,9 @@ export default function OrderSummary({
                                 Aplicar
                             </button>
                         </div>
+                        {flash.error && (
+                            <p className="px-1 text-xs font-medium text-carmesi-300">{flash.error}</p>
+                        )}
                     </form>
                 )
             )}

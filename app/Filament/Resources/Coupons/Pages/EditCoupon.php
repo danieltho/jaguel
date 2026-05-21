@@ -20,7 +20,7 @@ class EditCoupon extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        if ($data['discount_type'] === DiscountTypeEnum::FIXED_AMOUNT->value) {
+        if (($data['discount_type'] instanceof DiscountTypeEnum ? $data['discount_type']->value : $data['discount_type']) === DiscountTypeEnum::FIXED_AMOUNT->value) {
             $data['discount_value'] = $data['discount_value'] / 100;
         }
 
@@ -33,7 +33,7 @@ class EditCoupon extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        if ($data['discount_type'] === DiscountTypeEnum::FIXED_AMOUNT->value) {
+        if (($data['discount_type'] instanceof DiscountTypeEnum ? $data['discount_type']->value : $data['discount_type']) === DiscountTypeEnum::FIXED_AMOUNT->value) {
             $data['discount_value'] = $data['discount_value'] * 100;
         }
 
