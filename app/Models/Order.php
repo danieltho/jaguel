@@ -36,7 +36,13 @@ class Order extends Model
         'recipient_state',
         'delivery_type',
         'shipping_method',
+        'shipping_method_id',
     ];
+
+    public function shippingMethod(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(ShippingMethod::class);
+    }
 
     protected $attributes = [
         'subtotal' => 0,

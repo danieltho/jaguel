@@ -7,6 +7,7 @@ use App\Enums\PaymentStatusEnum;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\PaymentMethod;
+use App\Models\ShippingMethod;
 use App\Services\CartService;
 use App\Services\CouponService;
 use App\Services\EmailVerificationService;
@@ -89,10 +90,16 @@ class CheckoutController extends Controller
 
         // Skip delivery step for pickup orders
         if ($validated['delivery_type'] === 'pickup') {
+            $pickup = ShippingMethod::where('is_active', true)
+                ->where('delivery_type', 'pickup')
+                ->orderBy('sort_order')
+                ->first();
+
             session(['checkout_delivery' => [
                 'postal_code' => null,
-                'shipping_method' => 'punto_retiro',
-                'shipping_cost' => 0,
+                'shipping_method' => $pickup?->code,
+                'shipping_method_id' => $pickup?->id,
+                'shipping_cost' => $pickup?->price ?? 0,
             ]]);
 
             return redirect()->route('checkout.recipient');
@@ -114,25 +121,19 @@ class CheckoutController extends Controller
             return redirect()->route('checkout.recipient');
         }
 
-        $shippingOptions = [
-            [
-                'id' => 'punto_retiro',
-                'name' => 'Punto de Retiro',
-                'price' => 0,
-                'description' => 'Calle 37 N° 1242, Miramar, Buenos Aires',
-                'days' => 'Listo entre 3-5 días hábiles',
-            ],
-        ];
+        // El paso "Entrega" muestra todos los métodos activos (retiro + envío),
+        // para que el cliente pueda cambiar de opinión y elegir retirar.
+        $methods = ShippingMethod::where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
 
-        if ($deliveryType === 'shipping') {
-            $shippingOptions[] = [
-                'id' => 'correo_argentino',
-                'name' => 'Correo Argentino',
-                'price' => 640000,
-                'description' => 'Envío a domicilio',
-                'days' => '5-7 días hábiles',
-            ];
-        }
+        $shippingOptions = $methods->map(fn (ShippingMethod $m) => [
+            'id' => $m->code,
+            'name' => $m->name,
+            'price' => $m->price,
+            'description' => $m->description,
+            'days' => $m->days_label,
+        ])->values()->all();
 
         return Inertia::render('Checkout/Delivery', [
             'shippingOptions' => $shippingOptions,
@@ -145,20 +146,18 @@ class CheckoutController extends Controller
     {
         $request->validate([
             'postal_code' => 'required|string|max:10',
-            'shipping_method' => 'required|string|in:punto_retiro,correo_argentino',
+            'shipping_method' => 'required|string|exists:shipping_methods,code',
         ]);
 
-        $shippingCosts = [
-            'punto_retiro' => 0,
-            'correo_argentino' => 640000,
-        ];
-
-        $method = $request->input('shipping_method');
+        $method = ShippingMethod::where('code', $request->input('shipping_method'))
+            ->where('is_active', true)
+            ->firstOrFail();
 
         session(['checkout_delivery' => [
             'postal_code' => $request->input('postal_code'),
-            'shipping_method' => $method,
-            'shipping_cost' => $shippingCosts[$method] ?? 0,
+            'shipping_method' => $method->code,
+            'shipping_method_id' => $method->id,
+            'shipping_cost' => $method->price,
         ]]);
 
         // Clear downstream session
@@ -294,6 +293,7 @@ class CheckoutController extends Controller
             'payment_method_id' => $paymentMethod->id,
             'delivery_type' => $contact['delivery_type'],
             'shipping_method' => $delivery['shipping_method'],
+            'shipping_method_id' => $delivery['shipping_method_id'] ?? null,
             'recipient_firstname' => $recipient['firstname'],
             'recipient_lastname' => $recipient['lastname'],
             'recipient_phone' => $recipient['phone'],
