@@ -3,7 +3,7 @@ const Logo = ({ variant = 'default' }) => {
 
   return (
     <a href="/">
-      <img src={src} className='h-9 sm:h-[31px]' alt="El Jaguel" />
+      <img src={src} className='h-9 sm:h-7.75' alt="El Jaguel" />
     </a>
   );
 };

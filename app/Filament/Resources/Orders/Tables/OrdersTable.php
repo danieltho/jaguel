@@ -8,9 +8,11 @@ use App\Models\Order;
 use App\Services\MercadoPagoService;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Illuminate\Database\Eloquent\Collection;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
@@ -89,6 +91,12 @@ class OrdersTable
             ->recordActions([
                 ActionGroup::make([
                     EditAction::make(),
+                    Action::make('shippingLabel')
+                        ->label('Etiqueta de envío')
+                        ->icon(Heroicon::OutlinedPrinter)
+                        ->color('gray')
+                        ->url(fn (Order $record) => route('orders.shipping-label', $record))
+                        ->openUrlInNewTab(),
                     Action::make('syncMpStatus')
                         ->label('Sincronizar con MP')
                         ->icon(Heroicon::OutlinedArrowPath)
@@ -218,6 +226,15 @@ class OrdersTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    BulkAction::make('printShippingLabels')
+                        ->label('Imprimir etiquetas de envío')
+                        ->icon(Heroicon::OutlinedPrinter)
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records, $livewire) {
+                            $ids = $records->pluck('id')->implode(',');
+                            $url = route('orders.shipping-label.bulk', ['ids' => $ids]);
+                            $livewire->js("window.open(" . json_encode($url) . ", '_blank')");
+                        }),
                     DeleteBulkAction::make(),
                 ]),
             ]);

@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\CustomerPasswordController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OrderShippingLabelController;
 use App\Http\Controllers\ProductDetailController;
 use App\Http\Controllers\ProductListingController;
 use App\Http\Controllers\SearchController;
@@ -57,6 +58,13 @@ Route::prefix('checkout')->name('checkout.')->group(function () {
     Route::get('/pago', [CheckoutController::class, 'showPayment'])->name('payment');
     Route::post('/pago', [CheckoutController::class, 'placeOrder']);
     Route::get('/resultado', [CheckoutController::class, 'success'])->name('result');
+});
+
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::get('/backend/orders/{order}/etiqueta-envio', [OrderShippingLabelController::class, 'show'])
+        ->name('orders.shipping-label');
+    Route::get('/backend/orders/etiquetas-envio', [OrderShippingLabelController::class, 'bulk'])
+        ->name('orders.shipping-label.bulk');
 });
 
 Route::post('/webhook/mercadopago', [CheckoutController::class, 'webhook'])
