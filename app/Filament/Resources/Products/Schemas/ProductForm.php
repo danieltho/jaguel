@@ -130,11 +130,14 @@ class ProductForm
 
                 SpatieMediaLibraryFileUpload::make('files')
                     ->label('Imágenes')
+                    ->helperText('Máximo 20 MB por imagen. Hasta 10 imágenes.')
                     ->collection('default')
                     ->disk('public')
                     ->panelLayout('grid')
                     ->image()
                     ->multiple()
+                    ->maxFiles(10)
+                    ->maxSize(20480)
                     ->reorderable()
                     ->preserveFilenames()
                     ->downloadable()
@@ -383,7 +386,8 @@ class ProductForm
                                     ->label('Imagen')
                                     ->collection('variant')
                                     ->disk('public')
-                                    ->image(),
+                                    ->image()
+                                    ->maxSize(20480),
                             ]),
                             Hidden::make('price_sales'),
                             Hidden::make('price_cost'),
@@ -482,7 +486,7 @@ class ProductForm
                                         ]),
                                     ]),
                                 ])
-                                ->action(function (array $data, array $arguments, $get, $set) {
+                                ->action(function (array $data, array $arguments, $set) {
                                     $index = $arguments['item'];
                                     $set("variants.{$index}.sku", $data['sku']);
                                     $set("variants.{$index}.color_id", $data['color_id']);

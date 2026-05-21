@@ -11,7 +11,7 @@ export default function Footer() {
             <div className="mx-auto flex-col items-center gap-4 px-15 py-12">
                 <div className="flex w-full flex-col items-start justify-between gap-10 md:flex-row md:gap-6">
                     <div className="flex flex-col gap-6 self-stretch md:justify-between">
-                        <Logo />
+                        <Logo variant="white" />
                         <div className="flex gap-3">
                             <a
                                 href="#"

@@ -160,14 +160,14 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
 
             <div className="bg-neutral-50 pb-8">
                 {/* Breadcrumb */}
-                <div className="px-[60px] py-6">
+                <div className="px-4 py-6 sm:px-8 lg:px-[60px]">
                     <Breadcrumb items={breadcrumbItems} />
                 </div>
 
                 {/* Product Main Section */}
-                <div className="flex gap-[123px] items-start justify-center pb-[30px]">
+                <div className="flex flex-col items-start justify-center gap-8 pb-[30px] lg:flex-row lg:gap-[123px]">
                     {/* Image Panel */}
-                    <div className="w-[721px] flex flex-col gap-2.5 items-center pl-[60px]">
+                    <div className="flex w-full flex-col items-center gap-2.5 px-4 sm:px-8 lg:w-[721px] lg:pl-[60px] lg:pr-0">
                         <div className="w-full">
                             <ImageGallery
                                 images={product.images}
@@ -202,7 +202,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                     </div>
 
                     {/* Info Panel */}
-                    <div className="w-[536px] flex flex-col gap-6">
+                    <div className="flex w-full flex-col gap-6 px-4 sm:px-8 lg:w-[536px] lg:px-0 lg:pr-[60px]">
                         {/* Volver */}
                         <button
                             type="button"
@@ -214,7 +214,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                         </button>
 
                         {/* Categoría + SKU */}
-                        <div className="flex gap-6 items-center">
+                        <div className="flex flex-wrap gap-x-6 gap-y-2 items-center">
                             {product.category?.group && (
                                 <span className="bg-moss-50 h-[31px] px-1.5 py-1 rounded-[10px] text-base font-semibold text-moss-300 uppercase flex items-center">
                                     {product.category.group.name}
@@ -237,8 +237,8 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                             <h1
                                 className={
                                     hasComposite
-                                        ? 'text-[32px] font-semibold leading-normal'
-                                        : 'text-2xl font-bold leading-normal'
+                                        ? 'text-2xl font-semibold leading-normal sm:text-3xl lg:text-[32px]'
+                                        : 'text-xl font-bold leading-normal sm:text-2xl'
                                 }
                             >
                                 {product.name}
@@ -258,7 +258,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                                 {display.hasDiscount && (
                                     <span
                                         className={`font-normal line-through text-neutral-500 ${
-                                            hasComposite ? 'text-[32px]' : 'text-lg'
+                                            hasComposite ? 'text-xl sm:text-2xl lg:text-[32px]' : 'text-base sm:text-lg'
                                         }`}
                                     >
                                         {formatPrice(display.originalPrice)}
@@ -266,7 +266,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                                 )}
                                 <span
                                     className={`font-bold text-neutral-500 ${
-                                        hasComposite ? 'text-[40px]' : 'text-[32px]'
+                                        hasComposite ? 'text-2xl sm:text-3xl lg:text-[40px]' : 'text-xl sm:text-2xl lg:text-[32px]'
                                     }`}
                                 >
                                     {formatPrice(display.finalPrice)}
@@ -362,7 +362,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
 
                         {/* Action row — layout differs by product type */}
                         {hasComposite ? (
-                            <div className="flex gap-6 items-center">
+                            <div className="flex flex-wrap gap-4 sm:gap-6 items-center">
                                 <QuantityStepper quantity={quantity} onChange={setQuantity} />
                                 {(() => {
                                     const outOfStock = selectedVariant != null && (selectedVariant.stock ?? 0) <= 0;
@@ -434,7 +434,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                 </div>
 
                 {/* Info Bar */}
-                <div className="px-[60px] py-[30px] flex gap-[60px] items-center justify-center flex-wrap">
+                <div className="flex flex-wrap items-center justify-center gap-6 px-4 py-[30px] sm:px-8 sm:gap-10 lg:gap-[60px] lg:px-[60px]">
                     <InfoItem
                         icon={<MapPin size={24} />}
                         title="Retiro en punto o envío a domicilio"
@@ -454,11 +454,11 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
 
                 {/* Related Products */}
                 {relatedProducts.length > 0 && (
-                    <div className="px-[60px] py-[30px] flex flex-col items-center gap-4">
+                    <div className="flex flex-col items-center gap-4 px-4 py-[30px] sm:px-8 lg:px-[60px]">
                         <div className="self-start pt-[30px] px-4">
-                            <h2 className="text-2xl font-medium text-neutral-500">Productos Relacionados</h2>
+                            <h2 className="text-xl sm:text-2xl font-medium text-neutral-500">Productos Relacionados</h2>
                         </div>
-                        <div className="grid grid-cols-4 gap-6 w-full">
+                        <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             {relatedProducts.map((p) => (
                                 <ProductCard key={p.id} product={p} />
                             ))}

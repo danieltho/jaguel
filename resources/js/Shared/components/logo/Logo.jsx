@@ -1,7 +1,9 @@
-const Logo = () => {
+const Logo = ({ variant = 'default' }) => {
+  const src = variant === 'white' ? '/images/logo-white.svg' : '/images/logo.svg';
+
   return (
     <a href="/">
-      <img src="/images/logo.svg" className='h-[31px]' alt="El Jaguel" />
+      <img src={src} className='h-9 sm:h-[31px]' alt="El Jaguel" />
     </a>
   );
 };
