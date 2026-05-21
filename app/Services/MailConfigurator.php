@@ -17,7 +17,12 @@ class MailConfigurator
 
         $enabled = filter_var($cfg['enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
+        // Toggle apagado o sin host configurado: forzamos driver "log".
+        // Así no se filtran envíos a un SMTP heredado de .env (ej. mailpit).
         if (! $enabled || empty($cfg['host'])) {
+            Config::set('mail.default', 'log');
+            Mail::purge('log');
+
             return;
         }
 
