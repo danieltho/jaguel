@@ -24,17 +24,17 @@ export default function ProductCard({ product }) {
                         {name}
                     </h3>
 
-                    <div className="flex items-center gap-2 w-full">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 w-full">
                         {hasDiscount && (
-                            <span className="text-base text-neutral-500 line-through font-medium">
+                            <span className="text-sm sm:text-base text-neutral-500 line-through font-medium">
                                 {formatPrice(price)}
                             </span>
                         )}
-                        <span className="text-2xl font-bold text-neutral-500">
+                        <span className="text-xl sm:text-2xl font-bold text-neutral-500">
                             {formatPrice(finalPrice)}
                         </span>
                         {hasDiscount && discount.percentage && (
-                            <span className="inline-flex items-center justify-center px-1.5 py-1 rounded-full bg-carmesi-100 text-carmesi-300 text-sm font-bold">
+                            <span className="inline-flex shrink-0 items-center justify-center px-1.5 py-1 rounded-full bg-carmesi-100 text-carmesi-300 text-xs sm:text-sm font-bold">
                                 -{discount.percentage}%
                             </span>
                         )}

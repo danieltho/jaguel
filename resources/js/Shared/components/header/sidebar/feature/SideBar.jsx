@@ -12,7 +12,7 @@ import { useCategoryContext } from '../../../../context/CategoryContext';
 
 export default function SideBar() {
     const { isMenuOpen, closeMenu } = useSidebar();
-    const { categories, loading, baseUrl } = useCategoryContext();
+    const { categories, loading } = useCategoryContext();
     const { customer } = usePage().props;
     const [openCategoryId, setOpenCategoryId] = useState(null);
 
@@ -70,7 +70,6 @@ export default function SideBar() {
                                 <NavDropdown
                                     key={category.id}
                                     category={category}
-                                    baseUrl={baseUrl}
                                     isOpen={openCategoryId === category.id}
                                     onToggle={() => toggleCategory(category.id)}
                                     onNavigate={closeMenu}
@@ -78,7 +77,7 @@ export default function SideBar() {
                             ) : (
                                 <NavItem
                                     key={category.id}
-                                    href={`${baseUrl}${category.path}`}
+                                    href={category.path}
                                     label={category.name}
                                     onNavigate={closeMenu}
                                 />
@@ -118,7 +117,7 @@ function NavItem({ href, label, onNavigate }) {
     );
 }
 
-function NavDropdown({ category, baseUrl, isOpen, onToggle, onNavigate }) {
+function NavDropdown({ category, isOpen, onToggle, onNavigate }) {
     const panelId = `sidebar-category-${category.id}`;
 
     return (
@@ -142,7 +141,7 @@ function NavDropdown({ category, baseUrl, isOpen, onToggle, onNavigate }) {
                     {category.children.map((child) => (
                         <Link
                             key={child.id}
-                            href={`${baseUrl}${child.path}`}
+                            href={child.path}
                             onClick={onNavigate}
                             className="flex h-11 items-center px-4 text-xs font-medium text-neutral-400"
                         >

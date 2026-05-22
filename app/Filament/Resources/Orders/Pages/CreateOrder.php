@@ -5,7 +5,6 @@ namespace App\Filament\Resources\Orders\Pages;
 use App\Filament\Resources\Orders\OrderResource;
 use App\Models\Coupon;
 use App\Models\Customer;
-use App\Models\User;
 use App\Services\CouponService;
 use Filament\Resources\Pages\CreateRecord;
 
@@ -13,26 +12,19 @@ class CreateOrder extends CreateRecord
 {
     protected static string $resource = OrderResource::class;
 
-    protected function mutateFormDataBeforeCreate(array $data): array
-    {
-        // Convertir precios a centavos
-        $data['price'] = ($data['price'] ?? 0) * 100;
-        $data['subtotal'] = ($data['subtotal'] ?? $data['price']) * 100;
-        $data['discount_amount'] = ($data['discount_amount'] ?? 0) * 100;
-
-        return $data;
-    }
-
     protected function afterCreate(): void
     {
-        // Si hay un cupón aplicado, registrar el uso
-        if ($this->record->coupon_id) {
-            $coupon = Coupon::find($this->record->coupon_id);
-            $user = Customer::find($this->record->user_id);
+        // Recalcular totales según los items y el cupón.
+        $this->record->refresh();
+        $this->record->recalculateTotals();
 
-            if ($coupon && $user) {
-                $couponService = new CouponService();
-                $couponService->applyCoupon($coupon, $this->record, $user);
+        // Si hay un cupón aplicado, registrar el uso
+        if ($this->record->coupon_id && $this->record->customer_id) {
+            $coupon = Coupon::find($this->record->coupon_id);
+            $customer = Customer::find($this->record->customer_id);
+
+            if ($coupon && $customer) {
+                app(CouponService::class)->applyCoupon($coupon, $this->record, $customer);
             }
         }
     }

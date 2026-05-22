@@ -39,6 +39,7 @@ class CheckoutController extends Controller
             'customer' => $customer
                 ? $customer->only('firstname', 'lastname', 'email', 'phone')
                 : ['firstname' => '', 'lastname' => '', 'email' => '', 'phone' => ''],
+            'contact' => session('checkout_contact'),
             'summary' => $this->getSummary(),
         ]);
     }
@@ -83,10 +84,16 @@ class CheckoutController extends Controller
         unset($validated['verification_code']);
         $validated['email'] = $email;
 
+        $previousDeliveryType = session('checkout_contact.delivery_type');
+
         session(['checkout_contact' => $validated]);
 
-        // Clear downstream session if delivery type changed
-        session()->forget(['checkout_delivery', 'checkout_recipient']);
+        // Solo limpiar la info de envío (postal/método) si cambió el tipo de entrega,
+        // porque depende de pickup/shipping. Los datos del destinatario (nombre,
+        // dirección, etc.) se conservan: son válidos para cualquier tipo de entrega.
+        if ($previousDeliveryType !== $validated['delivery_type']) {
+            session()->forget('checkout_delivery');
+        }
 
         // Skip delivery step for pickup orders
         if ($validated['delivery_type'] === 'pickup') {
@@ -160,9 +167,6 @@ class CheckoutController extends Controller
             'shipping_cost' => $method->price,
         ]]);
 
-        // Clear downstream session
-        session()->forget('checkout_recipient');
-
         return redirect()->route('checkout.recipient');
     }
 
@@ -174,11 +178,36 @@ class CheckoutController extends Controller
         }
 
         $customer = $request->user('customer');
+        $saved = session('checkout_recipient');
+
+        // Prellenar con lo que el cliente ya ingresó (si volvió a editar pasos previos),
+        // y si no, con los datos del cliente autenticado.
+        if ($saved) {
+            $prefill = [
+                'firstname' => $saved['firstname'] ?? '',
+                'lastname' => $saved['lastname'] ?? '',
+                'phone' => $saved['phone'] ?? '',
+                'document' => $saved['document_number'] ?? '',
+                'address' => $saved['address'] ?? '',
+                'department' => $saved['department'] ?? '',
+                'city' => $saved['city'] ?? '',
+                'state' => $saved['state'] ?? '',
+                'document_type' => $saved['document_type'] ?? 'DNI',
+                'wants_factura_a' => $saved['wants_factura_a'] ?? false,
+            ];
+        } elseif ($customer) {
+            $prefill = $customer->only('firstname', 'lastname', 'phone', 'document', 'address', 'department', 'city', 'state')
+                + ['document_type' => 'DNI', 'wants_factura_a' => false];
+        } else {
+            $prefill = [
+                'firstname' => '', 'lastname' => '', 'phone' => '', 'document' => '',
+                'address' => '', 'department' => '', 'city' => '', 'state' => '',
+                'document_type' => 'DNI', 'wants_factura_a' => false,
+            ];
+        }
 
         return Inertia::render('Checkout/Recipient', [
-            'customer' => $customer
-                ? $customer->only('firstname', 'lastname', 'phone', 'document', 'address', 'address_number', 'department', 'city', 'state')
-                : ['firstname' => '', 'lastname' => '', 'phone' => '', 'document' => '', 'address' => '', 'address_number' => '', 'department' => '', 'city' => '', 'state' => ''],
+            'customer' => $prefill,
             'deliveryType' => session('checkout_contact.delivery_type'),
             'summary' => $this->getSummary(),
         ]);

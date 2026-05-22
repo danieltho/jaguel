@@ -70,6 +70,20 @@ class ProductDetailController extends Controller
             'thumb' => $media->hasGeneratedConversion('thumb') ? $media->getUrl('thumb') : $media->getUrl(),
         ])->values();
 
+        // Si el producto no tiene imágenes propias, usar las imágenes de las variantes
+        // (la primera imagen de cada variante), tomando la primera como principal.
+        if ($images->isEmpty()) {
+            $images = $product->variants
+                ->map(fn ($variant) => $variant->getFirstMedia('variant'))
+                ->filter()
+                ->map(fn ($media) => [
+                    'id' => $media->id,
+                    'url' => $media->hasGeneratedConversion('webp') ? $media->getUrl('webp') : $media->getUrl(),
+                    'thumb' => $media->hasGeneratedConversion('thumb') ? $media->getUrl('thumb') : $media->getUrl(),
+                ])
+                ->values();
+        }
+
         $variants = $product->variants->map(fn ($variant) => [
             'id' => $variant->id,
             'sku' => $variant->sku,

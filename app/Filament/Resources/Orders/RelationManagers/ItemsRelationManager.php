@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Orders\RelationManagers;
 
 use App\Models\ProductVariant;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -26,10 +27,13 @@ class ItemsRelationManager extends RelationManager
     {
         return $schema
             ->components([
+                Hidden::make('product_id'),
+
                 Select::make('product_variant_id')
-                    ->label('Variante de Producto')
-                    ->relationship('productVariant')
+                    ->label('Variable de producto')
+                    ->relationship('productVariant', 'sku', fn ($query) => $query->with(['product', 'color', 'size']))
                     ->getOptionLabelFromRecordUsing(fn (ProductVariant $record) =>
+                        ($record->product?->name ? $record->product->name . ' — ' : '') .
                         $record->sku .
                         ($record->color ? ' - ' . $record->color->name : '') .
                         ($record->size ? ' - ' . $record->size->name : '')
@@ -42,7 +46,11 @@ class ItemsRelationManager extends RelationManager
                         if ($state) {
                             $variant = ProductVariant::find($state);
                             if ($variant) {
-                                $set('unit_price', $variant->price);
+                                $set('product_id', $variant->product_id);
+                                $price = $variant->price_sales > 0
+                                    ? $variant->price_sales
+                                    : $variant->price_sold;
+                                $set('unit_price', (int) round($price));
                             }
                         }
                     }),
@@ -66,15 +74,22 @@ class ItemsRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                TextColumn::make('productVariant.sku')
+                TextColumn::make('sku')
                     ->label('SKU')
-                    ->searchable(),
-                TextColumn::make('productVariant.product.name')
-                    ->label('Producto'),
-                TextColumn::make('productVariant.color.name')
-                    ->label('Color'),
-                TextColumn::make('productVariant.size.name')
-                    ->label('Talla'),
+                    ->state(fn ($record) => $record->productVariant?->sku ?? $record->product?->sku)
+                    ->placeholder('-'),
+                TextColumn::make('name')
+                    ->label('Producto')
+                    ->state(fn ($record) => $record->productVariant?->product?->name ?? $record->product?->name)
+                    ->placeholder('-'),
+                TextColumn::make('color')
+                    ->label('Color')
+                    ->state(fn ($record) => $record->productVariant?->color?->name)
+                    ->placeholder('-'),
+                TextColumn::make('size')
+                    ->label('Talla')
+                    ->state(fn ($record) => $record->productVariant?->size?->name)
+                    ->placeholder('-'),
                 TextColumn::make('quantity')
                     ->label('Cantidad'),
                 TextColumn::make('unit_price')

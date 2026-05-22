@@ -18,8 +18,8 @@ export default function Recipient({ customer, deliveryType, summary }) {
         city: customer.city || '',
         state: customer.state || '',
         document_number: customer.document || '',
-        document_type: 'DNI',
-        wants_factura_a: false,
+        document_type: customer.document_type || 'DNI',
+        wants_factura_a: customer.wants_factura_a || false,
     });
 
     const handleSubmit = (e) => {

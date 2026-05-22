@@ -28,15 +28,15 @@ const DELIVERY_OPTIONS = [
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
-export default function Contact({ customer, summary }) {
+export default function Contact({ customer, contact, summary }) {
     const page = usePage();
     const { auth, flash } = page.props || {};
     const isAuthenticated = !!auth?.customer;
 
     const { data, setData, post, processing, errors } = useForm({
-        email: customer.email || '',
-        wants_newsletter: false,
-        delivery_type: 'pickup',
+        email: contact?.email || customer.email || '',
+        wants_newsletter: contact?.wants_newsletter || false,
+        delivery_type: contact?.delivery_type || 'pickup',
         verification_code: '',
     });
 

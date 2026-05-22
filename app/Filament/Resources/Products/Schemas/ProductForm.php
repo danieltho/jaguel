@@ -98,24 +98,33 @@ class ProductForm
                             ->label('Precio Costo')
                             ->postfix('$')
                             ->rule('numeric')
+                            ->default(0)
+                            ->dehydrateStateUsing(fn ($state) => $state === null || $state === '' ? 0 : $state)
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn ($state, $set, $get) => $set('profit_margin', self::calculateMargin($state, $get('price_sales')))),
                         TextInput::make('price_provider')
                             ->label('Precio Proveedor')
                             ->postfix('$')
-                            ->rule('numeric'),
+                            ->rule('numeric')
+                            ->default(0)
+                            ->dehydrateStateUsing(fn ($state) => $state === null || $state === '' ? 0 : $state),
                         TextInput::make('price_sold')
                             ->label('Precio Venta')
                             ->postfix('$')
-                            ->rule('numeric'),
+                            ->rule('numeric')
+                            ->default(0)
+                            ->dehydrateStateUsing(fn ($state) => $state === null || $state === '' ? 0 : $state),
                         TextInput::make('price_without_tax')
                             ->label('Precio sin impuesto')
                             ->postfix('$')
-                            ->rule('numeric'),
+                            ->rule('numeric')
+                            ->default(0),
                         TextInput::make('price_sales')
                             ->label('Precio Promocional')
                             ->postfix('$')
                             ->rule('numeric')
+                            ->default(0)
+                            ->dehydrateStateUsing(fn ($state) => $state === null || $state === '' ? 0 : $state)
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn ($state, $set, $get) => $set('profit_margin', self::calculateMargin($get('price_cost'), $state))),
                         TextInput::make('profit_margin')
@@ -378,7 +387,9 @@ class ProductForm
                                 TextInput::make('price_sold')
                                     ->label('Precio Venta')
                                     ->rule('numeric')
-                                    ->postfix('$'),
+                                    ->postfix('$')
+                                    ->default(0)
+                                    ->dehydrateStateUsing(fn ($state) => $state === null || $state === '' ? 0 : $state),
                                 TextInput::make('stock')
                                     ->label('Stock')
                                     ->rule('numeric'),
@@ -389,9 +400,15 @@ class ProductForm
                                     ->image()
                                     ->maxSize(20480),
                             ]),
-                            Hidden::make('price_sales'),
-                            Hidden::make('price_cost'),
-                            Hidden::make('price_provider'),
+                            Hidden::make('price_sales')
+                                ->default(0)
+                                ->dehydrateStateUsing(fn ($state) => $state === null || $state === '' ? 0 : $state),
+                            Hidden::make('price_cost')
+                                ->default(0)
+                                ->dehydrateStateUsing(fn ($state) => $state === null || $state === '' ? 0 : $state),
+                            Hidden::make('price_provider')
+                                ->default(0)
+                                ->dehydrateStateUsing(fn ($state) => $state === null || $state === '' ? 0 : $state),
                             Hidden::make('dimension_weight'),
                             Hidden::make('dimension_height'),
                             Hidden::make('dimension_width'),

@@ -17,23 +17,10 @@ class EditOrder extends EditRecord
         ];
     }
 
-    protected function mutateFormDataBeforeFill(array $data): array
+    protected function afterSave(): void
     {
-        // Convertir de centavos a pesos para mostrar
-        $data['price'] = ($data['price'] ?? 0) / 100;
-        $data['subtotal'] = ($data['subtotal'] ?? 0) / 100;
-        $data['discount_amount'] = ($data['discount_amount'] ?? 0) / 100;
-
-        return $data;
-    }
-
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        // Convertir a centavos para guardar
-        $data['price'] = ($data['price'] ?? 0) * 100;
-        $data['subtotal'] = ($data['subtotal'] ?? 0) * 100;
-        $data['discount_amount'] = ($data['discount_amount'] ?? 0) * 100;
-
-        return $data;
+        // Recalcular subtotal (sumatoria de items), descuento del cupón y total.
+        $this->record->refresh();
+        $this->record->recalculateTotals();
     }
 }

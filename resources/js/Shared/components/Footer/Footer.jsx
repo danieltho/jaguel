@@ -4,7 +4,7 @@ import { useCategoryContext } from '../../context/CategoryContext';
 import Logo from '../logo/Logo';
 
 export default function Footer() {
-    const { categories, baseUrl } = useCategoryContext();
+    const { categories } = useCategoryContext();
 
     return (
         <footer className="bg-moss-200 text-white">
@@ -58,7 +58,7 @@ export default function Footer() {
                                     {categories.map((cat) => (
                                         <Link
                                             key={cat.id}
-                                            href={`${baseUrl}${cat.path}`}
+                                            href={cat.path}
                                         >
                                             {cat.name}
                                         </Link>
