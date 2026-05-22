@@ -68,10 +68,13 @@ class CouponService
             }
         }
 
-        // Verificar monto mínimo
-        if ($coupon->minimum_purchase && $subtotal < $coupon->minimum_purchase) {
-            $minFormatted = number_format($coupon->minimum_purchase / 100, 2);
-            return ['valid' => false, 'error' => "El monto mínimo de compra es \${$minFormatted}"];
+        // Verificar monto mínimo (minimum_purchase se almacena en centavos)
+        if ($coupon->minimum_purchase) {
+            $minimum = $coupon->minimum_purchase / 100;
+            if ($subtotal < $minimum) {
+                $minFormatted = number_format($minimum, 2);
+                return ['valid' => false, 'error' => "El monto mínimo de compra es \${$minFormatted}"];
+            }
         }
 
         // Verificar alcance (solo cuando se evalúa un producto puntual)
@@ -104,8 +107,10 @@ class CouponService
     public function calculateDiscount(Coupon $coupon, int $subtotal): int
     {
         return match ($coupon->discount_type) {
+            // discount_value (porcentaje) se almacena tal cual (ej. 20 = 20%)
             DiscountTypeEnum::PERCENTAGE => (int) floor($subtotal * $coupon->discount_value / 100),
-            DiscountTypeEnum::FIXED_AMOUNT => min($coupon->discount_value, $subtotal),
+            // discount_value (monto fijo) se almacena en centavos -> convertir a la escala del subtotal
+            DiscountTypeEnum::FIXED_AMOUNT => (int) min(floor($coupon->discount_value / 100), $subtotal),
         };
     }
 
