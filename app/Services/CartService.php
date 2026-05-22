@@ -146,7 +146,11 @@ class CartService
 
         $validation = $couponService->validateCoupon($coupon, null, null, $subtotal);
         if (! ($validation['valid'] ?? false)) {
-            return ['success' => false, 'message' => $validation['message'] ?? 'Cupón no válido'];
+            return ['success' => false, 'message' => $validation['error'] ?? 'Cupón no válido'];
+        }
+
+        if (! $this->cartHasEligibleProduct($coupon, $couponService)) {
+            return ['success' => false, 'message' => 'Este cupón no aplica a los productos de tu carrito.'];
         }
 
         $discount = $couponService->calculateDiscount($coupon, $subtotal);
@@ -162,6 +166,27 @@ class CartService
         ]]);
 
         return ['success' => true, 'message' => 'Cupón aplicado', 'discount' => $discount];
+    }
+
+    /**
+     * Verifica que al menos un producto del carrito sea elegible para el cupón
+     * según su alcance (general / categoría / producto).
+     */
+    private function cartHasEligibleProduct(\App\Models\Coupon $coupon, CouponService $couponService): bool
+    {
+        if ($coupon->scope === \App\Enums\CouponScopeEnum::GENERAL) {
+            return true;
+        }
+
+        $productIds = collect(session('cart', []))->pluck('product_id')->unique();
+
+        if ($productIds->isEmpty()) {
+            return false;
+        }
+
+        return Product::whereIn('id', $productIds)
+            ->get()
+            ->contains(fn (Product $product) => $couponService->isProductEligible($coupon, $product));
     }
 
     public function removeCoupon(): void

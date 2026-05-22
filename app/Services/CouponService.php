@@ -31,7 +31,7 @@ class CouponService
             return ['valid' => false, 'error' => 'Cupón no encontrado'];
         }
 
-        return $this->validateCoupon($coupon, $user, $product, $subtotal);
+        return $this->validateCoupon($coupon, $customer, $product, $subtotal);
     }
 
     /**
@@ -39,8 +39,8 @@ class CouponService
      */
     public function validateCoupon(
         Coupon $coupon,
-        Customer $customer,
-        Product $product,
+        ?Customer $customer,
+        ?Product $product,
         int $subtotal
     ): array {
         // Verificar fechas
@@ -58,9 +58,9 @@ class CouponService
         }
 
         // Verificar limite por usuario
-        if ($coupon->max_uses_per_user) {
+        if ($coupon->max_uses_per_user && $customer) {
             $userUsages = CouponUsage::where('coupon_id', $coupon->id)
-                ->where('user_id', $customer->id)
+                ->where('customer_id', $customer->id)
                 ->count();
 
             if ($userUsages >= $coupon->max_uses_per_user) {
@@ -74,8 +74,8 @@ class CouponService
             return ['valid' => false, 'error' => "El monto mínimo de compra es \${$minFormatted}"];
         }
 
-        // Verificar alcance
-        if (!$this->isProductEligible($coupon, $product)) {
+        // Verificar alcance (solo cuando se evalúa un producto puntual)
+        if ($product && !$this->isProductEligible($coupon, $product)) {
             return ['valid' => false, 'error' => 'Este cupón no aplica al producto seleccionado'];
         }
 
