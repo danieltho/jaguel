@@ -65,16 +65,20 @@ export default function OrderSummary({
     const flash = usePage().props.flash ?? {};
 
     const handleApplyCoupon = (e) => {
-        e.preventDefault();
+        e?.preventDefault();
         if (!code.trim()) return;
         router.post('/carrito/cupon', { code: code.trim() }, {
             preserveScroll: true,
+            preserveState: true,
             onSuccess: () => setCode(''),
         });
     };
 
     const handleRemoveCoupon = () => {
-        router.delete('/carrito/cupon', { preserveScroll: true });
+        router.delete('/carrito/cupon', {
+            preserveScroll: true,
+            preserveState: true,
+        });
         setCode('');
     };
 
@@ -138,7 +142,7 @@ export default function OrderSummary({
                 </div>
             ) : (
                 showCouponInput && (
-                    <form onSubmit={handleApplyCoupon} className="flex flex-col gap-2.5">
+                    <div className="flex flex-col gap-2.5">
                         <label htmlFor="coupon-code" className="text-xs text-neutral-500">
                             ¿Tenés un cupón de descuento?
                         </label>
@@ -149,11 +153,18 @@ export default function OrderSummary({
                                 type="text"
                                 value={code}
                                 onChange={(e) => setCode(e.target.value.toUpperCase())}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        handleApplyCoupon();
+                                    }
+                                }}
                                 placeholder="EJEMPLO26"
                                 className="min-w-0 flex-1 bg-transparent text-xs text-neutral-500 placeholder:text-neutral-300 focus:outline-none"
                             />
                             <button
-                                type="submit"
+                                type="button"
+                                onClick={handleApplyCoupon}
                                 className="shrink-0 cursor-pointer text-xs font-semibold text-oxido-300 hover:underline"
                             >
                                 Aplicar
@@ -162,7 +173,7 @@ export default function OrderSummary({
                         {flash.error && (
                             <p className="px-1 text-xs font-medium text-carmesi-300">{flash.error}</p>
                         )}
-                    </form>
+                    </div>
                 )
             )}
         </div>

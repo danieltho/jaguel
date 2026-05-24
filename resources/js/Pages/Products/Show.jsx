@@ -136,7 +136,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
             ? [{
                 label: product.category.name,
                 href: product.category.group
-                    ? `/productos/${product.category.group.slug}?category=${product.category.slug}`
+                    ? `/productos/${product.category.group.slug}/${product.category.slug}`
                     : null,
             }]
             : []),

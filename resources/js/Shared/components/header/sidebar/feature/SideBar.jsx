@@ -5,7 +5,7 @@ import {
     ShoppingBagIcon,
     CaretDownIcon,
 } from '@phosphor-icons/react';
-import { Link, usePage } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { useSidebar } from '../../../../hook/useSidebar';
 import Logo from '../../../logo/Logo';
 import { useCategoryContext } from '../../../../context/CategoryContext';
@@ -13,7 +13,6 @@ import { useCategoryContext } from '../../../../context/CategoryContext';
 export default function SideBar() {
     const { isMenuOpen, closeMenu } = useSidebar();
     const { categories, loading } = useCategoryContext();
-    const { customer } = usePage().props;
     const [openCategoryId, setOpenCategoryId] = useState(null);
 
     if (!isMenuOpen) return null;
@@ -85,21 +84,6 @@ export default function SideBar() {
                         )}
                     </nav>
                 </div>
-
-                {!customer && (
-                    <div className="flex w-full flex-col">
-                        <NavItem
-                            href="/cuenta/login"
-                            label="Iniciar Sesión"
-                            onNavigate={closeMenu}
-                        />
-                        <NavItem
-                            href="/cuenta/registro"
-                            label="Crear Cuenta"
-                            onNavigate={closeMenu}
-                        />
-                    </div>
-                )}
             </aside>
         </div>
     );

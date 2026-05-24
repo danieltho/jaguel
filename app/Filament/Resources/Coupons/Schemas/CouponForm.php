@@ -15,6 +15,12 @@ use Filament\Schemas\Schema;
 
 class CouponForm
 {
+    private static function isCouponType($value): bool
+    {
+        return $value === CouponTypeEnum::COUPON
+            || $value === CouponTypeEnum::COUPON->value;
+    }
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -37,9 +43,10 @@ class CouponForm
                             ->label('Código del Cupón')
                             ->unique(ignoreRecord: true)
                             ->maxLength(50)
-                            ->visible(fn ($get) => $get('type') === CouponTypeEnum::COUPON->value)
+                            ->visible(fn ($get) => self::isCouponType($get('type')))
+                            ->required(fn ($get) => self::isCouponType($get('type')))
                             ->alphaDash()
-                            ->helperText('Dejar vacío para generar automáticamente. Solo letras, números, guiones y guiones bajos'),
+                            ->helperText('Código que el cliente escribirá para canjear el cupón. Solo letras, números, guiones y guiones bajos'),
 
                         Textarea::make('description')
                             ->label('Descripción')

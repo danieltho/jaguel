@@ -1,9 +1,25 @@
 import { usePage } from '@inertiajs/react';
-import { WhatsappLogo } from '@phosphor-icons/react';
+import {
+    WhatsappLogo,
+    MapPin,
+    CreditCard,
+    ArrowsClockwise,
+} from '@phosphor-icons/react';
 import Template from '../Shared/components/layout';
 import ProductCard from '../Shared/components/ProductCard/ProductCard';
 import CategoryBanner from '../Shared/components/CategoryBanner/CategoryBanner';
-import Newsletter from '../Shared/components/Newsletter/Newsletter';
+
+function InfoItem({ icon, title, description }) {
+    return (
+        <div className="flex gap-4 items-center px-2.5 py-2 rounded-2xl flex-1 min-w-0">
+            <div className="shrink-0 text-neutral-500">{icon}</div>
+            <div className="flex flex-col gap-[5px] text-neutral-500 leading-normal">
+                <p className="text-sm font-semibold">{title}</p>
+                <p className="text-xs font-normal">{description}</p>
+            </div>
+        </div>
+    );
+}
 
 export default function Home() {
     const { categoryGroups, featuredProducts } = usePage().props;
@@ -101,9 +117,25 @@ export default function Home() {
                     </div>
                 </section>
 
-                {/* Newsletter */}
-                <Newsletter />
-            
+                {/* Formas de envío y pago */}
+                <section className="flex flex-wrap items-center justify-center gap-6 px-4 py-[30px] sm:px-8 sm:gap-10 lg:gap-[60px] lg:px-[60px]">
+                    <InfoItem
+                        icon={<MapPin size={24} />}
+                        title="Retiro en punto o envío a domicilio"
+                        description="Retira en nuestro punto sin cargo o envío a domicilio gratis a partir de $80.000."
+                    />
+                    <InfoItem
+                        icon={<CreditCard size={24} />}
+                        title="Mercado Pago o Transferencia Bancaria"
+                        description="Paga con Mercado Pago como más te guste o transfiere con dinero en cuenta."
+                    />
+                    <InfoItem
+                        icon={<ArrowsClockwise size={24} />}
+                        title="Cambios y Devoluciones"
+                        description="Realiza cambios sin cargo."
+                    />
+                </section>
+
         </Template>
     );
 }

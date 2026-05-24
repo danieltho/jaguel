@@ -17,7 +17,7 @@ Route::get('/producto/{slug}/{variantSku?}', [ProductDetailController::class, 's
 
 Route::prefix('productos')->name('products.')->group(function () {
     Route::get('/', [ProductListingController::class, 'index'])->name('index');
-    Route::get('/{groupSlug}', [ProductListingController::class, 'byGroup'])->name('by-group');
+    Route::get('/{groupSlug}/{categorySlug?}', [ProductListingController::class, 'byGroup'])->name('by-group');
 });
 
 Route::prefix('carrito')->name('cart.')->group(function () {

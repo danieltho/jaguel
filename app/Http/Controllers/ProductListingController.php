@@ -46,20 +46,24 @@ class ProductListingController extends Controller
         ]);
     }
 
-    public function byGroup(Request $request, string $groupSlug): Response
+    public function byGroup(Request $request, string $groupSlug, ?string $categorySlug = null): Response
     {
         $group = CategoryGroup::with('categories')
             ->where('slug', $groupSlug)
             ->firstOrFail();
 
         $sort = $request->query('sort', 'newest');
-        $categorySlug = $request->query('category');
 
         $query = Product::where('is_active', true)
             ->whereHas('category', fn ($q) => $q->where('category_group_id', $group->id))
             ->with(['category.categoryGroup']);
 
         if ($categorySlug) {
+            abort_unless(
+                $group->categories->contains('slug', $categorySlug),
+                404
+            );
+
             $query->whereHas('category', fn ($q) => $q->where('slug', $categorySlug));
         }
 

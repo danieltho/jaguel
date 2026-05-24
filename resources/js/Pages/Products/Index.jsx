@@ -63,13 +63,13 @@ export default function ProductsIndex() {
         : [];
 
     const handleSortChange = (newSort) => {
-        const url = activeGroup
-            ? `/productos/${activeGroup.slug}`
-            : '/productos';
-        const params = { sort: newSort };
-        if (activeCategory) params.category = activeCategory;
+        let url = '/productos';
+        if (activeGroup) {
+            url = `/productos/${activeGroup.slug}`;
+            if (activeCategory) url += `/${activeCategory}`;
+        }
 
-        router.get(url, params, {
+        router.get(url, { sort: newSort }, {
             preserveState: false,
         });
     };
@@ -111,7 +111,7 @@ export default function ProductsIndex() {
                                 <TagButton
                                     key={cat.id}
                                     label={cat.name}
-                                    href={`/productos/${activeGroup.slug}?category=${cat.slug}`}
+                                    href={`/productos/${activeGroup.slug}/${cat.slug}`}
                                     isActive={activeCategory === cat.slug}
                                 />
                             ))}
@@ -137,12 +137,6 @@ export default function ProductsIndex() {
                         <div className="flex justify-center py-8">
                             <div className="h-8 w-8 animate-spin rounded-full border-2 border-oxido-300 border-t-transparent" />
                         </div>
-                    )}
-
-                    {!hasMore && allProducts.length > 0 && (
-                        <p className="py-8 text-center text-sm text-neutral-400">
-                            No hay más productos para mostrar
-                        </p>
                     )}
 
                     {allProducts.length === 0 && (

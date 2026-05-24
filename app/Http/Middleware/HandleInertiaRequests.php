@@ -60,7 +60,7 @@ class HandleInertiaRequests extends Middleware
                         'id' => $cat->id,
                         'name' => $cat->name,
                         'slug' => $cat->slug,
-                        'path' => '/productos/'.$group->slug.'?category='.$cat->slug,
+                        'path' => '/productos/'.$group->slug.'/'.$cat->slug,
                     ]),
                 ]),
         ];
