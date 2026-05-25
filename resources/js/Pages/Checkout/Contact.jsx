@@ -1,9 +1,9 @@
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { MapPin, Truck } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import CheckoutLayout from '../../Shared/components/CheckoutLayout/CheckoutLayout';
 import CheckoutInput from '../../Shared/components/CheckoutLayout/CheckoutInput';
-import { PrimaryButton, OutlineButton, BackButton } from '../../Shared/components/CheckoutLayout/CheckoutButton';
+import { PrimaryButton, BackButton } from '../../Shared/components/CheckoutLayout/CheckoutButton';
 import OrderSummary from '../../Shared/components/CheckoutLayout/OrderSummary';
 import {
     SectionHeading,
@@ -30,8 +30,7 @@ const RESEND_COOLDOWN_SECONDS = 60;
 
 export default function Contact({ customer, contact, summary }) {
     const page = usePage();
-    const { auth, flash } = page.props || {};
-    const isAuthenticated = !!auth?.customer;
+    const { flash } = page.props || {};
 
     const { data, setData, post, processing, errors } = useForm({
         email: contact?.email || customer.email || '',
@@ -162,14 +161,6 @@ export default function Contact({ customer, contact, summary }) {
                                     label="Quiero recibir ofertas y novedades por e-mail"
                                 />
                             </div>
-
-                            {!isAuthenticated && (
-                                <div className="self-start">
-                                    <OutlineButton as={Link} href="/cuenta/registro">
-                                        Quiero ser Usuario
-                                    </OutlineButton>
-                                </div>
-                            )}
 
                             <div className="flex w-full flex-col">
                                 <SectionHeading>Entrega</SectionHeading>

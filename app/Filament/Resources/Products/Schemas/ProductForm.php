@@ -208,6 +208,8 @@ class ProductForm
                         ->live(),
                     TextInput::make('stock')
                         ->label('Cantidad')
+                        ->numeric()
+                        ->minValue(0)
                         ->rule('numeric')
                         ->hidden(fn ($get) => $get('inventario_type') === ProductStatusEnum::OUT_STOCK->value),
                 ])
@@ -392,6 +394,8 @@ class ProductForm
                                     ->dehydrateStateUsing(fn ($state) => $state === null || $state === '' ? 0 : $state),
                                 TextInput::make('stock')
                                     ->label('Stock')
+                                    ->numeric()
+                                    ->minValue(0)
                                     ->rule('numeric'),
                                 SpatieMediaLibraryFileUpload::make('variant_image')
                                     ->label('Imagen')
@@ -472,6 +476,8 @@ class ProductForm
                                     Section::make('Inventario')->schema([
                                         TextInput::make('stock')
                                             ->label('Stock')
+                                            ->numeric()
+                                            ->minValue(0)
                                             ->rule('numeric'),
                                     ]),
                                     Section::make('Peso y dimensiones')->schema([

@@ -184,7 +184,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                                         key={img.id}
                                         type="button"
                                         onClick={() => setActiveImageIndex(idx)}
-                                        className={`w-[88px] h-[106px] rounded-[10px] overflow-hidden bg-oxido-50 transition-all ${
+                                        className={`w-[88px] h-[106px] rounded-[10px] overflow-hidden bg-transparent transition-all ${
                                             activeImageIndex === idx
                                                 ? 'ring-2 ring-moss-300'
                                                 : 'hover:opacity-80'

@@ -33,7 +33,7 @@ export function BackButton({ href, onClick, children = 'Volver' }) {
     );
 
     const className =
-        'inline-flex h-9 items-center gap-2.5 rounded-lg border border-oxido-300 px-4 text-sm font-medium text-oxido-300 transition-colors hover:bg-oxido-50';
+        'inline-flex h-9 w-fit self-start items-center gap-2.5 rounded-lg border border-oxido-300 px-4 text-sm font-medium text-oxido-300 transition-colors hover:bg-oxido-50';
 
     if (onClick) {
         return (
