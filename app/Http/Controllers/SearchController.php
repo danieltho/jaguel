@@ -23,7 +23,7 @@ class SearchController extends Controller
                     $q->where('name', 'LIKE', "%{$query}%")
                         ->orWhere('description', 'LIKE', "%{$query}%");
                 })
-                ->with(['category.categoryGroup'])
+                ->with(['category.categoryGroup', 'categoryGroup'])
                 ->paginate(12)
                 ->through(fn ($product) => $this->formatProduct($product));
         }
@@ -55,8 +55,8 @@ class SearchController extends Controller
             'price' => $priceSold,
             'discount' => $discountData,
             'image' => $product->getFirstMediaUrl('default'),
-            'category' => $product->category?->name,
-            'group_slug' => $product->category?->categoryGroup?->slug,
+            'category' => $product->category?->name ?? $product->categoryGroup?->name,
+            'group_slug' => $product->category?->categoryGroup?->slug ?? $product->categoryGroup?->slug,
         ];
     }
 }

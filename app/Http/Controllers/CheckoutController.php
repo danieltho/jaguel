@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OrderMailStepEnum;
 use App\Enums\PaymentMethodTypeEnum;
 use App\Enums\PaymentStatusEnum;
+use App\Mail\OrderStatusMail;
+use App\Models\Coupon;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\PaymentMethod;
@@ -13,6 +16,7 @@ use App\Services\CouponService;
 use App\Services\EmailVerificationService;
 use App\Services\MercadoPagoService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -346,7 +350,7 @@ class CheckoutController extends Controller
 
         // Apply coupon usage
         if ($coupon && $customer) {
-            $couponModel = \App\Models\Coupon::find($coupon['id']);
+            $couponModel = Coupon::find($coupon['id']);
             if ($couponModel) {
                 app(CouponService::class)->applyCoupon($couponModel, $order, $customer);
             }
@@ -361,6 +365,11 @@ class CheckoutController extends Controller
 
         // For other payment methods: clear immediately
         $this->clearCheckoutSession();
+
+        // Transferencia: el pago se acredita luego, avisamos que recibimos el pedido.
+        if ($paymentMethod->type === PaymentMethodTypeEnum::BANK_TRANSFER && filled($order->email)) {
+            Mail::to($order->email)->queue(new OrderStatusMail($order, OrderMailStepEnum::PENDING));
+        }
 
         return redirect()->route('checkout.result', [
             'status' => 'pending',

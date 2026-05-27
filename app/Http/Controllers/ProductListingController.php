@@ -18,7 +18,7 @@ class ProductListingController extends Controller
         $sort = $request->query('sort', 'newest');
 
         $query = Product::where('is_active', true)
-            ->with(['category.categoryGroup']);
+            ->with(['category.categoryGroup', 'categoryGroup']);
 
         $query = $this->applySorting($query, $sort);
 
@@ -55,8 +55,8 @@ class ProductListingController extends Controller
         $sort = $request->query('sort', 'newest');
 
         $query = Product::where('is_active', true)
-            ->whereHas('category', fn ($q) => $q->where('category_group_id', $group->id))
-            ->with(['category.categoryGroup']);
+            ->where('category_group_id', $group->id)
+            ->with(['category.categoryGroup', 'categoryGroup']);
 
         if ($categorySlug) {
             abort_unless(
@@ -131,8 +131,8 @@ class ProductListingController extends Controller
             'price' => $priceSold,
             'discount' => $discountData,
             'image' => $product->getFirstMediaUrl('default'),
-            'category' => $product->category?->name,
-            'group_slug' => $product->category?->categoryGroup?->slug,
+            'category' => $product->category?->name ?? $product->categoryGroup?->name,
+            'group_slug' => $product->category?->categoryGroup?->slug ?? $product->categoryGroup?->slug,
         ];
     }
 }

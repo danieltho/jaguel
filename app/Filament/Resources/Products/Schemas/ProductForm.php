@@ -30,7 +30,7 @@ class ProductForm
 {
     private static function calculateMargin(?float $cost, ?float $salePrice): ?float
     {
-        if (!$cost || !$salePrice || $salePrice <= 0) {
+        if (! $cost || ! $salePrice || $salePrice <= 0) {
             return null;
         }
 
@@ -63,11 +63,11 @@ class ProductForm
                             ->options(CategoryGroup::orderBy('name')->pluck('name', 'id'))
                             ->searchable()
                             ->preload()
-                            ->dehydrated(false)
+                            ->required()
                             ->live()
                             ->afterStateHydrated(function ($state, $set, $get) {
                                 $categoryId = $get('category_id');
-                                if ($categoryId) {
+                                if ($categoryId && ! $state) {
                                     $set('category_group_id', Category::find($categoryId)?->category_group_id);
                                 }
                             })
@@ -85,10 +85,17 @@ class ProductForm
                                 if ($groupId) {
                                     $query->where('category_group_id', $groupId);
                                 }
+
                                 return $query->pluck('name', 'id');
                             })
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->afterStateUpdated(function ($state, $set) {
+                                // Al elegir subcategoría, garantizar el grupo padre coherente.
+                                if ($state) {
+                                    $set('category_group_id', Category::find($state)?->category_group_id);
+                                }
+                            }),
                     ]),
                 ])->columnSpanFull(),
 
@@ -214,7 +221,7 @@ class ProductForm
                         ->hidden(fn ($get) => $get('inventario_type') === ProductStatusEnum::OUT_STOCK->value),
                 ])
                     ->columnSpanFull()
-                    ->hidden(fn ($get) => !empty($get('variants'))),
+                    ->hidden(fn ($get) => ! empty($get('variants'))),
 
                 Section::make('Variables de productos')->schema([
                     SchemaActions::make([
@@ -328,35 +335,32 @@ class ProductForm
                                     ];
                                 };
 
-                                if (!empty($colors) && !empty($sizes)) {
+                                if (! empty($colors) && ! empty($sizes)) {
                                     foreach ($colors as $colorId) {
                                         foreach ($sizes as $sizeId) {
-                                            $exists = collect($currentVariants)->contains(fn ($v) =>
-                                                ($v['color_id'] ?? null) == $colorId &&
+                                            $exists = collect($currentVariants)->contains(fn ($v) => ($v['color_id'] ?? null) == $colorId &&
                                                 ($v['size_id'] ?? null) == $sizeId
                                             );
-                                            if (!$exists) {
+                                            if (! $exists) {
                                                 $newVariants[] = $makeVariant($colorId, $sizeId);
                                             }
                                         }
                                     }
-                                } elseif (!empty($colors)) {
+                                } elseif (! empty($colors)) {
                                     foreach ($colors as $colorId) {
-                                        $exists = collect($currentVariants)->contains(fn ($v) =>
-                                            ($v['color_id'] ?? null) == $colorId &&
+                                        $exists = collect($currentVariants)->contains(fn ($v) => ($v['color_id'] ?? null) == $colorId &&
                                             empty($v['size_id'])
                                         );
-                                        if (!$exists) {
+                                        if (! $exists) {
                                             $newVariants[] = $makeVariant($colorId, null);
                                         }
                                     }
-                                } elseif (!empty($sizes)) {
+                                } elseif (! empty($sizes)) {
                                     foreach ($sizes as $sizeId) {
-                                        $exists = collect($currentVariants)->contains(fn ($v) =>
-                                            empty($v['color_id']) &&
+                                        $exists = collect($currentVariants)->contains(fn ($v) => empty($v['color_id']) &&
                                             ($v['size_id'] ?? null) == $sizeId
                                         );
-                                        if (!$exists) {
+                                        if (! $exists) {
                                             $newVariants[] = $makeVariant(null, $sizeId);
                                         }
                                     }

@@ -29,7 +29,7 @@ class HomeController extends Controller
         });
 
         $featuredProducts = Product::where('is_active', true)
-            ->with(['category.categoryGroup'])
+            ->with(['category.categoryGroup', 'categoryGroup'])
             ->latest()
             ->limit(4)
             ->get()
@@ -73,8 +73,8 @@ class HomeController extends Controller
             'price' => $priceSold,
             'discount' => $discountData,
             'image' => $product->getFirstMediaUrl('default'),
-            'category' => $product->category?->name,
-            'group_slug' => $product->category?->categoryGroup?->slug,
+            'category' => $product->category?->name ?? $product->categoryGroup?->name,
+            'group_slug' => $product->category?->categoryGroup?->slug ?? $product->categoryGroup?->slug,
         ];
     }
 }

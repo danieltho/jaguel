@@ -31,6 +31,7 @@ class Product extends Model implements HasMedia
         'price_cost',
         'stock',
         'category_id',
+        'category_group_id',
         'type',
         'is_active',
         'is_customizable',
@@ -59,12 +60,12 @@ class Product extends Model implements HasMedia
     {
         static::creating(function (Product $product) {
             if (empty($product->slug)) {
-                $product->slug = Str::slug($product->name) . '-' . Str::random(8);
+                $product->slug = Str::slug($product->name).'-'.Str::random(8);
             }
         });
 
         static::created(function (Product $product) {
-            $finalSlug = Str::slug($product->name) . '-' . $product->id;
+            $finalSlug = Str::slug($product->name).'-'.$product->id;
             if ($product->slug !== $finalSlug) {
                 $product->slug = $finalSlug;
                 $product->saveQuietly();
@@ -73,7 +74,7 @@ class Product extends Model implements HasMedia
 
         static::updating(function (Product $product) {
             if ($product->isDirty('name')) {
-                $product->slug = Str::slug($product->name) . '-' . $product->id;
+                $product->slug = Str::slug($product->name).'-'.$product->id;
             }
         });
     }
@@ -81,6 +82,11 @@ class Product extends Model implements HasMedia
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function categoryGroup(): BelongsTo
+    {
+        return $this->belongsTo(CategoryGroup::class);
     }
 
     public function tags(): BelongsToMany
@@ -104,8 +110,8 @@ class Product extends Model implements HasMedia
             ->format('webp');
 
         $this->addMediaConversion('thumb')
-              ->width(368)
-              ->height(232)
-              ->sharpen(10);
+            ->width(368)
+            ->height(232)
+            ->sharpen(10);
     }
 }

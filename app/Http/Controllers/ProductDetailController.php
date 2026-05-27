@@ -17,6 +17,7 @@ class ProductDetailController extends Controller
             ->where('is_active', true)
             ->with([
                 'category.categoryGroup',
+                'categoryGroup',
                 'variants' => fn ($q) => $q->orderBy('sort_order')->orderBy('id'),
                 'variants.color',
                 'variants.size',
@@ -27,9 +28,9 @@ class ProductDetailController extends Controller
             ->firstOrFail();
 
         $relatedProducts = Product::where('is_active', true)
-            ->where('category_id', $product->category_id)
+            ->where('category_group_id', $product->category_group_id)
             ->where('id', '!=', $product->id)
-            ->with(['category.categoryGroup'])
+            ->with(['category.categoryGroup', 'categoryGroup'])
             ->limit(4)
             ->get()
             ->map(fn ($p) => $this->formatProductCard($p));
@@ -84,23 +85,31 @@ class ProductDetailController extends Controller
                 ->values();
         }
 
-        $variants = $product->variants->map(fn ($variant) => [
-            'id' => $variant->id,
-            'sku' => $variant->sku,
-            'color' => $variant->color ? [
-                'id' => $variant->color->id,
-                'name' => $variant->color->name,
-                'hex' => $variant->color->rgb_color,
-            ] : null,
-            'size' => $variant->size ? [
-                'id' => $variant->size->id,
-                'name' => $variant->size->name,
-            ] : null,
-            'price_sold' => $variant->price_sold,
-            'price_sales' => $variant->price_sales,
-            'stock' => $variant->stock,
-            'image' => $variant->getFirstMediaUrl('variant') ?: null,
-        ]);
+        $variants = $product->variants->map(function ($variant) {
+            $media = $variant->getFirstMedia('variant');
+
+            return [
+                'id' => $variant->id,
+                'sku' => $variant->sku,
+                'color' => $variant->color ? [
+                    'id' => $variant->color->id,
+                    'name' => $variant->color->name,
+                    'hex' => $variant->color->rgb_color,
+                ] : null,
+                'size' => $variant->size ? [
+                    'id' => $variant->size->id,
+                    'name' => $variant->size->name,
+                ] : null,
+                'price_sold' => $variant->price_sold,
+                'price_sales' => $variant->price_sales,
+                'stock' => $variant->stock,
+                'image' => $media ? [
+                    'id' => $media->id,
+                    'url' => $media->hasGeneratedConversion('webp') ? $media->getUrl('webp') : $media->getUrl(),
+                    'thumb' => $media->hasGeneratedConversion('thumb') ? $media->getUrl('thumb') : $media->getUrl(),
+                ] : null,
+            ];
+        });
 
         return [
             'id' => $product->id,
@@ -116,11 +125,8 @@ class ProductDetailController extends Controller
             'category' => $product->category ? [
                 'name' => $product->category->name,
                 'slug' => $product->category->slug,
-                'group' => $product->category->categoryGroup ? [
-                    'name' => $product->category->categoryGroup->name,
-                    'slug' => $product->category->categoryGroup->slug,
-                ] : null,
             ] : null,
+            'category_group' => $this->formatGroup($product),
             'variants' => $variants,
             'dimensions' => [
                 'weight' => $product->dimension_weight,
@@ -153,8 +159,24 @@ class ProductDetailController extends Controller
             'price' => $priceSold,
             'discount' => $discountData,
             'image' => $product->getFirstMediaUrl('default'),
-            'category' => $product->category?->name,
-            'group_slug' => $product->category?->categoryGroup?->slug,
+            'category' => $product->category?->name ?? $product->categoryGroup?->name,
+            'group_slug' => $product->category?->categoryGroup?->slug ?? $product->categoryGroup?->slug,
         ];
+    }
+
+    /**
+     * Grupo (categoría padre) del producto, tomado de la relación directa o
+     * derivado de la subcategoría. Null si el producto no tiene categoría.
+     *
+     * @return array{name: string, slug: string}|null
+     */
+    private function formatGroup(Product $product): ?array
+    {
+        $group = $product->categoryGroup ?? $product->category?->categoryGroup;
+
+        return $group ? [
+            'name' => $group->name,
+            'slug' => $group->slug,
+        ] : null;
     }
 }

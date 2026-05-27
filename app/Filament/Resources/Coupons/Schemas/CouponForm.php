@@ -67,6 +67,7 @@ class CouponForm
                                 : 'Monto de descuento')
                             ->numeric()
                             ->required()
+                            ->live(onBlur: true)
                             ->suffix(fn ($get) => $get('discount_type') === DiscountTypeEnum::PERCENTAGE->value ? '%' : null)
                             ->prefix(fn ($get) => $get('discount_type') === DiscountTypeEnum::FIXED_AMOUNT->value ? 'ARS' : null)
                             ->helperText(fn ($get) => $get('discount_type') === DiscountTypeEnum::PERCENTAGE->value
@@ -75,11 +76,13 @@ class CouponForm
 
                         Select::make('scope')
                             ->label('Alcance del Cupón')
-                            ->options(CouponScopeEnum::class)
+                            ->options([
+                                CouponScopeEnum::GENERAL->value => CouponScopeEnum::GENERAL->getLabel(),
+                            ])
                             ->default(CouponScopeEnum::GENERAL)
                             ->required()
                             ->live()
-                            ->helperText('Selecciona productos/categorías en las pestañas de relación'),
+                            ->helperText('Por ahora los cupones aplican a cualquier producto'),
 
                         TextInput::make('minimum_purchase')
                             ->label('Compra mínima')

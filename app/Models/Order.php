@@ -4,10 +4,14 @@ namespace App\Models;
 
 use App\Enums\OrderStatusEnum;
 use App\Enums\PaymentStatusEnum;
+use App\Observers\OrderObserver;
+use App\Services\CouponService;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[ObservedBy([OrderObserver::class])]
 class Order extends Model
 {
     protected $fillable = [
@@ -39,7 +43,7 @@ class Order extends Model
         'shipping_method_id',
     ];
 
-    public function shippingMethod(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function shippingMethod(): BelongsTo
     {
         return $this->belongsTo(ShippingMethod::class);
     }
@@ -97,14 +101,14 @@ class Order extends Model
     public function recalculateTotals(): void
     {
         $this->subtotal = $this->items()->sum(\DB::raw('quantity * unit_price'));
-        
+
         // Calcular descuento si hay cupón
         $this->discount_amount = 0;
         if ($this->coupon_id && $this->coupon) {
-            $couponService = app(\App\Services\CouponService::class);
+            $couponService = app(CouponService::class);
             $this->discount_amount = $couponService->calculateDiscount($this->coupon, $this->subtotal);
         }
-        
+
         // Total = Subtotal - Descuento + Envío
         $this->total = $this->subtotal - $this->discount_amount + $this->shipping_cost;
         $this->saveQuietly();

@@ -21,7 +21,7 @@ function InfoItem({ icon, title, description }) {
     return (
         <div className="flex gap-4 items-center px-2.5 py-2 rounded-2xl flex-1 min-w-0">
             <div className="shrink-0 text-neutral-500">{icon}</div>
-            <div className="flex flex-col gap-[5px] text-neutral-500 leading-normal">
+            <div className="flex flex-col gap-[5px] text-neutral-500 leading-normal min-w-0 wrap-break-word">
                 <p className="text-sm font-semibold">{title}</p>
                 <p className="text-xs font-normal">{description}</p>
             </div>
@@ -79,6 +79,14 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
     const [personalization, setPersonalization] = useState('NO');
     const [personalizationOpen, setPersonalizationOpen] = useState(false);
 
+    // La galería sigue a la variante seleccionada: si tiene imagen propia se
+    // muestra solo esa, si no se usan las imágenes base del producto.
+    const galleryImages = selectedVariant?.image ? [selectedVariant.image] : product.images;
+
+    useEffect(() => {
+        setActiveImageIndex(0);
+    }, [selectedVariant?.id]);
+
     const display = selectedVariant
         ? (() => {
             const sold = selectedVariant.price_sold ?? product.price;
@@ -129,14 +137,14 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
     const breadcrumbItems = [
         { label: 'Inicio', href: '/' },
         { label: 'Todos los Productos', href: '/productos' },
-        ...(product.category?.group
-            ? [{ label: product.category.group.name, href: `/productos/${product.category.group.slug}` }]
+        ...(product.category_group
+            ? [{ label: product.category_group.name, href: `/productos/${product.category_group.slug}` }]
             : []),
         ...(product.category
             ? [{
                 label: product.category.name,
-                href: product.category.group
-                    ? `/productos/${product.category.group.slug}/${product.category.slug}`
+                href: product.category_group
+                    ? `/productos/${product.category_group.slug}/${product.category.slug}`
                     : null,
             }]
             : []),
@@ -170,21 +178,21 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                     <div className="flex w-full flex-col items-center gap-2.5 px-4 sm:px-8 lg:w-[721px] lg:pl-[60px] lg:pr-0">
                         <div className="w-full">
                             <ImageGallery
-                                images={product.images}
+                                images={galleryImages}
                                 alt={product.name}
                                 activeIndex={activeImageIndex}
                                 onIndexChange={setActiveImageIndex}
                             />
                         </div>
 
-                        {product.images.length > 1 && (
+                        {galleryImages.length > 1 && (
                             <div className="flex gap-6 items-center">
-                                {product.images.slice(0, 3).map((img, idx) => (
+                                {galleryImages.slice(0, 3).map((img, idx) => (
                                     <button
                                         key={img.id}
                                         type="button"
                                         onClick={() => setActiveImageIndex(idx)}
-                                        className={`w-[88px] h-[106px] rounded-[10px] overflow-hidden bg-transparent transition-all ${
+                                        className={`w-[88px] h-[106px] rounded-[10px] overflow-hidden transition-all ${
                                             activeImageIndex === idx
                                                 ? 'ring-2 ring-moss-300'
                                                 : 'hover:opacity-80'
@@ -215,9 +223,9 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
 
                         {/* Categoría + SKU */}
                         <div className="flex flex-wrap gap-x-6 gap-y-2 items-center">
-                            {product.category?.group && (
+                            {product.category_group && (
                                 <span className="bg-moss-50 h-[31px] px-1.5 py-1 rounded-[10px] text-base font-semibold text-moss-300 uppercase flex items-center">
-                                    {product.category.group.name}
+                                    {product.category_group.name}
                                 </span>
                             )}
                             {product.category && (

@@ -3,16 +3,21 @@
 namespace App\Services;
 
 use App\Enums\MpPaymentStatusEnum;
+use App\Enums\OrderMailStepEnum;
+use App\Enums\PaymentStatusEnum;
 use App\Jobs\ProcessMpWebhook;
+use App\Mail\OrderStatusMail;
 use App\Models\Order;
 use App\Models\PaymentTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use MercadoPago\Client\Payment\PaymentClient;
 use MercadoPago\Client\Payment\PaymentRefundClient;
 use MercadoPago\Client\Preference\PreferenceClient;
 use MercadoPago\Exceptions\MPApiException;
+use MercadoPago\Net\MPSearchRequest;
 
 class MercadoPagoService
 {
@@ -137,8 +142,8 @@ class MercadoPagoService
     public function syncOrderFromMp(Order $order): bool
     {
         try {
-            $client = new \MercadoPago\Client\Payment\PaymentClient;
-            $searchRequest = new \MercadoPago\Net\MPSearchRequest(5, 0, [
+            $client = new PaymentClient;
+            $searchRequest = new MPSearchRequest(5, 0, [
                 'external_reference' => (string) $order->id,
                 'sort' => 'date_created',
                 'criteria' => 'desc',
@@ -270,10 +275,19 @@ class MercadoPagoService
             return;
         }
 
+        $newPaymentStatus = $mpStatus->toPaymentStatus();
+        $wasPaid = $order->payment_status === PaymentStatusEnum::PAID;
+
         $order->forceFill([
             'mp_payment_id' => (string) $payment['id'],
-            'payment_status' => $mpStatus->toPaymentStatus(),
+            'payment_status' => $newPaymentStatus,
         ])->saveQuietly();
+
+        // saveQuietly() no dispara el OrderObserver: notificamos la compra aquí,
+        // solo en la transición a PAGADO para no reenviar en webhooks repetidos.
+        if (! $wasPaid && $newPaymentStatus === PaymentStatusEnum::PAID && filled($order->email)) {
+            Mail::to($order->email)->queue(new OrderStatusMail($order, OrderMailStepEnum::APPROVED));
+        }
     }
 
     private function buildBackUrls(): array

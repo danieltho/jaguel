@@ -1,10 +1,13 @@
 export default function Breadcrumb({ items }) {
     return (
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 min-w-0">
             {items.map((item, index) => {
                 const isLast = index === items.length - 1;
                 return (
-                    <span key={index} className="flex items-center gap-2">
+                    <span
+                        key={index}
+                        className={`flex items-center gap-2 ${isLast ? 'min-w-0' : 'shrink-0'}`}
+                    >
                         {index > 0 && !isLast && (
                             <span className="text-xs font-normal text-neutral-400">/</span>
                         )}
@@ -16,7 +19,7 @@ export default function Breadcrumb({ items }) {
                                 {item.label}
                             </a>
                         ) : (
-                            <span className="text-sm font-semibold text-neutral-500">
+                            <span className="truncate text-sm font-semibold text-neutral-500">
                                 {item.label}
                             </span>
                         )}
