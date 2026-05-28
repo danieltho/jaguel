@@ -63,14 +63,20 @@ class CheckoutController extends Controller
 
         if (! $isLoggedInWithSameEmail && ! $this->emailVerificationService->isEmailVerified($email)) {
             if (empty($validated['verification_code'])) {
+                $codeMessage = 'Te enviamos un código a tu email. Ingresalo para continuar.';
                 try {
                     $this->emailVerificationService->sendCode($email, $request);
                 } catch (\Throwable $e) {
-                    return back()->withErrors(['email' => $e->getMessage()])->withInput();
+                    // El error del catch va al campo del CÓDIGO (no del email),
+                    // así el input de verificación se sigue mostrando aunque el
+                    // envío del mail falle (cooldown, rate-limit, SMTP, etc.).
+                    $codeMessage = $this->emailVerificationService->hasPendingCode($email)
+                        ? 'Ya te enviamos un código. Ingresalo o pedí uno nuevo cuando termine el cooldown.'
+                        : $e->getMessage();
                 }
 
                 return back()
-                    ->withErrors(['verification_code' => 'Te enviamos un código a tu email. Ingresalo para continuar.'])
+                    ->withErrors(['verification_code' => $codeMessage])
                     ->withInput()
                     ->with('verification_required', true);
             }
@@ -460,7 +466,9 @@ class CheckoutController extends Controller
         try {
             $this->emailVerificationService->sendCode($validated['email'], $request);
         } catch (\Throwable $e) {
-            return back()->withErrors(['email' => $e->getMessage()])->withInput();
+            return back()
+                ->withErrors(['verification_code' => $e->getMessage()])
+                ->with('verification_required', true);
         }
 
         return back()->with('verification_resent', true);

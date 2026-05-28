@@ -43,14 +43,16 @@ export default function Contact({ customer, contact, summary }) {
     const [cooldown, setCooldown] = useState(0);
 
     useEffect(() => {
-        if (flash?.verification_required) {
+        // El input se muestra cuando el backend lo marca por flash O cuando
+        // sigue habiendo un error de verificación (sobrevive a recargas).
+        if (flash?.verification_required || errors.verification_code) {
             setVerificationRequired(true);
-            setCooldown(RESEND_COOLDOWN_SECONDS);
+            if (cooldown === 0) setCooldown(RESEND_COOLDOWN_SECONDS);
         }
         if (flash?.verification_resent) {
             setCooldown(RESEND_COOLDOWN_SECONDS);
         }
-    }, [flash?.verification_required, flash?.verification_resent]);
+    }, [flash?.verification_required, flash?.verification_resent, errors.verification_code]);
 
     useEffect(() => {
         if (cooldown <= 0) return;

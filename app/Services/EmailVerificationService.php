@@ -29,6 +29,15 @@ class EmailVerificationService
             ->exists();
     }
 
+    public function hasPendingCode(string $email): bool
+    {
+        return EmailVerification::query()
+            ->where('email', $this->normalize($email))
+            ->whereNull('verified_at')
+            ->where('expires_at', '>', now())
+            ->exists();
+    }
+
     public function sendCode(string $email, ?Request $request = null): EmailVerification
     {
         $email = $this->normalize($email);
