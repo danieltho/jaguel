@@ -416,7 +416,10 @@ class CheckoutController extends Controller
         if ($orderId) {
             $order = Order::with('paymentMethod')->find($orderId);
 
-            if ($order && $order->payment_status === PaymentStatusEnum::PENDING) {
+            // Solo consultamos MP si la orden efectivamente pasó por MP
+            // (tiene preference id). Para transferencia/efectivo no hay nada
+            // que sincronizar, y antes generaba un 401 inocuo en el log.
+            if ($order && $order->payment_status === PaymentStatusEnum::PENDING && filled($order->mp_preference_id)) {
                 $this->mercadoPagoService->syncOrderFromMp($order);
                 $order->refresh();
             }

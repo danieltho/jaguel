@@ -4,6 +4,14 @@ services:
       - ./:/var/www
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
 
+  queue:
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    # En dev usamos queue:listen para recargar código por job sin tener que
+    # reiniciar el contenedor a cada cambio.
+    command: php artisan queue:listen --tries=1
+
   nginx:
     ports:
       - "8000:80"
