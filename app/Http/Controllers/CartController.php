@@ -57,7 +57,11 @@ class CartController extends Controller
             $request->integer('quantity'),
         );
 
-        return back();
+        $result = $this->cartService->revalidateCoupon();
+
+        return $result['removed']
+            ? back()->with('error', $result['message'])
+            : back();
     }
 
     public function remove(Request $request)
@@ -68,7 +72,11 @@ class CartController extends Controller
 
         $this->cartService->removeItem($request->string('cart_key'));
 
-        return back();
+        $result = $this->cartService->revalidateCoupon();
+
+        return $result['removed']
+            ? back()->with('error', $result['message'])
+            : back();
     }
 
     public function applyCoupon(Request $request)

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\CouponScopeEnum;
+use App\Models\Coupon;
 use App\Models\Product;
 use App\Models\ProductVariant;
 
@@ -133,7 +135,7 @@ class CartService
 
     public function applyCoupon(string $code): array
     {
-        $coupon = \App\Models\Coupon::where('code', $code)
+        $coupon = Coupon::where('code', $code)
             ->where('is_active', true)
             ->first();
 
@@ -172,9 +174,9 @@ class CartService
      * Verifica que al menos un producto del carrito sea elegible para el cupón
      * según su alcance (general / categoría / producto).
      */
-    private function cartHasEligibleProduct(\App\Models\Coupon $coupon, CouponService $couponService): bool
+    private function cartHasEligibleProduct(Coupon $coupon, CouponService $couponService): bool
     {
-        if ($coupon->scope === \App\Enums\CouponScopeEnum::GENERAL) {
+        if ($coupon->scope === CouponScopeEnum::GENERAL) {
             return true;
         }
 
@@ -194,9 +196,69 @@ class CartService
         session()->forget('cart_coupon');
     }
 
+    /**
+     * Re-valida el cupón guardado en sesión contra el estado actual del carrito.
+     * Si ya no es válido (p. ej. el subtotal cayó por debajo del monto mínimo
+     * al borrar productos) lo remueve; si sigue válido recalcula su descuento.
+     *
+     * @return array{coupon: ?array, removed: bool, message?: string}
+     */
+    public function revalidateCoupon(): array
+    {
+        $stored = session('cart_coupon');
+
+        if (! $stored) {
+            return ['coupon' => null, 'removed' => false];
+        }
+
+        $coupon = Coupon::where('id', $stored['id'])
+            ->where('is_active', true)
+            ->first();
+
+        if (! $coupon) {
+            $this->removeCoupon();
+
+            return ['coupon' => null, 'removed' => true, 'message' => 'El cupón ya no está disponible'];
+        }
+
+        $couponService = app(CouponService::class);
+        $subtotal = $this->getSubtotal();
+
+        $validation = $couponService->validateCoupon($coupon, null, null, $subtotal);
+        if (! ($validation['valid'] ?? false)) {
+            $this->removeCoupon();
+
+            return ['coupon' => null, 'removed' => true, 'message' => $validation['error'] ?? 'El cupón ya no es válido'];
+        }
+
+        if (! $this->cartHasEligibleProduct($coupon, $couponService)) {
+            $this->removeCoupon();
+
+            return ['coupon' => null, 'removed' => true, 'message' => 'Este cupón ya no aplica a los productos de tu carrito.'];
+        }
+
+        $discount = $couponService->calculateDiscount($coupon, $subtotal);
+
+        if ($discount <= 0) {
+            $this->removeCoupon();
+
+            return ['coupon' => null, 'removed' => true, 'message' => 'El cupón ya no genera descuento sobre este carrito.'];
+        }
+
+        $updated = [
+            'id' => $coupon->id,
+            'code' => $coupon->code,
+            'discount' => $discount,
+        ];
+
+        session(['cart_coupon' => $updated]);
+
+        return ['coupon' => $updated, 'removed' => false];
+    }
+
     public function getCoupon(): ?array
     {
-        return session('cart_coupon');
+        return $this->revalidateCoupon()['coupon'];
     }
 
     private function makeKey(int $productId, ?int $variantId): string
