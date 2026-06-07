@@ -26,10 +26,13 @@
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                     <tr>
                         @foreach (OrderMailStepEnum::steps() as $s)
-                            @php $active = $s === $step; @endphp
+                            @php
+                                $active = $s === $step;
+                                $stepLabel = ($s === OrderMailStepEnum::SHIPPING && $isPickup) ? 'Retiro' : $s->label();
+                            @endphp
                             <td align="center" style="padding: 6px 4px;">
                                 <span style="display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; {{ $active ? 'background: #A1A389; color: #ffffff;' : 'background: #f1f1ee; color: #b5b5ad;' }}">
-                                    {{ $s->label() }}
+                                    {{ $stepLabel }}
                                 </span>
                             </td>
                         @endforeach

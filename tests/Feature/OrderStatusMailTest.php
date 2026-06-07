@@ -94,6 +94,31 @@ class OrderStatusMailTest extends TestCase
         Mail::assertQueued(OrderStatusMail::class, fn (OrderStatusMail $mail) => $mail->step === $expected);
     }
 
+    public function test_shipping_step_mail_differs_for_pickup_and_delivery(): void
+    {
+        $pickup = $this->makeOrder(['delivery_type' => 'pickup']);
+        $shipping = $this->makeOrder(['delivery_type' => 'shipping']);
+
+        $pickupHtml = (new OrderStatusMail($pickup, OrderMailStepEnum::SHIPPING))->render();
+        $shippingHtml = (new OrderStatusMail($shipping, OrderMailStepEnum::SHIPPING))->render();
+
+        // Cuerpo: descripción según el tipo de entrega.
+        $this->assertStringContainsString('punto de retiro', $pickupHtml);
+        $this->assertStringNotContainsString('domicilio', $pickupHtml);
+        $this->assertStringContainsString('domicilio', $shippingHtml);
+
+        // Barra de progreso: etiqueta "Retiro" vs "Envío".
+        $this->assertStringContainsString('Retiro', $pickupHtml);
+        $this->assertStringNotContainsString('Retiro', $shippingHtml);
+        $this->assertStringContainsString('Envío', $shippingHtml);
+
+        // Asunto contextualizado.
+        $this->assertStringContainsString('listo para retirar', OrderMailStepEnum::SHIPPING->subject($pickup));
+        $this->assertStringContainsString('en camino', OrderMailStepEnum::SHIPPING->subject($shipping));
+
+        $this->assertNotSame($pickupHtml, $shippingHtml);
+    }
+
     public function test_non_notifying_status_change_does_not_queue_mail(): void
     {
         Mail::fake();
