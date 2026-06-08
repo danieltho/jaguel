@@ -25,12 +25,26 @@ services:
 
   nginx:
     restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN}                                         # ← dominio leído del .env
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - app_code:/var/www:ro                                    # ← mismo código que app
       - app_storage:/var/www/storage:ro                         # ← mismo storage
-      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./docker/nginx/templates:/etc/nginx/templates:ro        # ← envsubst genera conf.d/default.conf
+      - certbot_certs:/etc/letsencrypt                          # ← certificados emitidos
+      - certbot_www:/var/www/certbot                            # ← webroot del challenge ACME
+
+  certbot:
+    image: certbot/certbot
+    restart: unless-stopped
+    volumes:
+      - certbot_certs:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    # Reintenta la renovación cada 12h; certbot solo renueva si faltan <30 días.
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'"
 
   db:
     restart: unless-stopped
@@ -43,3 +57,5 @@ services:
 volumes:
   app_code:
   app_storage:
+  certbot_certs:
+  certbot_www:
