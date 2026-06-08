@@ -1,22 +1,18 @@
 # Plantilla procesada por la imagen oficial de nginx (envsubst) al arrancar.
-# Solo se sustituyen las variables de entorno definidas en el contenedor
-# (DOMAIN). Las variables propias de nginx ($uri, $host, etc.) NO se tocan.
+# Solo se sustituyen las variables de entorno definidas en el contenedor (DOMAIN).
+# Las variables propias de nginx ($uri, $host, etc.) NO se tocan.
+#
+# SSL: Cloudflare Origin Certificate (montado en /etc/nginx/ssl). El tráfico público
+# lo termina Cloudflare; este cert asegura el tramo Cloudflare → origin (SSL mode
+# "Full (strict)").
 
 # ---------------------------------------------------------------------------
-# HTTP: sirve el challenge ACME y redirige todo lo demás a HTTPS
+# HTTP: redirige a HTTPS (Cloudflare normalmente ya fuerza HTTPS en el borde)
 # ---------------------------------------------------------------------------
 server {
     listen 80;
     server_name ${DOMAIN};
-
-    # Certbot deja aquí los archivos de verificación del dominio.
-    location /.well-known/acme-challenge/ {
-        root /var/certbot;
-    }
-
-    location / {
-        return 301 https://$host$request_uri;
-    }
+    return 301 https://$host$request_uri;
 }
 
 # ---------------------------------------------------------------------------
@@ -27,10 +23,10 @@ server {
     http2 on;
     server_name ${DOMAIN};
 
-    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
-    include             /etc/letsencrypt/options-ssl-nginx.conf;
-    ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
+    ssl_certificate     /etc/nginx/ssl/origin.pem;
+    ssl_certificate_key /etc/nginx/ssl/origin.key;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
 
     index index.php index.html;
     error_log  /var/log/nginx/error.log;
