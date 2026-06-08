@@ -17,7 +17,11 @@ class CreateCoupon extends CreateRecord
             $data['code'] = $this->generateUniqueCode();
         }
 
-        if ($data['discount_type'] === DiscountTypeEnum::FIXED_AMOUNT->value) {
+        $discountType = $data['discount_type'] instanceof DiscountTypeEnum
+            ? $data['discount_type']->value
+            : $data['discount_type'];
+
+        if ($discountType === DiscountTypeEnum::FIXED_AMOUNT->value) {
             $data['discount_value'] = $data['discount_value'] * 100;
         }
 
