@@ -10,10 +10,14 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 #[ObservedBy([OrderObserver::class])]
-class Order extends Model
+class Order extends Model implements HasMedia
 {
+    use InteractsWithMedia;
+
     protected $fillable = [
         'email',
         'postal_code',
@@ -46,6 +50,13 @@ class Order extends Model
     public function shippingMethod(): BelongsTo
     {
         return $this->belongsTo(ShippingMethod::class);
+    }
+
+    public function registerMediaCollections(): void
+    {
+        // El tipo de archivo se valida en el controlador (mimes:pdf,jpg,jpeg,png),
+        // que es el punto donde se reporta el error al usuario.
+        $this->addMediaCollection('payment_receipt')->singleFile();
     }
 
     protected $attributes = [

@@ -280,6 +280,7 @@ class CheckoutController extends Controller
     {
         $request->validate([
             'payment_method_id' => 'required|exists:payment_methods,id',
+            'payment_receipt' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ]);
 
         $customer = $request->user('customer');
@@ -352,6 +353,12 @@ class CheckoutController extends Controller
                 'quantity' => $item['quantity'],
                 'unit_price' => $item['unit_price'],
             ]);
+        }
+
+        // Comprobante de transferencia (opcional)
+        if ($paymentMethod->type === PaymentMethodTypeEnum::BANK_TRANSFER
+            && $request->hasFile('payment_receipt')) {
+            $order->addMediaFromRequest('payment_receipt')->toMediaCollection('payment_receipt');
         }
 
         // Apply coupon usage

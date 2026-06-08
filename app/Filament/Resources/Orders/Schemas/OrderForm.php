@@ -3,9 +3,10 @@
 namespace App\Filament\Resources\Orders\Schemas;
 
 use App\Enums\OrderStatusEnum;
+use App\Enums\PaymentMethodTypeEnum;
 use App\Enums\PaymentStatusEnum;
-use App\Models\PaymentMethod;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
@@ -71,6 +72,20 @@ class OrderForm
                             ->disabled()
                             ->dehydrated(false)
                             ->visible(fn ($record) => $record?->delivery_type === 'shipping'),
+                    ]),
+
+                Section::make('Comprobante de Pago')
+                    ->visibleOn('edit')
+                    ->visible(fn ($record) => $record?->paymentMethod?->type === PaymentMethodTypeEnum::BANK_TRANSFER)
+                    ->schema([
+                        SpatieMediaLibraryFileUpload::make('payment_receipt')
+                            ->label('Comprobante')
+                            ->collection('payment_receipt')
+                            ->disk('public')
+                            ->downloadable()
+                            ->openable()
+                            ->disabled()
+                            ->dehydrated(false),
                     ]),
 
                 Section::make('Datos del Destinatario')

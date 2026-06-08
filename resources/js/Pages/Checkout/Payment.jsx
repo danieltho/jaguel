@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import {
     EnvelopeSimple,
@@ -7,6 +7,7 @@ import {
     Info,
     X,
     CaretRight,
+    Paperclip,
 } from '@phosphor-icons/react';
 import CheckoutLayout from '../../Shared/components/CheckoutLayout/CheckoutLayout';
 import { PrimaryButton, BackButton } from '../../Shared/components/CheckoutLayout/CheckoutButton';
@@ -39,21 +40,39 @@ function ReviewRow({ icon: Icon, title, description, changeHref }) {
 }
 
 export default function Payment({ contact, delivery, recipient, paymentMethods, summary }) {
-    const [processing, setProcessing] = useState(false);
     const [showAlert, setShowAlert] = useState(true);
     const [selectedMethodId, setSelectedMethodId] = useState(paymentMethods[0]?.id || null);
+    const [receipt, setReceipt] = useState(null);
 
     const selectedMethod = paymentMethods.find((m) => m.id === selectedMethodId);
     const isCreditCard = selectedMethod?.type === 'credit_card';
+    const isBankTransfer = selectedMethod?.type === 'bank_transfer';
+
+    const { setData, post, processing, errors } = useForm({
+        payment_method_id: selectedMethodId,
+        payment_receipt: null,
+    });
+
+    const selectMethod = (id) => {
+        setSelectedMethodId(id);
+        setData('payment_method_id', id);
+    };
+
+    const onFileChange = (e) => {
+        const file = e.target.files?.[0] ?? null;
+        setReceipt(file);
+        setData('payment_receipt', file);
+    };
+
+    const clearReceipt = () => {
+        setReceipt(null);
+        setData('payment_receipt', null);
+    };
 
     const handlePlaceOrder = () => {
         if (!selectedMethodId) return;
-        setProcessing(true);
-        router.post(
-            '/checkout/pago',
-            { payment_method_id: selectedMethodId },
-            { onFinish: () => setProcessing(false) },
-        );
+        setData('payment_method_id', selectedMethodId);
+        post('/checkout/pago', { forceFormData: true });
     };
 
     const addressLine = [recipient.address, recipient.department].filter(Boolean).join(', ');
@@ -126,7 +145,7 @@ export default function Payment({ contact, delivery, recipient, paymentMethods, 
                                         <button
                                             key={method.id}
                                             type="button"
-                                            onClick={() => setSelectedMethodId(method.id)}
+                                            onClick={() => selectMethod(method.id)}
                                             className={`flex h-14 w-full items-center gap-6 rounded-[10px] border px-5 py-2.5 text-left transition-colors ${
                                                 isSelected
                                                     ? 'border-black'
@@ -159,6 +178,59 @@ export default function Payment({ contact, delivery, recipient, paymentMethods, 
                                     <p className="w-full text-center text-xs text-neutral-500">
                                         Serás redirigido a Mercado Pago al realizar el pedido.
                                     </p>
+                                )}
+
+                                {isBankTransfer && (
+                                    <div className="flex w-full flex-col gap-4 rounded-[10px] border border-neutral-300 p-5">
+                                        {selectedMethod?.description ? (
+                                            <div className="flex flex-col gap-1.5">
+                                                <p className="text-sm font-semibold text-neutral-500">
+                                                    Datos para transferir
+                                                </p>
+                                                <p className="whitespace-pre-line text-xs text-neutral-500">
+                                                    {selectedMethod.description}
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <p className="text-xs text-neutral-500">
+                                                Te enviaremos los datos para transferir por mail.
+                                            </p>
+                                        )}
+
+                                        <div className="flex w-full flex-col gap-2.5">
+                                            <label
+                                                htmlFor="payment_receipt"
+                                                className="text-xs text-neutral-500"
+                                            >
+                                                Subir comprobante (opcional) — PDF, JPG o PNG
+                                            </label>
+                                            <input
+                                                id="payment_receipt"
+                                                type="file"
+                                                accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/*"
+                                                onChange={onFileChange}
+                                                className="block w-full text-xs text-neutral-500 file:mr-4 file:rounded-lg file:border-0 file:bg-oxido-50 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-oxido-300 hover:file:bg-oxido-100"
+                                            />
+                                            {receipt && (
+                                                <div className="flex items-center gap-2 text-xs text-neutral-500">
+                                                    <Paperclip size={14} />
+                                                    <span className="truncate">{receipt.name}</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={clearReceipt}
+                                                        className="text-carmesi-300 hover:underline"
+                                                    >
+                                                        Quitar
+                                                    </button>
+                                                </div>
+                                            )}
+                                            {errors.payment_receipt && (
+                                                <p className="pl-1 text-xs text-carmesi-300">
+                                                    {errors.payment_receipt}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
                                 )}
 
                                 <div className="flex w-full flex-col items-end gap-2">
