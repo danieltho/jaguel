@@ -1,0 +1,61 @@
+# Plantilla procesada por la imagen oficial de nginx (envsubst) al arrancar.
+# Solo se sustituyen las variables de entorno definidas en el contenedor
+# (DOMAIN). Las variables propias de nginx ($uri, $host, etc.) NO se tocan.
+
+# ---------------------------------------------------------------------------
+# HTTP: sirve el challenge ACME y redirige todo lo demás a HTTPS
+# ---------------------------------------------------------------------------
+server {
+    listen 80;
+    server_name ${DOMAIN};
+
+    # Certbot deja aquí los archivos de verificación del dominio.
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# ---------------------------------------------------------------------------
+# HTTPS: la app real
+# ---------------------------------------------------------------------------
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name ${DOMAIN};
+
+    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    include             /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
+
+    index index.php index.html;
+    error_log  /var/log/nginx/error.log;
+    access_log /var/log/nginx/access.log;
+    root /var/www/public;
+
+    client_max_body_size 120M;
+
+    location ~ \.php$ {
+        try_files $uri =404;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass app:9000;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param HTTPS on;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+        gzip_static on;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
