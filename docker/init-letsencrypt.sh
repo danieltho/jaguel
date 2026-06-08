@@ -47,7 +47,7 @@ staging_arg=""
 
 # Para incluir www agregá: -d www.$DOMAIN  (y sumá www al server_name del template)
 $COMPOSE run --rm --entrypoint "\
-  certbot certonly --webroot -w /var/www/certbot \
+  certbot certonly --webroot -w /var/certbot \
     $staging_arg \
     --email $EMAIL \
     -d $DOMAIN \

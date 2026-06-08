@@ -35,16 +35,16 @@ services:
       - app_storage:/var/www/storage:ro                         # ← mismo storage
       - ./docker/nginx/templates:/etc/nginx/templates:ro        # ← envsubst genera conf.d/default.conf
       - certbot_certs:/etc/letsencrypt                          # ← certificados emitidos
-      - certbot_www:/var/www/certbot                            # ← webroot del challenge ACME
+      - certbot_www:/var/certbot                                # ← webroot ACME (fuera del :ro /var/www)
 
   certbot:
     image: certbot/certbot
     restart: unless-stopped
     volumes:
       - certbot_certs:/etc/letsencrypt
-      - certbot_www:/var/www/certbot
+      - certbot_www:/var/certbot
     # Reintenta la renovación cada 12h; certbot solo renueva si faltan <30 días.
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'"
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/certbot --quiet; sleep 12h & wait $${!}; done;'"
 
   db:
     restart: unless-stopped

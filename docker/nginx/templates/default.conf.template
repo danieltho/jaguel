@@ -11,7 +11,7 @@ server {
 
     # Certbot deja aquí los archivos de verificación del dominio.
     location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
+        root /var/certbot;
     }
 
     location / {
