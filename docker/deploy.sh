@@ -23,8 +23,8 @@ if ! grep -qE '^APP_KEY=base64:' .env; then
     php artisan key:generate --force
 fi
 
-php artisan migrate --force --no-interaction
-
+# Resolver config/rutas/vistas ANTES de migrar, así migrate usa siempre config
+# fresca y no un bootstrap/cache/config.php rancio (con, p.ej., DB vieja).
 if [ "${DEPLOY_MODE:-prod}" = "prod" ]; then
     php artisan config:cache
     php artisan route:cache
@@ -36,6 +36,8 @@ else
     php artisan route:clear
     php artisan view:clear
 fi
+
+php artisan migrate --force --no-interaction
 
 # Crear symlink si no existe (idempotente, sin enmascarar errores)
 if [ ! -L public/storage ]; then
