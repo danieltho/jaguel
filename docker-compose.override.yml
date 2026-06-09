@@ -2,6 +2,7 @@ services:
   app:
     environment:
       SKIP_IMAGE_SYNC: "true"
+      DEPLOY_MODE: "local-app"      # migra pero NO cachea config/route/view (dev en vivo)
     volumes:
       - ./:/var/www
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
@@ -9,6 +10,7 @@ services:
   queue:
     environment:
       SKIP_IMAGE_SYNC: "true"
+      DEPLOY_MODE: "skip"           # no corre deploy.sh → evita doble migración
     volumes:
       - ./:/var/www
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini

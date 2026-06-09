@@ -48,8 +48,12 @@ if [ -n "$DB_DATABASE" ]; then
     "
 fi
 
-# Correr deploy como jaguelweb (no como root)
-su jaguelweb -c "sh /var/www/docker/deploy.sh"
+# Correr deploy (migraciones/caches) como jaguelweb, salvo que el servicio lo
+# desactive con DEPLOY_MODE=skip (queue en local: evita doble migración).
+# Se inyecta DEPLOY_MODE dentro del su -c para que deploy.sh lo reciba seguro.
+if [ "${DEPLOY_MODE:-prod}" != "skip" ]; then
+  su jaguelweb -c "DEPLOY_MODE='${DEPLOY_MODE:-prod}' sh /var/www/docker/deploy.sh"
+fi
 
 # Arrancar php-fpm como root (php-fpm hace su propio drop a www-data según su config)
 exec "$@"

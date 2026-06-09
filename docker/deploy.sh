@@ -24,9 +24,18 @@ if ! grep -qE '^APP_KEY=base64:' .env; then
 fi
 
 php artisan migrate --force --no-interaction
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+
+if [ "${DEPLOY_MODE:-prod}" = "prod" ]; then
+    php artisan config:cache
+    php artisan route:cache
+    php artisan view:cache
+else
+    # Local: sin cache para que .env/rutas/vistas se relean en vivo.
+    # Limpiamos por si quedó cache de una corrida previa.
+    php artisan config:clear
+    php artisan route:clear
+    php artisan view:clear
+fi
 
 # Crear symlink si no existe (idempotente, sin enmascarar errores)
 if [ ! -L public/storage ]; then
