@@ -1,17 +1,22 @@
 #!/usr/bin/env sh
 set -e
 
-# Sincronizar código de la imagen al volumen montado (refresca el código en prod,
-# donde /var/www es un named volume). En local /var/www es un bind mount del repo
-# del host: el override pone SKIP_IMAGE_SYNC=true para NO correr rsync --delete y
-# así no borrar .git, node_modules, etc. (preserva storage, .env, cache)
+# Sincronizar código de la imagen al volumen montado.
 if [ "${SKIP_IMAGE_SYNC:-false}" != "true" ]; then
+  # PROD: /var/www es un named volume (app_code); refrescar TODO el código
+  # desde la imagen en cada deploy (preserva storage, .env, cache).
   rsync -a --delete \
     --exclude='/.git' \
     --exclude='/storage' \
     --exclude='/bootstrap/cache' \
     --exclude='/.env' \
     /opt/app-image/ /var/www/
+else
+  # LOCAL: el código viene del bind mount del host (./:/var/www) y se edita en
+  # vivo. El host no corre composer install, así que traemos SOLO vendor desde
+  # la imagen (ya construido en el build). Sin --delete y acotado a /vendor:
+  # nunca toca .git, node_modules ni el código fuente del host.
+  rsync -a /opt/app-image/vendor/ /var/www/vendor/
 fi
 
 cd /var/www
