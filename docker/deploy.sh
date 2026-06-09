@@ -16,7 +16,13 @@ mkdir -p \
     storage/logs \
     bootstrap/cache
 
-php artisan key:generate --force
+# Generar APP_KEY SOLO si no existe. NUNCA rotarla en cada deploy:
+# rotaría la clave de cifrado e invalidaría todo lo encriptado (settings SMTP,
+# tokens) y las sesiones. La clave debe ser estable en producción.
+if ! grep -qE '^APP_KEY=base64:' .env; then
+    php artisan key:generate --force
+fi
+
 php artisan migrate --force --no-interaction
 php artisan config:cache
 php artisan route:cache
