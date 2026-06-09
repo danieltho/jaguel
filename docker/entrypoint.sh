@@ -1,12 +1,18 @@
 #!/usr/bin/env sh
 set -e
 
-# Sincronizar código de la imagen al volumen montado (preserva storage, .env, cache)
-rsync -a --delete \
-  --exclude='/storage' \
-  --exclude='/bootstrap/cache' \
-  --exclude='/.env' \
-  /opt/app-image/ /var/www/
+# Sincronizar código de la imagen al volumen montado (refresca el código en prod,
+# donde /var/www es un named volume). En local /var/www es un bind mount del repo
+# del host: el override pone SKIP_IMAGE_SYNC=true para NO correr rsync --delete y
+# así no borrar .git, node_modules, etc. (preserva storage, .env, cache)
+if [ "${SKIP_IMAGE_SYNC:-false}" != "true" ]; then
+  rsync -a --delete \
+    --exclude='/.git' \
+    --exclude='/storage' \
+    --exclude='/bootstrap/cache' \
+    --exclude='/.env' \
+    /opt/app-image/ /var/www/
+fi
 
 cd /var/www
 
