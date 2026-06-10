@@ -89,12 +89,12 @@ export default function Contact({ customer, contact, summary }) {
     return (
         <CheckoutLayout currentStep={1}>
             <Head title="Datos de Contacto" />
-            <div className="mx-auto w-full max-w-[1320px] px-15 py-[30px]">
+            <div className="mx-auto w-full max-w-[1320px] px-4 py-[30px] sm:px-8 lg:px-15">
                 <form onSubmit={handleSubmit} className="flex flex-col gap-2.5">
                     <BackButton href="/carrito" />
 
-                    <div className="flex items-start justify-between gap-6">
-                        <div className="flex w-[872px] flex-col items-end gap-4">
+                    <div className="flex flex-col items-start justify-between gap-6 lg:flex-row">
+                        <div className="flex w-full flex-col items-end gap-4 lg:w-[872px]">
                             <div className="flex w-full flex-col gap-2.5">
                                 <SectionHeading>Datos de Contacto</SectionHeading>
 
@@ -183,12 +183,12 @@ export default function Contact({ customer, contact, summary }) {
                                 )}
                             </div>
 
-                            <PrimaryButton type="submit" disabled={processing} className="w-[280px]">
+                            <PrimaryButton type="submit" disabled={processing} className="w-full sm:w-[280px]">
                                 {verificationRequired ? 'Verificar y continuar' : 'Continuar'}
                             </PrimaryButton>
                         </div>
 
-                        <aside className="w-[424px] shrink-0 px-2.5 py-4">
+                        <aside className="w-full shrink-0 py-4 lg:w-[424px] lg:px-2.5">
                             <OrderSummary {...summary} />
                         </aside>
                     </div>

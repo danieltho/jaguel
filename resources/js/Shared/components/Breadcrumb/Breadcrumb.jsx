@@ -8,8 +8,8 @@ export default function Breadcrumb({ items }) {
                         key={index}
                         className={`flex items-center gap-2 ${isLast ? 'min-w-0' : 'shrink-0'}`}
                     >
-                        {index > 0 && !isLast && (
-                            <span className="text-xs font-normal text-neutral-400">/</span>
+                        {index > 0 && (
+                            <span className="shrink-0 text-xs font-normal text-neutral-400">/</span>
                         )}
                         {item.href && !isLast ? (
                             <a

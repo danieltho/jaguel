@@ -19,7 +19,7 @@ import { formatPrice } from '../../Shared/utils/formatPrice';
 
 function InfoItem({ icon, title, description }) {
     return (
-        <div className="flex gap-4 items-center px-2.5 py-2 rounded-2xl flex-1 min-w-0">
+        <div className="flex gap-4 items-center px-2.5 py-2 rounded-2xl w-full sm:w-auto sm:flex-1 min-w-0">
             <div className="shrink-0 text-neutral-500">{icon}</div>
             <div className="flex flex-col gap-[5px] text-neutral-500 leading-normal min-w-0 wrap-break-word">
                 <p className="text-sm font-semibold">{title}</p>
@@ -31,23 +31,23 @@ function InfoItem({ icon, title, description }) {
 
 function QuantityStepper({ quantity, onChange }) {
     return (
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-3 items-center sm:gap-4">
             <button
                 type="button"
                 onClick={() => onChange(Math.max(1, quantity - 1))}
                 aria-label="Restar"
-                className="size-[41px] bg-moss-300 rounded-md flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
+                className="size-[41px] shrink-0 bg-moss-300 rounded-md flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
             >
                 <Minus size={20} weight="bold" className="text-oxido-50" />
             </button>
-            <div className="w-[112px] h-[41px] bg-oxido-50 rounded-md flex items-center justify-center">
+            <div className="h-[41px] w-16 sm:w-[112px] bg-oxido-50 rounded-md flex items-center justify-center">
                 <span className="text-xs font-medium text-neutral-500">{quantity}</span>
             </div>
             <button
                 type="button"
                 onClick={() => onChange(quantity + 1)}
                 aria-label="Sumar"
-                className="size-[41px] bg-moss-300 rounded-md flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
+                className="size-[41px] shrink-0 bg-moss-300 rounded-md flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
             >
                 <Plus size={20} weight="bold" className="text-oxido-50" />
             </button>
@@ -442,7 +442,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                 </div>
 
                 {/* Info Bar */}
-                <div className="flex flex-wrap items-center justify-center gap-6 px-4 py-[30px] sm:px-8 sm:gap-10 lg:gap-[60px] lg:px-[60px]">
+                <div className="flex flex-col sm:flex-row sm:flex-wrap items-center justify-center gap-6 px-4 py-[30px] sm:px-8 sm:gap-10 lg:gap-[60px] lg:px-[60px]">
                     <InfoItem
                         icon={<MapPin size={24} />}
                         title="Retiro en punto o envío a domicilio"

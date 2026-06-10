@@ -8,7 +8,7 @@ export default function Footer() {
 
     return (
         <footer className="bg-moss-200 text-white">
-            <div className="mx-auto flex-col items-center gap-4 px-15 py-12">
+            <div className="mx-auto flex flex-col items-center gap-8 px-6 py-12 sm:px-15">
                 <div className="flex w-full flex-col items-start justify-between gap-10 md:flex-row md:gap-6">
                     <div className="flex flex-col gap-6 self-stretch md:justify-between">
                         <Logo variant="white" />
@@ -68,7 +68,7 @@ export default function Footer() {
                         )}
                     </div>
                 </div>
-                <p className="w-full text-center text-xs">
+                <p className="w-full border-t border-white/20 pt-6 text-center text-xs text-neutral-50">
                     &copy; 2026 El Jaguel. All rights reserved
                 </p>
             </div>

@@ -4,6 +4,7 @@ import Template from '../../Shared/components/layout';
 import ProductCard from '../../Shared/components/ProductCard/ProductCard';
 import Breadcrumb from '../../Shared/components/Breadcrumb/Breadcrumb';
 import TagButton from '../../Shared/components/TagButton/TagButton';
+import CategorySelect from '../../Shared/components/CategorySelect/CategorySelect';
 import SortDropdown from '../../Shared/components/SortDropdown/SortDropdown';
 import { useInfinity } from '../../Shared/hook/useInfinity';
 
@@ -62,6 +63,22 @@ export default function ProductsIndex() {
         }))
         : [];
 
+    // Opciones para el selector desplegable en mobile.
+    const groupSelectOptions = [
+        { label: 'Todos los Productos', href: '/productos', isActive: !activeGroup },
+        ...groupTabs.map((tab) => ({ label: tab.label, href: tab.href, isActive: false })),
+    ];
+    const subcategorySelectOptions = activeGroup
+        ? [
+            { label: 'Todos', href: `/productos/${activeGroup.slug}`, isActive: !activeCategory },
+            ...subcategories.map((cat) => ({
+                label: cat.name,
+                href: `/productos/${activeGroup.slug}/${cat.slug}`,
+                isActive: activeCategory === cat.slug,
+            })),
+        ]
+        : [];
+
     const handleSortChange = (newSort) => {
         let url = '/productos';
         if (activeGroup) {
@@ -76,7 +93,7 @@ export default function ProductsIndex() {
 
     return (
         <Template>
-            <div className="mx-auto flex max-w-360 flex-col gap-6 px-15">
+            <div className="mx-auto flex max-w-360 flex-col gap-6 px-4 sm:px-8 lg:px-15">
                 {/* Breadcrumb */}
                 <section className="py-6">
                     <Breadcrumb items={breadcrumbItems} />
@@ -89,33 +106,47 @@ export default function ProductsIndex() {
                     </h1>
 
                     {groupTabs.length > 0 && (
-                        <div className="flex items-center justify-center gap-2.5">
-                            {groupTabs.map((tab) => (
-                                <TagButton
-                                    key={tab.slug}
-                                    label={tab.label}
-                                    href={tab.href}
-                                />
-                            ))}
-                        </div>
+                        <>
+                            {/* Mobile: selector desplegable */}
+                            <div className="w-full max-w-xs sm:hidden">
+                                <CategorySelect options={groupSelectOptions} />
+                            </div>
+                            {/* Desktop: tags */}
+                            <div className="hidden flex-wrap items-center justify-center gap-2.5 sm:flex">
+                                {groupTabs.map((tab) => (
+                                    <TagButton
+                                        key={tab.slug}
+                                        label={tab.label}
+                                        href={tab.href}
+                                    />
+                                ))}
+                            </div>
+                        </>
                     )}
 
                     {subcategories.length > 0 && (
-                        <div className="flex items-center justify-center gap-2.5">
-                            <TagButton
-                                label="Todos"
-                                href={`/productos/${activeGroup.slug}`}
-                                isActive={!activeCategory}
-                            />
-                            {subcategories.map((cat) => (
+                        <>
+                            {/* Mobile: selector desplegable */}
+                            <div className="w-full max-w-xs sm:hidden">
+                                <CategorySelect options={subcategorySelectOptions} />
+                            </div>
+                            {/* Desktop: tags */}
+                            <div className="hidden flex-wrap items-center justify-center gap-2.5 sm:flex">
                                 <TagButton
-                                    key={cat.id}
-                                    label={cat.name}
-                                    href={`/productos/${activeGroup.slug}/${cat.slug}`}
-                                    isActive={activeCategory === cat.slug}
+                                    label="Todos"
+                                    href={`/productos/${activeGroup.slug}`}
+                                    isActive={!activeCategory}
                                 />
-                            ))}
-                        </div>
+                                {subcategories.map((cat) => (
+                                    <TagButton
+                                        key={cat.id}
+                                        label={cat.name}
+                                        href={`/productos/${activeGroup.slug}/${cat.slug}`}
+                                        isActive={activeCategory === cat.slug}
+                                    />
+                                ))}
+                            </div>
+                        </>
                     )}
                 </section>
 

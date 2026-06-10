@@ -11,7 +11,7 @@ import CategoryBanner from '../Shared/components/CategoryBanner/CategoryBanner';
 
 function InfoItem({ icon, title, description }) {
     return (
-        <div className="flex gap-4 items-center px-2.5 py-2 rounded-2xl flex-1 min-w-0">
+        <div className="flex gap-4 items-center px-2.5 py-2 rounded-2xl w-full sm:w-auto sm:flex-1 min-w-0">
             <div className="shrink-0 text-neutral-500">{icon}</div>
             <div className="flex flex-col gap-[5px] text-neutral-500 leading-normal">
                 <p className="text-sm font-semibold">{title}</p>
@@ -28,7 +28,7 @@ export default function Home() {
         <Template isHomePage={true}>
             
                 {/* Hero Section */}
-                <section className="relative -mt-25 flex h-152 w-full flex-col justify-center gap-6 overflow-hidden px-15 pt-25">
+                <section className="relative -mt-25 flex h-152 w-full flex-col justify-center gap-6 overflow-hidden px-6 pt-25 sm:px-15">
                     <img
                         src="/images/hero-home.jpg"
                         alt=""
@@ -39,8 +39,8 @@ export default function Home() {
                         aria-hidden="true"
                         className="pointer-events-none absolute inset-0 bg-linear-to-b from-black/10 from-38% to-black/60"
                     />
-                    <div className="relative flex w-md flex-col gap-2.5">
-                        <h1 className="text-[32px] font-bold text-white">
+                    <div className="relative flex w-full max-w-md flex-col gap-2.5">
+                        <h1 className="text-2xl font-bold text-white sm:text-[32px]">
                             Tienda de Mates y Cuchillería Artesanal
                         </h1>
                         <p className="text-lg font-semibold text-neutral-50">
@@ -57,7 +57,7 @@ export default function Home() {
 
                 {/* Categories */}
                 <section className="">
-                    <div className="mx-auto flex items-center">
+                    <div className="mx-auto flex flex-col sm:flex-row items-stretch">
                         {categoryGroups?.map((group) => (
                             <CategoryBanner key={group.id} group={group} />
                         ))}
@@ -118,7 +118,7 @@ export default function Home() {
                 </section>
 
                 {/* Formas de envío y pago */}
-                <section className="flex flex-wrap items-center justify-center gap-6 px-4 py-[30px] sm:px-8 sm:gap-10 lg:gap-[60px] lg:px-[60px]">
+                <section className="flex flex-col sm:flex-row sm:flex-wrap items-center justify-center gap-6 px-4 py-[30px] sm:px-8 sm:gap-10 lg:gap-[60px] lg:px-[60px]">
                     <InfoItem
                         icon={<MapPin size={24} />}
                         title="Retiro en punto o envío a domicilio"

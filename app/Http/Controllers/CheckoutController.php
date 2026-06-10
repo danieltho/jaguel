@@ -492,7 +492,7 @@ class CheckoutController extends Controller
 
         $email = $contact['email'];
 
-        return Customer::firstOrCreate(
+        $customer = Customer::firstOrCreate(
             ['email' => $email],
             [
                 'firstname' => $recipient['firstname'],
@@ -504,6 +504,12 @@ class CheckoutController extends Controller
                 'state' => $recipient['state'],
             ]
         );
+
+        // El invitado pudo verificar su email antes de que existiera su Customer,
+        // así que sincronizamos la marca de verificación recién ahora.
+        $this->emailVerificationService->syncCustomerVerification($customer);
+
+        return $customer;
     }
 
     private function clearCheckoutSession(): void

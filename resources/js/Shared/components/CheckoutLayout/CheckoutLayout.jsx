@@ -17,8 +17,8 @@ const STEPS = [
 
 function StepIndicator({ currentStep }) {
     return (
-        <div className="opacity-60 px-15 py-[30px]">
-            <div className="mx-auto flex w-full max-w-[696px] items-center px-6">
+        <div className="opacity-60 px-4 py-[30px] sm:px-8 lg:px-15">
+            <div className="mx-auto flex w-full max-w-[696px] items-center sm:px-6">
                 {STEPS.map((step, i) => {
                     const isActive = i + 1 === currentStep;
                     const isCompleted = i + 1 < currentStep;
@@ -62,12 +62,12 @@ function InfoBar() {
     ];
 
     return (
-        <div className="px-15 py-15">
-            <div className="mx-auto flex max-w-[1320px] flex-wrap items-center justify-center gap-x-[50px] gap-y-6">
+        <div className="px-4 py-10 sm:px-8 lg:px-15 lg:py-15">
+            <div className="mx-auto grid max-w-[1320px] grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-x-[50px] lg:flex lg:flex-wrap lg:items-center lg:justify-center">
                 {items.map((item) => {
                     const Icon = item.icon;
                     return (
-                        <div key={item.title} className="flex min-w-0 flex-1 items-center gap-4">
+                        <div key={item.title} className="flex min-w-0 items-center gap-4 lg:flex-1">
                             <Icon size={24} className="shrink-0 text-neutral-500" />
                             <div className="flex min-w-0 flex-col gap-[5px] text-neutral-500">
                                 <p className="text-sm font-bold">{item.title}</p>
@@ -83,9 +83,9 @@ function InfoBar() {
 
 function CheckoutFooter() {
     return (
-        <footer className="px-15 py-5">
-            <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-4 text-moss-300">
-                <p className="w-32 text-xs">© 2026 El Jaguel. All rights reserved</p>
+        <footer className="px-4 py-5 sm:px-8 lg:px-15">
+            <div className="mx-auto flex max-w-[1320px] flex-col items-center justify-between gap-4 text-moss-300 sm:flex-row">
+                <p className="text-center text-xs sm:w-32 sm:text-left">© 2026 El Jaguel. All rights reserved</p>
                 <p className="text-center text-xs whitespace-nowrap">
                     A product of{' '}
                     <span className="text-sm font-semibold">Ophelia Studio</span>
@@ -114,7 +114,7 @@ function CheckoutFooter() {
 export default function CheckoutLayout({ children, currentStep = 1, showInfoBar = true }) {
     return (
         <div className="flex min-h-screen flex-col bg-neutral-50">
-            <header className="flex justify-center px-15 py-[30px]">
+            <header className="flex justify-center px-4 py-[30px] sm:px-8 lg:px-15">
                 <Link href="/" aria-label="El Jaguel">
                     <img src="/images/logo.svg" className="h-[54px] w-auto object-contain" alt="El Jaguel" />
                 </Link>
