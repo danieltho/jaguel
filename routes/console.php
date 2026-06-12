@@ -12,3 +12,8 @@ Schedule::command('mp:reconcile')
     ->everyFifteenMinutes()
     ->withoutOverlapping()
     ->runInBackground();
+
+Schedule::command('orders:payment-reminders')
+    ->hourly()
+    ->withoutOverlapping()
+    ->runInBackground();
