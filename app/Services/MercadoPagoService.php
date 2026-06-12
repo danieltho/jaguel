@@ -114,14 +114,18 @@ class MercadoPagoService
             'back_urls' => $backUrls,
         ];
 
+        // auto_return y notification_url solo dependen de que las URLs sean
+        // HTTPS públicas (lo que MP exige). No las atamos al entorno de Laravel:
+        // así funcionan en cualquier server con dominio HTTPS, incluso si quedó
+        // APP_ENV=local. En localhost (http) no se envían y MP no las rechaza.
         $hasPublicBackUrls = str_starts_with($backUrls['success'], 'https://');
 
-        if ($hasPublicBackUrls && ! app()->environment('local')) {
+        if ($hasPublicBackUrls) {
             $preferenceData['auto_return'] = 'all';
         }
 
         $webhookUrl = $this->buildWebhookUrl();
-        if (str_starts_with($webhookUrl, 'https://') && ! app()->environment('local')) {
+        if (str_starts_with($webhookUrl, 'https://')) {
             $preferenceData['notification_url'] = $webhookUrl;
         }
 
