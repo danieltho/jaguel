@@ -38,6 +38,36 @@ class EmailVerificationService
             ->exists();
     }
 
+    /**
+     * Indica si el email tiene un código ya verificado.
+     * A diferencia de isEmailVerified(), no depende de que el Customer exista:
+     * mira la tabla email_verifications, útil para invitados que verifican
+     * antes de que su Customer sea creado al finalizar la compra.
+     */
+    public function wasCodeVerified(string $email): bool
+    {
+        return EmailVerification::query()
+            ->where('email', $this->normalize($email))
+            ->whereNotNull('verified_at')
+            ->exists();
+    }
+
+    /**
+     * Marca el Customer como verificado si su email pasó la verificación.
+     * Reutilizable tras crear un Customer nuevo (invitado) para que la marca
+     * no se pierda. email_verified_at no es fillable, se setea con forceFill.
+     */
+    public function syncCustomerVerification(Customer $customer): void
+    {
+        if ($customer->email_verified_at !== null) {
+            return;
+        }
+
+        if ($this->wasCodeVerified($customer->email)) {
+            $customer->forceFill(['email_verified_at' => now()])->save();
+        }
+    }
+
     public function sendCode(string $email, ?Request $request = null): EmailVerification
     {
         $email = $this->normalize($email);
