@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Services\CouponService;
+use App\Support\MediaUrl;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -23,7 +24,7 @@ class SearchController extends Controller
                     $q->where('name', 'LIKE', "%{$query}%")
                         ->orWhere('description', 'LIKE', "%{$query}%");
                 })
-                ->with(['category.categoryGroup', 'categoryGroup'])
+                ->with(['category.categoryGroup', 'categoryGroup', 'media'])
                 ->paginate(12)
                 ->through(fn ($product) => $this->formatProduct($product));
         }
@@ -54,7 +55,7 @@ class SearchController extends Controller
             'slug' => $product->slug,
             'price' => $priceSold,
             'discount' => $discountData,
-            'image' => $product->getFirstMediaUrl('default'),
+            'image' => MediaUrl::firstFor($product, 'default', 'thumb', 'webp'),
             'category' => $product->category?->name ?? $product->categoryGroup?->name,
             'group_slug' => $product->category?->categoryGroup?->slug ?? $product->categoryGroup?->slug,
         ];

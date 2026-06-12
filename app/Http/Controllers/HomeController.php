@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CategoryGroup;
 use App\Models\Product;
 use App\Services\CouponService;
+use App\Support\MediaUrl;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,12 +15,12 @@ class HomeController extends Controller
 
     public function __invoke(): Response
     {
-        $categoryGroups = CategoryGroup::with('categories')->get()->map(function ($group) {
+        $categoryGroups = CategoryGroup::with(['categories', 'media'])->get()->map(function ($group) {
             return [
                 'id' => $group->id,
                 'name' => $group->name,
                 'slug' => $group->slug,
-                'image' => $group->getFirstMediaUrl('default'),
+                'image' => MediaUrl::firstFor($group, 'default', 'thumb-xl'),
                 'categories' => $group->categories->map(fn ($cat) => [
                     'id' => $cat->id,
                     'name' => $cat->name,
@@ -29,7 +30,7 @@ class HomeController extends Controller
         });
 
         $featuredProducts = Product::where('is_active', true)
-            ->with(['category.categoryGroup', 'categoryGroup'])
+            ->with(['category.categoryGroup', 'categoryGroup', 'media'])
             ->latest()
             ->limit(4)
             ->get()
@@ -72,7 +73,7 @@ class HomeController extends Controller
             'slug' => $product->slug,
             'price' => $priceSold,
             'discount' => $discountData,
-            'image' => $product->getFirstMediaUrl('default'),
+            'image' => MediaUrl::firstFor($product, 'default', 'thumb', 'webp'),
             'category' => $product->category?->name ?? $product->categoryGroup?->name,
             'group_slug' => $product->category?->categoryGroup?->slug ?? $product->categoryGroup?->slug,
         ];

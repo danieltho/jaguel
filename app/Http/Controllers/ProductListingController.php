@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CategoryGroup;
 use App\Models\Product;
 use App\Services\CouponService;
+use App\Support\MediaUrl;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,7 +19,7 @@ class ProductListingController extends Controller
         $sort = $request->query('sort', 'newest');
 
         $query = Product::where('is_active', true)
-            ->with(['category.categoryGroup', 'categoryGroup']);
+            ->with(['category.categoryGroup', 'categoryGroup', 'media']);
 
         $query = $this->applySorting($query, $sort);
 
@@ -56,7 +57,7 @@ class ProductListingController extends Controller
 
         $query = Product::where('is_active', true)
             ->where('category_group_id', $group->id)
-            ->with(['category.categoryGroup', 'categoryGroup']);
+            ->with(['category.categoryGroup', 'categoryGroup', 'media']);
 
         if ($categorySlug) {
             abort_unless(
@@ -130,7 +131,7 @@ class ProductListingController extends Controller
             'slug' => $product->slug,
             'price' => $priceSold,
             'discount' => $discountData,
-            'image' => $product->getFirstMediaUrl('default'),
+            'image' => MediaUrl::firstFor($product, 'default', 'thumb', 'webp'),
             'category' => $product->category?->name ?? $product->categoryGroup?->name,
             'group_slug' => $product->category?->categoryGroup?->slug ?? $product->categoryGroup?->slug,
         ];

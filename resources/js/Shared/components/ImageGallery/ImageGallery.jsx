@@ -28,7 +28,7 @@ export default function ImageGallery({
     return (
         <>
             <div
-                className={`relative w-full aspect-[3/4] bg-oxido-50 rounded-br-[20px] overflow-hidden ${className}`.trim()}
+                className={`relative w-full aspect-[3/4] bg-transparent rounded-br-[20px] overflow-hidden ${className}`.trim()}
             >
                 <button
                     type="button"
@@ -36,9 +36,12 @@ export default function ImageGallery({
                     aria-label="Ampliar imagen"
                     className="absolute inset-0 w-full h-full cursor-zoom-in"
                 >
+                    {/* Imagen principal: es el LCP de la página, no debe ser lazy */}
                     <img
                         src={current?.url || '/images/img_default.jpg'}
                         alt={alt}
+                        fetchPriority="high"
+                        decoding="async"
                         className="absolute inset-0 w-full h-full object-contain"
                     />
                 </button>
@@ -88,6 +91,7 @@ export default function ImageGallery({
                             <img
                                 src={current?.url || '/images/img_default.jpg'}
                                 alt={alt}
+                                decoding="async"
                                 className="absolute inset-0 w-full h-full object-contain"
                             />
 
@@ -101,7 +105,7 @@ export default function ImageGallery({
                                                 type="button"
                                                 onClick={() => setIndex(idx)}
                                                 aria-label={`Ver imagen ${idx + 1}`}
-                                                className={`w-[88px] h-[106px] rounded-[10px] overflow-hidden bg-oxido-50 cursor-pointer transition-all ${
+                                                className={`w-[88px] h-[106px] rounded-[10px] overflow-hidden bg-transparent cursor-pointer transition-all ${
                                                     isActive
                                                         ? 'ring-2 ring-moss-300'
                                                         : 'hover:opacity-80'
@@ -110,7 +114,9 @@ export default function ImageGallery({
                                                 <img
                                                     src={img.thumb || img.url}
                                                     alt=""
-                                                    className="w-full h-full object-cover"
+                                                    loading="lazy"
+                                                    decoding="async"
+                                                    className="w-full h-full object-contain"
                                                 />
                                             </button>
                                         );

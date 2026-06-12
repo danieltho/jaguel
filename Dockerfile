@@ -26,6 +26,11 @@ RUN apt-get update && apt-get install -y \
     libicu-dev \
     zip \
     unzip \
+    jpegoptim \
+    optipng \
+    pngquant \
+    gifsicle \
+    webp \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions

@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Casts\ScaledPrice;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -61,9 +61,15 @@ class ProductVariant extends Model implements HasMedia
 
     public function registerMediaConversions(?Media $media = null): void
     {
+        $this->addMediaConversion('webp')
+            ->fit(Fit::Max, 1600, 1600)
+            ->format('webp')
+            ->quality(82);
+
         $this->addMediaConversion('thumb')
-            ->width(368)
-            ->height(232)
+            ->fit(Fit::Max, 600, 600)
+            ->format('webp')
+            ->quality(78)
             ->sharpen(10);
     }
 }

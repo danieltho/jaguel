@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -107,11 +108,14 @@ class Product extends Model implements HasMedia
     public function registerMediaConversions(?Media $media = null): void
     {
         $this->addMediaConversion('webp')
-            ->format('webp');
+            ->fit(Fit::Max, 1600, 1600)
+            ->format('webp')
+            ->quality(82);
 
         $this->addMediaConversion('thumb')
-            ->width(368)
-            ->height(232)
+            ->fit(Fit::Max, 600, 600)
+            ->format('webp')
+            ->quality(78)
             ->sharpen(10);
     }
 }

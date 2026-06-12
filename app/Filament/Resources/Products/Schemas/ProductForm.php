@@ -146,14 +146,14 @@ class ProductForm
 
                 SpatieMediaLibraryFileUpload::make('files')
                     ->label('Imágenes')
-                    ->helperText('Máximo 20 MB por imagen. Hasta 10 imágenes.')
+                    ->helperText('Máximo 8 MB por imagen. Hasta 10 imágenes.')
                     ->collection('default')
                     ->disk('public')
                     ->panelLayout('grid')
                     ->image()
                     ->multiple()
                     ->maxFiles(10)
-                    ->maxSize(20480)
+                    ->maxSize(8192)
                     ->reorderable()
                     ->preserveFilenames()
                     ->downloadable()
@@ -406,7 +406,7 @@ class ProductForm
                                     ->collection('variant')
                                     ->disk('public')
                                     ->image()
-                                    ->maxSize(20480),
+                                    ->maxSize(8192),
                             ]),
                             Hidden::make('price_sales')
                                 ->default(0)

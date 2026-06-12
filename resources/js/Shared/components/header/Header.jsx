@@ -15,7 +15,7 @@ const Header = () => {
             <MenuOverlay />
             <SideBar />
             <header className="relative z-10 w-full px-4 pt-4 sm:px-8 sm:pt-5 lg:px-15">
-                <div className="mx-auto flex h-16 max-w-360 items-center justify-between rounded-2xl bg-oxido-50 px-5 shadow-[0px_4px_10px_0px_rgba(0,0,0,0.25)] sm:h-20 sm:px-10 lg:px-15">
+                <div className="mx-auto flex h-16 items-center justify-between rounded-2xl bg-oxido-50 px-5 shadow-[0px_4px_10px_0px_rgba(0,0,0,0.25)] sm:h-20 sm:px-10 lg:px-15">
                     <NavBarLink>
                         <button
                             type="button"

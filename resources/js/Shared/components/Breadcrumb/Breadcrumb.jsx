@@ -19,7 +19,7 @@ export default function Breadcrumb({ items }) {
                                 {item.label}
                             </a>
                         ) : (
-                            <span className="truncate text-sm font-semibold text-neutral-500">
+                            <span className="truncate text-xs font-semibold text-neutral-500">
                                 {item.label}
                             </span>
                         )}
