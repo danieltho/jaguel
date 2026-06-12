@@ -10,6 +10,7 @@ use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use MercadoPago\MercadoPagoConfig;
 
@@ -25,6 +26,31 @@ class AppServiceProvider extends ServiceProvider
         $this->configureMercadoPago();
         $this->configureMail();
         $this->registerMailLogging();
+        $this->shareEmailFooterContact();
+    }
+
+    private function shareEmailFooterContact(): void
+    {
+        View::composer('emails.partials.footer', function ($view) {
+            $contact = [];
+
+            try {
+                $contact = $this->app->make(SettingsService::class)->group('contact');
+            } catch (\Throwable $e) {
+                // No bloquear el render si la tabla de settings no existe (instalación inicial).
+            }
+
+            $phone = $contact['whatsapp'] ?? '+54 9 223 312-3981';
+            $email = $contact['email'] ?? 'eljaguelcriollo@gmail.com';
+
+            $digits = preg_replace('/\D+/', '', (string) ($contact['whatsapp'] ?? ''));
+
+            $view->with([
+                'contactPhone' => $phone,
+                'contactEmail' => $email,
+                'whatsappUrl' => $digits !== '' ? 'https://wa.me/'.$digits : '#',
+            ]);
+        });
     }
 
     private function registerMailLogging(): void

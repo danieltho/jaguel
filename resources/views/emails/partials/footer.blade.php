@@ -41,8 +41,8 @@
                             Miramar, Buenos Aires
                         </div>
                         <div>
-                            +54 9 223 312-3981<br>
-                            eljaguelcriollo@gmail.com
+                            {{ $contactPhone ?? '+54 9 223 312-3981' }}<br>
+                            {{ $contactEmail ?? 'eljaguelcriollo@gmail.com' }}
                         </div>
                     </td>
                 </tr>

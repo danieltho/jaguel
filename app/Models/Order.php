@@ -74,6 +74,8 @@ class Order extends Model implements HasMedia
         'discount_amount' => 'integer',
         'status' => OrderStatusEnum::class,
         'payment_status' => PaymentStatusEnum::class,
+        'payment_reminder_1_sent_at' => 'datetime',
+        'payment_reminder_2_sent_at' => 'datetime',
         'wants_factura_a' => 'boolean',
     ];
 
