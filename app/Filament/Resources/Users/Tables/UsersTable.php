@@ -6,6 +6,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ExportBulkAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -21,6 +22,9 @@ class UsersTable
                 TextColumn::make('email')
                     ->label('Correo electrónico')
                     ->searchable(),
+                IconColumn::make('notify_orders')
+                    ->label('Notif. compras')
+                    ->boolean(),
                 TextColumn::make('email_verified_at')
                     ->label('Email verificado')
                     ->dateTime()

@@ -23,6 +23,7 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
+        'notify_orders',
     ];
 
     /**
@@ -45,12 +46,21 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'notify_orders' => 'boolean',
         ];
     }
 
     public function couponUsages(): HasMany
     {
         return $this->hasMany(CouponUsage::class);
+    }
+
+    /**
+     * Usuarios del panel que reciben las notificaciones de nuevas compras.
+     */
+    public function scopeNotifiableForOrders($query)
+    {
+        return $query->where('notify_orders', true);
     }
 
     public function canAccessPanel(Panel $panel): bool

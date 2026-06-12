@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Enums\OrderMailStepEnum;
 use App\Enums\PaymentMethodTypeEnum;
 use App\Enums\PaymentStatusEnum;
+use App\Mail\NewOrderAdminMail;
 use App\Mail\OrderStatusMail;
 use App\Models\Coupon;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\PaymentMethod;
 use App\Models\ShippingMethod;
+use App\Models\User;
 use App\Services\CartService;
 use App\Services\CouponService;
 use App\Services\EmailVerificationService;
@@ -377,6 +379,12 @@ class CheckoutController extends Controller
             if ($couponModel) {
                 app(CouponService::class)->applyCoupon($couponModel, $order, $customer);
             }
+        }
+
+        // Aviso de nueva compra a los usuarios del panel suscritos.
+        $adminRecipients = User::notifiableForOrders()->pluck('email')->filter();
+        if ($adminRecipients->isNotEmpty()) {
+            Mail::to($adminRecipients->all())->queue(new NewOrderAdminMail($order->load('items.productVariant')));
         }
 
         // For credit card: keep cart alive until MP confirms — store order ID in session
