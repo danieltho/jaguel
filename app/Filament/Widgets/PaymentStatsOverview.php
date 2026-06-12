@@ -54,8 +54,8 @@ class PaymentStatsOverview extends BaseWidget
         ];
     }
 
-    private function formatMoney(int $cents): string
+    private function formatMoney(int $amount): string
     {
-        return '$ '.number_format($cents / 100, 2, ',', '.');
+        return '$ '.number_format($amount, 2, ',', '.');
     }
 }
