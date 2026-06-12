@@ -6,6 +6,7 @@ use App\Enums\CouponScopeEnum;
 use App\Models\Coupon;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Support\MediaUrl;
 
 class CartService
 {
@@ -48,8 +49,8 @@ class CartService
                 'variant_id' => $variant?->id,
                 'name' => $product->name,
                 'slug' => $product->slug,
-                'image' => $variant?->getFirstMediaUrl('variant')
-                    ?: $product->getFirstMediaUrl('default'),
+                'image' => MediaUrl::firstFor($variant, 'variant', 'thumb', 'webp')
+                    ?: MediaUrl::firstFor($product, 'default', 'thumb', 'webp'),
                 'color' => $variant?->color?->name,
                 'size' => $variant?->size?->name,
                 'unit_price' => $unitPrice,

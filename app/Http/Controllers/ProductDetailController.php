@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Services\CouponService;
+use App\Support\MediaUrl;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -30,7 +31,7 @@ class ProductDetailController extends Controller
         $relatedProducts = Product::where('is_active', true)
             ->where('category_group_id', $product->category_group_id)
             ->where('id', '!=', $product->id)
-            ->with(['category.categoryGroup', 'categoryGroup'])
+            ->with(['category.categoryGroup', 'categoryGroup', 'media'])
             ->limit(4)
             ->get()
             ->map(fn ($p) => $this->formatProductCard($p));
@@ -67,8 +68,8 @@ class ProductDetailController extends Controller
 
         $images = $product->getMedia('default')->map(fn ($media) => [
             'id' => $media->id,
-            'url' => $media->hasGeneratedConversion('webp') ? $media->getUrl('webp') : $media->getUrl(),
-            'thumb' => $media->hasGeneratedConversion('thumb') ? $media->getUrl('thumb') : $media->getUrl(),
+            'url' => MediaUrl::resolve($media, 'webp'),
+            'thumb' => MediaUrl::resolve($media, 'thumb', 'webp'),
         ])->values();
 
         // Si el producto no tiene imágenes propias, usar las imágenes de las variantes
@@ -79,8 +80,8 @@ class ProductDetailController extends Controller
                 ->filter()
                 ->map(fn ($media) => [
                     'id' => $media->id,
-                    'url' => $media->hasGeneratedConversion('webp') ? $media->getUrl('webp') : $media->getUrl(),
-                    'thumb' => $media->hasGeneratedConversion('thumb') ? $media->getUrl('thumb') : $media->getUrl(),
+                    'url' => MediaUrl::resolve($media, 'webp'),
+                    'thumb' => MediaUrl::resolve($media, 'thumb', 'webp'),
                 ])
                 ->values();
         }
@@ -105,8 +106,8 @@ class ProductDetailController extends Controller
                 'stock' => $variant->stock,
                 'image' => $media ? [
                     'id' => $media->id,
-                    'url' => $media->hasGeneratedConversion('webp') ? $media->getUrl('webp') : $media->getUrl(),
-                    'thumb' => $media->hasGeneratedConversion('thumb') ? $media->getUrl('thumb') : $media->getUrl(),
+                    'url' => MediaUrl::resolve($media, 'webp'),
+                    'thumb' => MediaUrl::resolve($media, 'thumb', 'webp'),
                 ] : null,
             ];
         });
@@ -158,7 +159,7 @@ class ProductDetailController extends Controller
             'slug' => $product->slug,
             'price' => $priceSold,
             'discount' => $discountData,
-            'image' => $product->getFirstMediaUrl('default'),
+            'image' => MediaUrl::firstFor($product, 'default', 'thumb', 'webp'),
             'category' => $product->category?->name ?? $product->categoryGroup?->name,
             'group_slug' => $product->category?->categoryGroup?->slug ?? $product->categoryGroup?->slug,
         ];

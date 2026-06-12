@@ -16,18 +16,8 @@ import Breadcrumb from '../../Shared/components/Breadcrumb/Breadcrumb';
 import ProductCard from '../../Shared/components/ProductCard/ProductCard';
 import ImageGallery from '../../Shared/components/ImageGallery/ImageGallery';
 import { formatPrice } from '../../Shared/utils/formatPrice';
-
-function InfoItem({ icon, title, description }) {
-    return (
-        <div className="flex gap-4 items-center px-2.5 py-2 rounded-2xl w-full sm:w-auto sm:flex-1 min-w-0">
-            <div className="shrink-0 text-neutral-500">{icon}</div>
-            <div className="flex flex-col gap-[5px] text-neutral-500 leading-normal min-w-0 wrap-break-word">
-                <p className="text-sm font-semibold">{title}</p>
-                <p className="text-xs font-normal">{description}</p>
-            </div>
-        </div>
-    );
-}
+import { useToast } from '../../Shared/hook/useToast';
+import InfoItem from '../../Shared/components/InfoItem/InfoItem';
 
 function QuantityStepper({ quantity, onChange }) {
     return (
@@ -56,6 +46,7 @@ function QuantityStepper({ quantity, onChange }) {
 }
 
 export default function Show({ product, relatedProducts, initialVariantSku }) {
+    const { showToast } = useToast();
     const [quantity, setQuantity] = useState(1);
     const [selectedVariant, setSelectedVariant] = useState(() => {
         if (!product.variants?.length) return null;
@@ -159,6 +150,17 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
             personalization: product.is_customizable && !hasComposite ? personalization : null,
         }, {
             preserveScroll: true,
+            onSuccess: () => showToast({
+                type: 'success',
+                title: 'Añadido al carrito',
+                message: quantity > 1 ? `${product.name} (x${quantity})` : product.name,
+                image: galleryImages[0]?.thumb || galleryImages[0]?.url,
+            }),
+            onError: () => showToast({
+                type: 'error',
+                title: 'No se pudo añadir al carrito',
+                message: 'Por favor, inténtalo de nuevo.',
+            }),
         });
     };
 
@@ -192,7 +194,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                                         key={img.id}
                                         type="button"
                                         onClick={() => setActiveImageIndex(idx)}
-                                        className={`w-[88px] h-[106px] rounded-[10px] overflow-hidden transition-all ${
+                                        className={`w-[88px] h-[106px] rounded-[10px] overflow-hidden bg-transparent transition-all ${
                                             activeImageIndex === idx
                                                 ? 'ring-2 ring-moss-300'
                                                 : 'hover:opacity-80'
@@ -201,7 +203,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                                         <img
                                             src={img.thumb || img.url}
                                             alt=""
-                                            className="w-full h-full object-cover"
+                                            className="w-full h-full object-contain"
                                         />
                                     </button>
                                 ))}
@@ -234,7 +236,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                                 </span>
                             )}
                             {display.sku && (
-                                <p className="flex-1 text-sm text-neutral-500">
+                                <p className="flex-1 text-xs font-normal text-neutral-500">
                                     SKU: {display.sku}
                                 </p>
                             )}
@@ -464,7 +466,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                 {relatedProducts.length > 0 && (
                     <div className="flex flex-col items-center gap-4 px-4 py-[30px] sm:px-8 lg:px-[60px]">
                         <div className="self-start pt-[30px] px-4">
-                            <h2 className="text-xl sm:text-2xl font-medium text-neutral-500">Productos Relacionados</h2>
+                            <h2 className="text-lg font-bold text-neutral-500">Productos Relacionados</h2>
                         </div>
                         <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             {relatedProducts.map((p) => (

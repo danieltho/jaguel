@@ -17,6 +17,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 
 class CategoryGroupResource extends Resource
 {
@@ -35,14 +36,16 @@ class CategoryGroupResource extends Resource
                 TextInput::make('name')
                     ->required()
                     ->live(onBlur: true)
-                    ->afterStateUpdated(fn ($set, $state) => $set('slug', \Illuminate\Support\Str::slug($state))),
+                    ->afterStateUpdated(fn ($set, $state) => $set('slug', Str::slug($state))),
                 TextInput::make('slug')
                     ->required()
                     ->unique(ignoreRecord: true),
                 SpatieMediaLibraryFileUpload::make('image')
-                ->collection('default')
-                ->disk('public')
-                ->downloadable()
+                    ->collection('default')
+                    ->disk('public')
+                    ->image()
+                    ->maxSize(8192)
+                    ->downloadable(),
             ]);
     }
 
@@ -54,11 +57,11 @@ class CategoryGroupResource extends Resource
                     ->searchable(),
                 TextColumn::make('categories_count')
                     ->label('Categorías')
-                ->counts('categories')
-                ->sortable(),
+                    ->counts('categories')
+                    ->sortable(),
                 SpatieMediaLibraryImageColumn::make('image')
-                ->collection('default')
-                ->conversion('thumb-md')
+                    ->collection('default')
+                    ->conversion('thumb-md'),
             ])
             ->filters([
                 //

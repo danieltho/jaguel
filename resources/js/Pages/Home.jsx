@@ -8,18 +8,7 @@ import {
 import Template from '../Shared/components/layout';
 import ProductCard from '../Shared/components/ProductCard/ProductCard';
 import CategoryBanner from '../Shared/components/CategoryBanner/CategoryBanner';
-
-function InfoItem({ icon, title, description }) {
-    return (
-        <div className="flex gap-4 items-center px-2.5 py-2 rounded-2xl w-full sm:w-auto sm:flex-1 min-w-0">
-            <div className="shrink-0 text-neutral-500">{icon}</div>
-            <div className="flex flex-col gap-[5px] text-neutral-500 leading-normal">
-                <p className="text-sm font-semibold">{title}</p>
-                <p className="text-xs font-normal">{description}</p>
-            </div>
-        </div>
-    );
-}
+import InfoItem from '../Shared/components/InfoItem/InfoItem';
 
 export default function Home() {
     const { categoryGroups, featuredProducts } = usePage().props;
