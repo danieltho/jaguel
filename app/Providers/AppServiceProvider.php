@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Services\MailConfigurator;
+use App\Services\MercadoPagoService;
 use App\Services\SettingsService;
 use Illuminate\Support\ServiceProvider;
+use MercadoPago\MercadoPagoConfig;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,15 +33,13 @@ class AppServiceProvider extends ServiceProvider
     private function configureMercadoPago(): void
     {
         try {
-            $settings = $this->app->make(SettingsService::class);
-            $token = $settings->get('mercadopago', 'access_token')
-                ?? config('services.mercadopago.access_token');
+            $token = $this->app->make(MercadoPagoService::class)->resolveAccessToken();
         } catch (\Throwable $e) {
-            $token = config('services.mercadopago.access_token');
+            $token = null;
         }
 
         if ($token) {
-            \MercadoPago\MercadoPagoConfig::setAccessToken($token);
+            MercadoPagoConfig::setAccessToken($token);
         }
     }
 }

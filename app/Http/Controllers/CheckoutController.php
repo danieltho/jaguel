@@ -16,6 +16,7 @@ use App\Services\CouponService;
 use App\Services\EmailVerificationService;
 use App\Services\MercadoPagoService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -257,15 +258,24 @@ class CheckoutController extends Controller
             return redirect()->route('checkout.contact');
         }
 
+        // Métodos administrados manualmente (transferencia, efectivo). El medio
+        // de Mercado Pago (credit_card) NO se gestiona acá: depende solo de la
+        // configuración de Mercado Pago (toggle habilitado + access token).
         $paymentMethods = PaymentMethod::where('is_active', true)
+            ->where('type', '!=', PaymentMethodTypeEnum::CREDIT_CARD)
             ->orderBy('sort_order')
-            ->get(['id', 'type', 'title', 'subtitle', 'description', 'max_installments']);
+            ->get();
 
-        if (! $this->mercadoPagoService->isConfigured()) {
-            $paymentMethods = $paymentMethods->reject(
-                fn (PaymentMethod $m) => $m->type === PaymentMethodTypeEnum::CREDIT_CARD
-            )->values();
+        if ($this->mercadoPagoService->isConfigured()) {
+            $paymentMethods->push($this->resolveMercadoPagoMethod());
         }
+
+        $paymentMethods = $paymentMethods
+            ->sortBy('sort_order')
+            ->map(fn (PaymentMethod $m) => $m->only(
+                'id', 'type', 'title', 'subtitle', 'description', 'max_installments'
+            ))
+            ->values();
 
         return Inertia::render('Checkout/Payment', [
             'contact' => $contact,
@@ -396,17 +406,22 @@ class CheckoutController extends Controller
             $preference = $this->mercadoPagoService->createPreference($order);
 
             return Inertia::location($preference['init_point']);
-        } catch (\Exception $e) {
-            \Log::error('MercadoPago preference creation failed', [
+        } catch (\Throwable $e) {
+            Log::error('MercadoPago preference creation failed', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'order_id' => $order->id,
                 'response' => method_exists($e, 'getApiResponse') ? $e->getApiResponse()?->getContent() : null,
             ]);
 
-            return redirect()->route('checkout.result', [
-                'status' => 'pending',
-                'order' => $order->id,
+            // No dejamos la orden "pendiente" fantasma ni simulamos un pedido
+            // recibido: marcamos el intento como fallido y volvemos al paso de
+            // pago con un error visible para que el cliente pueda reintentar.
+            $order->update(['payment_status' => PaymentStatusEnum::FAILED]);
+            session()->forget('checkout_pending_order_id');
+
+            return back()->withErrors([
+                'payment_method_id' => 'No pudimos iniciar el pago con tarjeta. Probá nuevamente o elegí otro medio de pago.',
             ]);
         }
     }
@@ -510,6 +525,26 @@ class CheckoutController extends Controller
         $this->emailVerificationService->syncCustomerVerification($customer);
 
         return $customer;
+    }
+
+    /**
+     * Devuelve el registro canónico del medio de pago Mercado Pago (credit_card),
+     * creándolo con valores por defecto si no existe. Así la opción queda
+     * disponible siempre que Mercado Pago esté configurado, sin depender de que
+     * el registro haya sido sembrado o activado manualmente en el admin.
+     */
+    private function resolveMercadoPagoMethod(): PaymentMethod
+    {
+        return PaymentMethod::firstOrCreate(
+            ['type' => PaymentMethodTypeEnum::CREDIT_CARD],
+            [
+                'title' => 'Tarjeta de Credito / Debito',
+                'subtitle' => 'Hasta 6 cuotas sin interes',
+                'description' => 'Pago seguro a traves de Mercado Pago.',
+                'is_active' => true,
+                'sort_order' => 1,
+            ]
+        );
     }
 
     private function clearCheckoutSession(): void

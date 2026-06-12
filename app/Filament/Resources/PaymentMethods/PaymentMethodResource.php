@@ -43,7 +43,10 @@ class PaymentMethodResource extends Resource
             ->components([
                 Select::make('type')
                     ->label('Tipo')
-                    ->options(PaymentMethodTypeEnum::class)
+                    ->options(collect(PaymentMethodTypeEnum::cases())
+                        ->reject(fn (PaymentMethodTypeEnum $type) => $type === PaymentMethodTypeEnum::CREDIT_CARD)
+                        ->mapWithKeys(fn (PaymentMethodTypeEnum $type) => [$type->value => $type->getLabel()])
+                        ->all())
                     ->required()
                     ->live()
                     ->columnSpanFull(),
@@ -83,6 +86,7 @@ class PaymentMethodResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->where('type', '!=', PaymentMethodTypeEnum::CREDIT_CARD))
             ->columns([
                 TextColumn::make('type')
                     ->label('Tipo')

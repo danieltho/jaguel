@@ -29,10 +29,35 @@ class MercadoPagoService
             return false;
         }
 
+        return $this->resolveAccessToken() !== null;
+    }
+
+    /**
+     * Devuelve el access token de Mercado Pago solo si parece válido. Ignora
+     * valores vacíos y el placeholder por defecto (`your_token` del .env), y
+     * exige el prefijo oficial (`TEST-` o `APP_USR-`). Así evitamos ofrecer el
+     * pago con tarjeta con credenciales que Mercado Pago va a rechazar.
+     */
+    public function resolveAccessToken(): ?string
+    {
         $token = $this->settings->get('mercadopago', 'access_token')
             ?? config('services.mercadopago.access_token');
 
-        return filled($token);
+        if (! is_string($token)) {
+            return null;
+        }
+
+        $token = trim($token);
+
+        if ($token === '') {
+            return null;
+        }
+
+        if (! str_starts_with($token, 'TEST-') && ! str_starts_with($token, 'APP_USR-')) {
+            return null;
+        }
+
+        return $token;
     }
 
     public function isEnabled(): bool
@@ -106,9 +131,17 @@ class MercadoPagoService
 
         $order->forceFill(['mp_preference_id' => $preference->id])->saveQuietly();
 
-        $redirectUrl = app()->environment('local')
-            ? $preference->sandbox_init_point
-            : $preference->init_point;
+        // init_point funciona con credenciales TEST y de producción; usamos
+        // sandbox_init_point solo como respaldo (en la API actual suele venir
+        // vacío). Si ambos están vacíos, abortamos con un error explícito en
+        // lugar de devolver una URL vacía que no redirige a ningún lado.
+        $redirectUrl = $preference->init_point ?: $preference->sandbox_init_point;
+
+        if (empty($redirectUrl)) {
+            throw new \RuntimeException(
+                'Mercado Pago no devolvió una URL de pago (init_point) para la orden '.$order->id
+            );
+        }
 
         return [
             'id' => $preference->id,
