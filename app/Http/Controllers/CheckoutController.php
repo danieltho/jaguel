@@ -400,6 +400,55 @@ class CheckoutController extends Controller
         ]);
     }
 
+    // Retomar el pago de una orden pendiente desde el email de recordatorio.
+    // La ruta está firmada (middleware 'signed'), por lo que el link no puede
+    // ser manipulado para apuntar a otra orden.
+    public function pay(Order $order)
+    {
+        // Si la orden ya no está pendiente, mostramos su estado real en lugar de
+        // reiniciar un pago. Reutilizamos el mapeo de estados de success().
+        if ($order->payment_status !== PaymentStatusEnum::PENDING) {
+            $status = match ($order->payment_status) {
+                PaymentStatusEnum::PAID => 'approved',
+                PaymentStatusEnum::FAILED => 'rejected',
+                default => 'pending',
+            };
+
+            return redirect()->route('checkout.result', [
+                'status' => $status,
+                'order' => $order->id,
+            ]);
+        }
+
+        // El pago online solo aplica a tarjeta (Mercado Pago). Transferencia y
+        // efectivo se acreditan manualmente, así que no hay nada que retomar.
+        $isCreditCard = $order->paymentMethod?->type === PaymentMethodTypeEnum::CREDIT_CARD;
+
+        if (! $isCreditCard || ! $this->mercadoPagoService->isConfigured()) {
+            return redirect()->route('checkout.result', [
+                'status' => 'pending',
+                'order' => $order->id,
+            ]);
+        }
+
+        try {
+            $preference = $this->mercadoPagoService->createPreference($order);
+
+            return redirect()->away($preference['init_point']);
+        } catch (\Throwable $e) {
+            Log::error('MercadoPago resume payment failed', [
+                'message' => $e->getMessage(),
+                'order_id' => $order->id,
+                'response' => method_exists($e, 'getApiResponse') ? $e->getApiResponse()?->getContent() : null,
+            ]);
+
+            return redirect()->route('checkout.result', [
+                'status' => 'pending',
+                'order' => $order->id,
+            ]);
+        }
+    }
+
     private function redirectToMercadoPago(Order $order)
     {
         try {
