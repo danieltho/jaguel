@@ -4,20 +4,25 @@ namespace App\Filament\Widgets;
 
 use App\Enums\PaymentStatusEnum;
 use App\Models\Order;
+use Filament\Actions\Action;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\DatePicker;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class PaymentsChart extends ChartWidget
+class PaymentsChart extends ChartWidget implements HasActions
 {
+    use InteractsWithActions;
+
     protected ?string $heading = 'Pagos aprobados';
 
     protected int|string|array $columnSpan = '50%';
 
     protected ?string $maxHeight = '400px';
+
+    protected string $view = 'filament.widgets.payments-chart';
 
     public ?string $filter = '30';
 
@@ -36,22 +41,45 @@ class PaymentsChart extends ChartWidget
         ];
     }
 
-    public function filterFormSchema(): array
+    public function updatedFilter($value): void
     {
-        return [
-            Grid::make(2)
-                ->schema([
-                    DatePicker::make('fromDate')
-                        ->label('Desde')
-                        ->native(false)
-                        ->visible(fn (Get $get) => $get('filter') === 'custom'),
-                    DatePicker::make('toDate')
-                        ->label('Hasta')
-                        ->native(false)
-                        ->visible(fn (Get $get) => $get('filter') === 'custom'),
-                ])
-                ->columnSpanFull(),
-        ];
+        if ($value === 'custom') {
+            $this->mountAction('customRange');
+
+            return;
+        }
+
+        $this->cachedData = null;
+    }
+
+    public function customRangeAction(): Action
+    {
+        return Action::make('customRange')
+            ->modalHeading('Rango personalizado')
+            ->modalSubmitActionLabel('Aplicar')
+            ->fillForm(fn (): array => [
+                'fromDate' => $this->fromDate ?? now()->subDays(29)->toDateString(),
+                'toDate' => $this->toDate ?? now()->toDateString(),
+            ])
+            ->schema([
+                DatePicker::make('fromDate')
+                    ->label('Desde')
+                    ->native(false)
+                    ->required()
+                    ->maxDate(now()),
+                DatePicker::make('toDate')
+                    ->label('Hasta')
+                    ->native(false)
+                    ->required()
+                    ->maxDate(now())
+                    ->afterOrEqual('fromDate'),
+            ])
+            ->action(function (array $data): void {
+                $this->fromDate = $data['fromDate'];
+                $this->toDate = $data['toDate'];
+                $this->cachedData = null;
+                $this->updateChartData();
+            });
     }
 
     protected function getData(): array
