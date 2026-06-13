@@ -24,6 +24,9 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libzip-dev \
     libicu-dev \
+    libmagickwand-dev \
+    libheif-dev \
+    libde265-dev \
     zip \
     unzip \
     jpegoptim \
@@ -37,6 +40,9 @@ RUN apt-get update && apt-get install -y \
 RUN docker-php-ext-configure intl
 RUN docker-php-ext-configure gd --with-jpeg --with-webp --with-freetype
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip intl
+
+# Imagick con soporte HEIC/HEIF (libheif + libde265) para leer y convertir HEIC
+RUN pecl install imagick && docker-php-ext-enable imagick
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
