@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
 class UserForm
@@ -25,6 +26,10 @@ class UserForm
                     ->label('Contraseña')
                     ->password()
                     ->required(),
+                Toggle::make('receives_order_notifications')
+                    ->label('Recibir notificaciones de pedidos')
+                    ->helperText('Si está activo, este usuario recibirá un correo cada vez que se realice un nuevo pedido.')
+                    ->default(false),
             ]);
     }
 }

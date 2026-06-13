@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Enums\OrderMailStepEnum;
 use App\Enums\PaymentMethodTypeEnum;
 use App\Enums\PaymentStatusEnum;
+use App\Mail\NewOrderAdminMail;
 use App\Mail\OrderStatusMail;
 use App\Models\Coupon;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\PaymentMethod;
 use App\Models\ShippingMethod;
+use App\Models\User;
 use App\Services\CartService;
 use App\Services\CouponService;
 use App\Services\EmailVerificationService;
@@ -379,6 +381,10 @@ class CheckoutController extends Controller
             }
         }
 
+        // Aviso a los administradores suscritos: el pedido se concreta al hacer
+        // click en "Realizar pedido", sin importar el medio de pago elegido.
+        $this->notifyAdmins($order);
+
         // For credit card: keep cart alive until MP confirms — store order ID in session
         if ($paymentMethod->type === PaymentMethodTypeEnum::CREDIT_CARD) {
             session(['checkout_pending_order_id' => $order->id]);
@@ -545,6 +551,24 @@ class CheckoutController extends Controller
                 'sort_order' => 1,
             ]
         );
+    }
+
+    /**
+     * Envía el aviso de pedido nuevo a los administradores (tabla users) que
+     * tienen activado "Recibir notificaciones de pedidos".
+     */
+    private function notifyAdmins(Order $order): void
+    {
+        $recipients = User::where('receives_order_notifications', true)
+            ->pluck('email')
+            ->filter()
+            ->all();
+
+        if (empty($recipients)) {
+            return;
+        }
+
+        Mail::to($recipients)->queue(new NewOrderAdminMail($order));
     }
 
     private function clearCheckoutSession(): void
