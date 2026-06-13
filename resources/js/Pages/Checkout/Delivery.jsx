@@ -7,7 +7,6 @@ import {
     SectionHeading,
     RadioOption,
 } from '../../Shared/components/CheckoutLayout/CheckoutPrimitives';
-import { formatPrice } from '../../Shared/utils/formatPrice';
 
 export default function Delivery({ shippingOptions, summary }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -61,7 +60,6 @@ export default function Delivery({ shippingOptions, summary }) {
                                         onChange={() => setData('shipping_method', option.id)}
                                         title={option.name}
                                         description={option.description || option.days}
-                                        priceLabel={option.price === 0 ? 'Gratis' : formatPrice(option.price)}
                                     />
                                 ))}
                                 {errors.shipping_method && (
