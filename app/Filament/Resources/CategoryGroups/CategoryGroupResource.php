@@ -44,6 +44,7 @@ class CategoryGroupResource extends Resource
                     ->collection('default')
                     ->disk('public')
                     ->image()
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'])
                     ->maxSize(8192)
                     ->downloadable(),
             ]);

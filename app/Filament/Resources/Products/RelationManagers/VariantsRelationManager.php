@@ -55,6 +55,7 @@ class VariantsRelationManager extends RelationManager
                     ->directory('product/original')
                     ->panelLayout('grid')
                     ->image()
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'])
                     ->maxSize(8192)
                     ->multiple()
                     ->reorderable()

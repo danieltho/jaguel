@@ -290,7 +290,7 @@ class CheckoutController extends Controller
     {
         $request->validate([
             'payment_method_id' => 'required|exists:payment_methods,id',
-            'payment_receipt' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+            'payment_receipt' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,heic,heif', 'max:5120'],
         ]);
 
         $customer = $request->user('customer');

@@ -151,6 +151,7 @@ class ProductForm
                     ->disk('public')
                     ->panelLayout('grid')
                     ->image()
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'])
                     ->multiple()
                     ->maxFiles(10)
                     ->maxSize(8192)
@@ -406,6 +407,7 @@ class ProductForm
                                     ->collection('variant')
                                     ->disk('public')
                                     ->image()
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'])
                                     ->maxSize(8192),
                             ]),
                             Hidden::make('price_sales')

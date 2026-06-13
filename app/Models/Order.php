@@ -10,8 +10,10 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 #[ObservedBy([OrderObserver::class])]
 class Order extends Model implements HasMedia
@@ -57,6 +59,17 @@ class Order extends Model implements HasMedia
         // El tipo de archivo se valida en el controlador (mimes:pdf,jpg,jpeg,png),
         // que es el punto donde se reporta el error al usuario.
         $this->addMediaCollection('payment_receipt')->singleFile();
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        // Solo aplica a comprobantes que sean imagen (HEIC/JPG/PNG); los PDF se omiten
+        // automaticamente porque no hay generador de imagen para ese tipo.
+        $this->addMediaConversion('webp')
+            ->performOnCollections('payment_receipt')
+            ->fit(Fit::Max, 1600, 1600)
+            ->format('webp')
+            ->quality(82);
     }
 
     protected $attributes = [

@@ -202,12 +202,12 @@ export default function Payment({ contact, delivery, recipient, paymentMethods, 
                                                 htmlFor="payment_receipt"
                                                 className="text-xs text-neutral-500"
                                             >
-                                                Subir comprobante (opcional) — PDF, JPG o PNG
+                                                Subir comprobante (opcional) — PDF, JPG, PNG o HEIC
                                             </label>
                                             <input
                                                 id="payment_receipt"
                                                 type="file"
-                                                accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/*"
+                                                accept=".pdf,.jpg,.jpeg,.png,.heic,.heif,application/pdf,image/*,image/heic,image/heif"
                                                 onChange={onFileChange}
                                                 className="block w-full text-xs text-neutral-500 file:mr-4 file:rounded-lg file:border-0 file:bg-oxido-50 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-oxido-300 hover:file:bg-oxido-100"
                                             />
