@@ -58,6 +58,9 @@ Route::prefix('checkout')->name('checkout.')->group(function () {
     Route::get('/pago', [CheckoutController::class, 'showPayment'])->name('payment');
     Route::post('/pago', [CheckoutController::class, 'placeOrder']);
     Route::get('/resultado', [CheckoutController::class, 'success'])->name('result');
+    Route::get('/orden/{order}/pagar', [CheckoutController::class, 'pay'])
+        ->name('pay')
+        ->middleware('signed');
 });
 
 Route::middleware(['web', 'auth'])->group(function () {

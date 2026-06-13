@@ -1,6 +1,8 @@
 @php
     /** @var \App\Models\Order $order */
     /** @var int $reminder */
+    /** @var bool $canPay */
+    /** @var string|null $payUrl */
 
     $name = trim(($order->recipient_firstname ?? '').' '.($order->recipient_lastname ?? ''));
     $name = $name !== '' ? $name : 'Hola';
@@ -8,6 +10,7 @@
     $money = fn ($value) => '$'.number_format((int) $value, 0, ',', '.');
 
     $isFinal = $reminder >= 2;
+    $canPay = ($canPay ?? false) && ! empty($payUrl);
 @endphp
 <!DOCTYPE html>
 <html lang="es">
@@ -43,6 +46,22 @@
                     </p>
                     <p style="margin: 0 0 24px; font-size: 15px; color: #555; line-height: 1.5;">
                         Estamos para ayudarte a terminarlo. Si tenés alguna duda o necesitás una mano, escribinos y lo completamos juntos.
+                    </p>
+                @endif
+
+                @if ($canPay)
+                    {{-- Botón para retomar el pago (solo tarjeta / Mercado Pago) --}}
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 0 0 8px;">
+                        <tr>
+                            <td align="center">
+                                <a href="{{ $payUrl }}" style="display: inline-block; padding: 14px 32px; border-radius: 999px; background: #A1A389; color: #ffffff; font-size: 15px; font-weight: 700; text-decoration: none;">
+                                    Pagar ahora
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                    <p style="margin: 0 0 24px; font-size: 13px; color: #999; text-align: center; line-height: 1.5;">
+                        Te llevamos directo al pago seguro para terminar en un par de clics.
                     </p>
                 @endif
 
