@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Minus, Plus, Trash } from '@phosphor-icons/react';
 import Template from '../../Shared/components/layout';
 import Breadcrumb from '../../Shared/components/Breadcrumb/Breadcrumb';
@@ -87,6 +87,20 @@ function CartItem({ item }) {
     );
 }
 
+function FlashError() {
+    const flashError = usePage().props.flash?.error;
+
+    if (!flashError) {
+        return null;
+    }
+
+    return (
+        <div className="mt-4 rounded-lg border border-carmesi-100 bg-carmesi-50 px-4 py-3 text-sm text-carmesi-300">
+            {flashError}
+        </div>
+    );
+}
+
 export default function CartIndex({ items, subtotal, discount, couponCode, shipping, total }) {
     const breadcrumbItems = [
         { label: 'Inicio', href: '/' },
@@ -99,6 +113,7 @@ export default function CartIndex({ items, subtotal, discount, couponCode, shipp
                 <Head title="Carrito" />
                 <div className="mx-auto max-w-[1320px] px-4 py-6 sm:px-8 lg:px-15">
                     <Breadcrumb items={breadcrumbItems} />
+                    <FlashError />
                     <div className="flex flex-col items-center justify-center gap-4 py-20">
                         <h1 className="text-2xl font-bold text-neutral-500">Tu carrito está vacío</h1>
                         <p className="text-sm text-neutral-400">Agregá productos para comenzar tu compra.</p>
@@ -119,6 +134,7 @@ export default function CartIndex({ items, subtotal, discount, couponCode, shipp
             <Head title="Carrito" />
             <div className="mx-auto max-w-[1320px] px-4 py-6 sm:px-8 lg:px-15">
                 <Breadcrumb items={breadcrumbItems} />
+                <FlashError />
 
                 <h1 className="mt-4 mb-6 text-2xl font-bold text-neutral-500">Tu Carrito</h1>
 
