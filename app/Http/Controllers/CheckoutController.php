@@ -17,6 +17,7 @@ use App\Services\CartService;
 use App\Services\CouponService;
 use App\Services\EmailVerificationService;
 use App\Services\MercadoPagoService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -484,7 +485,7 @@ class CheckoutController extends Controller
         }
     }
 
-    public function success(Request $request): Response
+    public function success(Request $request): Response|RedirectResponse
     {
         $status = $request->query('status', 'pending');
         $orderId = $request->query('order')
@@ -502,6 +503,19 @@ class CheckoutController extends Controller
             if ($order && $order->payment_status === PaymentStatusEnum::PENDING && filled($order->mp_preference_id)) {
                 $this->mercadoPagoService->syncOrderFromMp($order);
                 $order->refresh();
+            }
+
+            // Cancelacion en Mercado Pago: la orden paso por MP pero el cliente
+            // volvio sin pagar, asi que sigue PENDING y nunca se registro un pago
+            // (mp_payment_id vacio). El carrito sigue intacto (el flujo de tarjeta
+            // no lo limpia), asi que lo devolvemos al carrito para reintentar.
+            if ($order
+                && filled($order->mp_preference_id)
+                && $order->payment_status === PaymentStatusEnum::PENDING
+                && blank($order->mp_payment_id)
+            ) {
+                return redirect()->route('cart.index')
+                    ->with('error', 'Cancelaste el pago. Tu carrito sigue disponible para reintentar.');
             }
 
             if ($order?->paymentMethod) {
