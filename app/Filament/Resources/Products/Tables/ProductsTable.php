@@ -15,11 +15,13 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class ProductsTable
 {
@@ -133,11 +135,39 @@ class ProductsTable
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->before(function (Product $record, DeleteAction $action): void {
+                        if ($record->orderItems()->exists()) {
+                            Notification::make()
+                                ->danger()
+                                ->title('No se puede eliminar el producto')
+                                ->body('Este producto tiene compras realizadas y no puede ser eliminado.')
+                                ->persistent()
+                                ->send();
+
+                            $action->cancel();
+                        }
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->before(function (Collection $records, DeleteBulkAction $action): void {
+                            $withOrders = $records->filter(
+                                fn (Product $record): bool => $record->orderItems()->exists()
+                            );
+
+                            if ($withOrders->isNotEmpty()) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title('No se pueden eliminar algunos productos')
+                                    ->body('Uno o más productos seleccionados tienen compras realizadas y no pueden ser eliminados: '.$withOrders->pluck('name')->implode(', ').'.')
+                                    ->persistent()
+                                    ->send();
+
+                                $action->cancel();
+                            }
+                        }),
                 ]),
             ]);
     }
