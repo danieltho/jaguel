@@ -27,8 +27,9 @@
                     <tr>
                         @foreach (OrderMailStepEnum::steps() as $s)
                             @php
-                                $active = $s === $step;
-                                $stepLabel = ($s === OrderMailStepEnum::SHIPPING && $isPickup) ? 'Retiro' : $s->label();
+                                $active = $s === $step->progressStep();
+                                $isPickupStep = $isPickup || $step === OrderMailStepEnum::READY_PICKUP;
+                                $stepLabel = ($s === OrderMailStepEnum::SHIPPING && $isPickupStep) ? 'Retiro' : $s->label();
                             @endphp
                             <td align="center" style="padding: 6px 4px;">
                                 <span style="display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; {{ $active ? 'background: #A1A389; color: #ffffff;' : 'background: #f1f1ee; color: #b5b5ad;' }}">
@@ -68,11 +69,13 @@
 
                     @case(OrderMailStepEnum::SHIPPING)
                         <p style="margin: 0 0 24px; font-size: 15px; color: #555; line-height: 1.5;">
-                            @if ($isPickup)
-                                Ya puedes dirigirte al punto de retiro seleccionado para recoger el pedido.
-                            @else
-                                ¡Tu pedido está listo! Pronto llegará a tu domicilio.
-                            @endif
+                            ¡Tu pedido está listo! Pronto llegará a tu domicilio.
+                        </p>
+                        @break
+
+                    @case(OrderMailStepEnum::READY_PICKUP)
+                        <p style="margin: 0 0 24px; font-size: 15px; color: #555; line-height: 1.5;">
+                            Ya puedes dirigirte al punto de retiro seleccionado para recoger el pedido.
                         </p>
                         @break
 

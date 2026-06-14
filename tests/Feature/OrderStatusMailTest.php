@@ -78,7 +78,7 @@ class OrderStatusMailTest extends TestCase
         return [
             'en preparación' => [OrderStatusEnum::IN_PREPARATION, OrderMailStepEnum::IN_PREPARATION],
             'enviado' => [OrderStatusEnum::SHIPPING, OrderMailStepEnum::SHIPPING],
-            'listo para retiro' => [OrderStatusEnum::READY_PICKUP, OrderMailStepEnum::SHIPPING],
+            'listo para retiro' => [OrderStatusEnum::READY_PICKUP, OrderMailStepEnum::READY_PICKUP],
             'entregado' => [OrderStatusEnum::DELIVERED, OrderMailStepEnum::DELIVERED],
         ];
     }
@@ -94,15 +94,16 @@ class OrderStatusMailTest extends TestCase
         Mail::assertQueued(OrderStatusMail::class, fn (OrderStatusMail $mail) => $mail->step === $expected);
     }
 
-    public function test_shipping_step_mail_differs_for_pickup_and_delivery(): void
+    public function test_ready_pickup_and_shipping_steps_have_distinct_wording(): void
     {
-        $pickup = $this->makeOrder(['delivery_type' => 'pickup']);
-        $shipping = $this->makeOrder(['delivery_type' => 'shipping']);
+        // El bug: aunque el pedido sea de envío a domicilio, el paso de retiro
+        // debe decir "listo para retirar" (el texto lo decide el paso, no delivery_type).
+        $order = $this->makeOrder(['delivery_type' => 'shipping']);
 
-        $pickupHtml = (new OrderStatusMail($pickup, OrderMailStepEnum::SHIPPING))->render();
-        $shippingHtml = (new OrderStatusMail($shipping, OrderMailStepEnum::SHIPPING))->render();
+        $pickupHtml = (new OrderStatusMail($order, OrderMailStepEnum::READY_PICKUP))->render();
+        $shippingHtml = (new OrderStatusMail($order, OrderMailStepEnum::SHIPPING))->render();
 
-        // Cuerpo: descripción según el tipo de entrega.
+        // Cuerpo.
         $this->assertStringContainsString('punto de retiro', $pickupHtml);
         $this->assertStringNotContainsString('domicilio', $pickupHtml);
         $this->assertStringContainsString('domicilio', $shippingHtml);
@@ -112,9 +113,9 @@ class OrderStatusMailTest extends TestCase
         $this->assertStringNotContainsString('Retiro', $shippingHtml);
         $this->assertStringContainsString('Envío', $shippingHtml);
 
-        // Asunto contextualizado.
-        $this->assertStringContainsString('listo para retirar', OrderMailStepEnum::SHIPPING->subject($pickup));
-        $this->assertStringContainsString('en camino', OrderMailStepEnum::SHIPPING->subject($shipping));
+        // Asunto.
+        $this->assertStringContainsString('listo para retirar', OrderMailStepEnum::READY_PICKUP->subject($order));
+        $this->assertStringContainsString('en camino', OrderMailStepEnum::SHIPPING->subject($order));
 
         $this->assertNotSame($pickupHtml, $shippingHtml);
     }

@@ -14,6 +14,7 @@ enum OrderMailStepEnum: string
     case APPROVED = 'aprobado';
     case IN_PREPARATION = 'en preparacion';
     case SHIPPING = 'envio';
+    case READY_PICKUP = 'listo para retirar';
     case DELIVERED = 'entregado';
 
     /**
@@ -34,8 +35,18 @@ enum OrderMailStepEnum: string
             self::APPROVED => 'Aprobado',
             self::IN_PREPARATION => 'En preparación',
             self::SHIPPING => 'Envío',
+            self::READY_PICKUP => 'Retiro',
             self::DELIVERED => 'Entregado',
         };
+    }
+
+    /**
+     * Casilla que ocupa este paso en la barra de progreso.
+     * READY_PICKUP comparte la casilla de SHIPPING (son rutas alternativas).
+     */
+    public function progressStep(): self
+    {
+        return $this === self::READY_PICKUP ? self::SHIPPING : $this;
     }
 
     /** Mapea un estado de pedido a su paso de mail, o null si ese estado no notifica. */
@@ -43,7 +54,8 @@ enum OrderMailStepEnum: string
     {
         return match ($status) {
             OrderStatusEnum::IN_PREPARATION => self::IN_PREPARATION,
-            OrderStatusEnum::SHIPPING, OrderStatusEnum::READY_PICKUP => self::SHIPPING,
+            OrderStatusEnum::SHIPPING => self::SHIPPING,
+            OrderStatusEnum::READY_PICKUP => self::READY_PICKUP,
             OrderStatusEnum::DELIVERED => self::DELIVERED,
             default => null,
         };
@@ -58,9 +70,8 @@ enum OrderMailStepEnum: string
             self::PENDING => "Recibimos tu pedido {$number} — pendiente de pago",
             self::APPROVED => "¡Gracias por tu compra! Pedido {$number}",
             self::IN_PREPARATION => "Tu pedido {$number} está en preparación",
-            self::SHIPPING => $order->delivery_type === 'pickup'
-                ? "Tu pedido {$number} está listo para retirar"
-                : "Tu pedido {$number} está en camino",
+            self::SHIPPING => "Tu pedido {$number} está en camino",
+            self::READY_PICKUP => "Tu pedido {$number} está listo para retirar",
             self::DELIVERED => "¡Tu pedido {$number} fue entregado!",
         };
     }
