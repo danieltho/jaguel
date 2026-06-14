@@ -364,6 +364,9 @@ class CheckoutController extends Controller
                 'product_variant_id' => $item['variant_id'],
                 'quantity' => $item['quantity'],
                 'unit_price' => $item['unit_price'],
+                'is_customized' => $item['customized'] ?? false,
+                'customization_price' => $item['customization_price'] ?? 0,
+                'customization_label' => $item['customization_label'] ?? null,
             ]);
         }
 

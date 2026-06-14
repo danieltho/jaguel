@@ -119,6 +119,8 @@ class ProductDetailController extends Controller
             'sku' => $product->sku,
             'description' => $product->description,
             'is_customizable' => $product->is_customizable,
+            'customization_label' => $product->customization_label,
+            'customization_price' => $product->customization_price,
             'price' => $priceSold,
             'price_without_tax' => $product->price_without_tax,
             'discount' => $discountData,

@@ -13,11 +13,16 @@ class OrderItem extends Model
         'product_variant_id',
         'quantity',
         'unit_price',
+        'is_customized',
+        'customization_price',
+        'customization_label',
     ];
 
     protected $casts = [
         'quantity' => 'integer',
         'unit_price' => 'integer',
+        'is_customized' => 'boolean',
+        'customization_price' => 'integer',
     ];
 
     protected static function booted(): void

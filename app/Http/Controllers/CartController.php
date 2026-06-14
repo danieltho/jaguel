@@ -34,12 +34,14 @@ class CartController extends Controller
             'product_id' => 'required|integer|exists:products,id',
             'variant_id' => 'nullable|integer|exists:product_variants,id',
             'quantity' => 'integer|min:1',
+            'customized' => 'boolean',
         ]);
 
         $this->cartService->addItem(
             $request->integer('product_id'),
             $request->integer('variant_id') ?: null,
             $request->integer('quantity', 1),
+            $request->boolean('customized'),
         );
 
         return back();

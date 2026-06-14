@@ -45,6 +45,12 @@ function CartItem({ item }) {
                             {[item.color, item.size].filter(Boolean).join(' / ')}
                         </p>
                     )}
+                    {item.customized && (
+                        <p className="mt-1 text-xs text-moss-300">
+                            Incluye {item.customization_label}
+                            {item.customization_price > 0 && ` (+${formatPrice(item.customization_price)})`}
+                        </p>
+                    )}
                     <p className="mt-1 text-base font-semibold text-neutral-500">
                         {formatPrice(item.unit_price)}
                     </p>

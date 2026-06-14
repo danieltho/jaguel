@@ -10,6 +10,7 @@
     $money = fn ($value) => '$'.number_format((int) $value, 0, ',', '.');
 
     $isPickup = $order->delivery_type === 'pickup';
+    $hasCustomized = $order->items->contains(fn ($item) => $item->is_customized);
 @endphp
 <!DOCTYPE html>
 <html lang="es">
@@ -90,6 +91,16 @@
                         @break
                 @endswitch
 
+                @if ($hasCustomized)
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 0 0 24px;">
+                        <tr>
+                            <td style="padding: 16px; background: #f1f1ee; border-left: 4px solid #A1A389; border-radius: 4px; font-size: 14px; color: #555; line-height: 1.5;">
+                                Tu pedido incluye un producto personalizado. Comunicate al <strong>{{ $contactPhone }}</strong> para coordinar los detalles del grabado.
+                            </td>
+                        </tr>
+                    </table>
+                @endif
+
                 {{-- Detalle completo: solo en los mails de pendiente y aprobado --}}
                 @if (in_array($step, [OrderMailStepEnum::PENDING, OrderMailStepEnum::APPROVED], true))
                     {{-- Modo de envío --}}
@@ -118,6 +129,9 @@
                                 <td style="padding: 6px 0; border-bottom: 1px solid #f1f1ee;">
                                     {{ $item->product?->name ?? 'Producto' }}@if ($attrs) <span style="color: #999;">({{ $attrs }})</span>@endif
                                     <br><span style="color: #999;">x{{ $item->quantity }}</span>
+                                    @if ($item->is_customized)
+                                        <br><span style="color: #A1A389; font-size: 13px;">Incluye {{ $item->customization_label ?? 'Grabado Personalizado' }}</span>
+                                    @endif
                                 </td>
                                 <td align="right" style="padding: 6px 0; border-bottom: 1px solid #f1f1ee; white-space: nowrap;">
                                     {{ $money($item->unit_price * $item->quantity) }}
