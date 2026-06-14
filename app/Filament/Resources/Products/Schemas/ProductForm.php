@@ -55,8 +55,21 @@ class ProductForm
                         ->toolbarButtons(['bold']),
                     Toggle::make('is_customizable')
                         ->label('Producto personalizado')
-                        ->helperText('Si está activo, el cliente podrá elegir si quiere personalizarlo en el detalle del producto.')
-                        ->default(false),
+                        ->helperText('Si está activo, el cliente podrá elegir si quiere el grabado personalizado en el detalle del producto.')
+                        ->default(false)
+                        ->live(),
+                    Grid::make()->columns(2)->schema([
+                        TextInput::make('customization_label')
+                            ->label('Etiqueta del grabado')
+                            ->placeholder('Grabado Personalizado')
+                            ->maxLength(255),
+                        TextInput::make('customization_price')
+                            ->label('Precio del grabado')
+                            ->postfix('$')
+                            ->rule('numeric')
+                            ->default(0)
+                            ->dehydrateStateUsing(fn ($state) => $state === null || $state === '' ? 0 : $state),
+                    ])->visible(fn ($get) => (bool) $get('is_customizable')),
                     Grid::make()->columns(2)->schema([
                         Select::make('category_group_id')
                             ->label('Grupo de categorías')

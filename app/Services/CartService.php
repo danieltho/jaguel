@@ -41,7 +41,10 @@ class CartService
 
             $variant = isset($item['variant_id']) ? $variants->get($item['variant_id']) : null;
 
-            $unitPrice = $this->getItemPrice($product, $variant);
+            $customized = ! empty($item['customized']) && $product->is_customizable;
+            $customizationPrice = $customized ? (float) $product->customization_price : 0;
+
+            $unitPrice = $this->getItemPrice($product, $variant) + $customizationPrice;
 
             return [
                 'cart_key' => $key,
@@ -53,6 +56,9 @@ class CartService
                     ?: MediaUrl::firstFor($product, 'default', 'thumb', 'webp'),
                 'color' => $variant?->color?->name,
                 'size' => $variant?->size?->name,
+                'customized' => $customized,
+                'customization_label' => $customized ? ($product->customization_label ?: 'Grabado Personalizado') : null,
+                'customization_price' => $customizationPrice,
                 'unit_price' => $unitPrice,
                 'quantity' => $item['quantity'],
                 'total' => $unitPrice * $item['quantity'],
@@ -60,10 +66,10 @@ class CartService
         })->filter()->values()->all();
     }
 
-    public function addItem(int $productId, ?int $variantId, int $quantity = 1): void
+    public function addItem(int $productId, ?int $variantId, int $quantity = 1, bool $customized = false): void
     {
         $cart = session('cart', []);
-        $key = $this->makeKey($productId, $variantId);
+        $key = $this->makeKey($productId, $variantId, $customized);
 
         if (isset($cart[$key])) {
             $cart[$key]['quantity'] += $quantity;
@@ -72,6 +78,7 @@ class CartService
                 'product_id' => $productId,
                 'variant_id' => $variantId,
                 'quantity' => $quantity,
+                'customized' => $customized,
             ];
         }
 
@@ -125,7 +132,11 @@ class CartService
             $product = $products->get($item['product_id']);
             $variant = isset($item['variant_id']) ? $variants->get($item['variant_id']) : null;
 
-            return $this->getItemPrice($product, $variant) * $item['quantity'];
+            $customizationPrice = (! empty($item['customized']) && $product && $product->is_customizable)
+                ? (float) $product->customization_price
+                : 0;
+
+            return ($this->getItemPrice($product, $variant) + $customizationPrice) * $item['quantity'];
         });
     }
 
@@ -262,9 +273,9 @@ class CartService
         return $this->revalidateCoupon()['coupon'];
     }
 
-    private function makeKey(int $productId, ?int $variantId): string
+    private function makeKey(int $productId, ?int $variantId, bool $customized = false): string
     {
-        return $productId.'-'.($variantId ?? 'null');
+        return $productId.'-'.($variantId ?? 'null').'-c'.($customized ? '1' : '0');
     }
 
     private function getItemPrice(?Product $product, ?ProductVariant $variant): float

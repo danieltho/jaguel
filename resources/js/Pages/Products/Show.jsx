@@ -4,7 +4,6 @@ import {
     Minus,
     Plus,
     CaretLeft,
-    CaretDown,
     ShoppingCart,
     MapPin,
     CreditCard,
@@ -67,8 +66,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
         }
     }, [selectedVariant?.sku, product.slug]);
     const [activeImageIndex, setActiveImageIndex] = useState(0);
-    const [personalization, setPersonalization] = useState('NO');
-    const [personalizationOpen, setPersonalizationOpen] = useState(false);
+    const [customized, setCustomized] = useState(false);
 
     // La galería sigue a la variante seleccionada: si tiene imagen propia se
     // muestra solo esa, si no se usan las imágenes base del producto.
@@ -100,6 +98,11 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
             hasDiscount: !!product.discount,
             discountPercentage: product.discount?.percentage ?? null,
         };
+
+    const customizationPrice = product.customization_price || 0;
+    const customizationLabel = product.customization_label || 'Grabado Personalizado';
+    const engravingTotal = product.is_customizable && customized ? customizationPrice : 0;
+    const finalWithEngraving = display.finalPrice + engravingTotal;
 
     const sizes = [...new Map(
         product.variants
@@ -147,7 +150,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
             product_id: product.id,
             variant_id: selectedVariant?.id || null,
             quantity,
-            personalization: product.is_customizable && !hasComposite ? personalization : null,
+            customized: product.is_customizable ? customized : false,
         }, {
             preserveScroll: true,
             onSuccess: () => showToast({
@@ -279,7 +282,7 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                                         hasComposite ? 'text-2xl sm:text-3xl lg:text-[40px]' : 'text-xl sm:text-2xl lg:text-[32px]'
                                     }`}
                                 >
-                                    {formatPrice(display.finalPrice)}
+                                    {formatPrice(finalWithEngraving)}
                                 </span>
                                 {display.hasDiscount && display.discountPercentage && (
                                     <span className="bg-carmesi-100 h-[31px] px-1.5 py-1 rounded-full text-sm font-bold text-carmesi-300 flex items-center">
@@ -370,6 +373,24 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                             </div>
                         )}
 
+                        {/* Grabado personalizado */}
+                        {product.is_customizable && (
+                            <label className="flex items-start gap-3 cursor-pointer w-fit">
+                                <input
+                                    type="checkbox"
+                                    checked={customized}
+                                    onChange={(e) => setCustomized(e.target.checked)}
+                                    className="mt-0.5 size-5 shrink-0 cursor-pointer accent-moss-300"
+                                />
+                                <span className="text-sm font-medium text-neutral-500">
+                                    {customizationLabel}
+                                    {customizationPrice > 0 && (
+                                        <span className="text-neutral-400"> (+{formatPrice(customizationPrice)})</span>
+                                    )}
+                                </span>
+                            </label>
+                        )}
+
                         {/* Action row — layout differs by product type */}
                         {hasComposite ? (
                             <div className="flex flex-wrap gap-4 sm:gap-6 items-center">
@@ -396,40 +417,6 @@ export default function Show({ product, relatedProducts, initialVariantSku }) {
                         ) : (
                             <>
                                 <QuantityStepper quantity={quantity} onChange={setQuantity} />
-
-                                {product.is_customizable && (
-                                    <div className="flex flex-col gap-2.5">
-                                        <label className="text-xs text-neutral-500">Personalización</label>
-                                        <div className="relative w-[252px]">
-                                            <button
-                                                type="button"
-                                                onClick={() => setPersonalizationOpen((v) => !v)}
-                                                className="bg-oxido-50 h-11 w-full px-4 rounded-lg flex items-center justify-between text-xs font-medium text-neutral-500 cursor-pointer"
-                                            >
-                                                <span>{personalization}</span>
-                                                <CaretDown size={20} />
-                                            </button>
-                                            {personalizationOpen && (
-                                                <ul className="absolute z-10 mt-1 w-full bg-oxido-50 rounded-lg shadow-[0_4px_20px_0_rgba(214,216,224,0.25)] overflow-hidden">
-                                                    {['SI', 'NO'].map((opt) => (
-                                                        <li key={opt}>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    setPersonalization(opt);
-                                                                    setPersonalizationOpen(false);
-                                                                }}
-                                                                className="w-full h-11 px-4 text-left text-xs font-medium text-neutral-400 hover:bg-moss-50 transition-colors"
-                                                            >
-                                                                {opt}
-                                                            </button>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
 
                                 <button
                                     type="button"

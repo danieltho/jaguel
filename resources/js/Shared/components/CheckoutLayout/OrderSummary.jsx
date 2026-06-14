@@ -43,6 +43,12 @@ function SummaryProductCard({ item }) {
                             Cantidad: <InlineChip>{item.quantity}</InlineChip>
                         </span>
                     </div>
+                    {item.customized && (
+                        <p className="text-xs text-moss-300">
+                            Incluye {item.customization_label}
+                            {item.customization_price > 0 && ` (+${formatPrice(item.customization_price)})`}
+                        </p>
+                    )}
                 </div>
                 <p className="whitespace-nowrap text-base font-medium text-neutral-500">
                     {formatPrice(item.unit_price * item.quantity)}
